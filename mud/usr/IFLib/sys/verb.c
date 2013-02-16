@@ -1,5 +1,5 @@
 # include <iflib.h>
-# include <iflib/verbd.h>
+# include <iflib/verb.h>
 # include <toollib.h>
 # include <type.h>
 
@@ -36,7 +36,6 @@ void add_verb(object VERB_DATA v) {
 void remove_verb(object VERB_DATA v) {
   string *names;
   int i, n;
-
 
   names = v -> get_verbs();
   for(i = 0, n = sizeof(names); i < n; i++) {
