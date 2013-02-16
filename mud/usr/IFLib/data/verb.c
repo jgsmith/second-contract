@@ -8,8 +8,8 @@
  *   see_alsos : other help documents that can give context
  *   syntaxes: a mapping of syntax to info about how to use that syntax
  */
-# include <verb.h>
 # include <iflib.h>
+# include <iflib/verb.h>
 
 string *verbs;
 string help;
