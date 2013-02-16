@@ -1,0 +1,67 @@
+# grammar for parsing syntax patterns
+#
+# things like "<direct:object>"
+
+whitespace = /[ \b]+/
+
+_word = /[a-z][-a-z]*/
+qstring = /'[^']*'/
+
+syntax : bit
+syntax : syntax bit
+
+bit : word
+bit : '<' slot '>' ? _slot
+bit : '<' slot qstring '>' ? _slot_qstring
+bit : '{' word_list '}' 
+bit : '{' word_list qstring '}'
+bit : '[' word_list ']'
+
+slot : direct_object
+slot : indirect_object
+slot : _word
+
+word : _word
+word : 'direct'
+word : 'indirect'
+word : object_type
+word : indirect_env
+
+word_list : word
+word_list : word_list '|' word
+
+direct_object : 'direct' ? _direct
+direct_object : 'direct' ':' object_type ? _direct_obj
+direct_object : 'direct' ':' object_type ':' direct_env ? _direct_obj_env
+
+indirect_object : 'indirect' ? _indirect
+indirect_object : 'indirect' ':' object_type ? indirect_obj
+indirect_object : 'indirect' ':' object_type ':' indirect_env ? _indirect_obj_env
+
+object_type : 'object'
+object_type : 'living'
+object_type : 'player'
+object_type : 'objects'
+object_type : 'livings'
+object_type : 'players'
+
+# in actor's environment
+direct_env : 'here'
+direct_env : 'here-me'
+direct_env : 'me-here'
+# in actor's environment and "close" to actor
+direct_env : 'close'
+# in actor's inventory
+direct_env : 'me'
+# in actor's inventory and worn or wielded
+direct_env : 'on'
+# not as close as 'close' but not as far as 'here'
+direct_env : 'near'
+
+# any of the direct object environments
+indirect_env : direct_env
+# or in relation to the direct objects
+indirect_env : 'in-direct-obs'
+indirect_env : 'close-direct-obs'
+indirect_env : 'near-direct-obs'
+indirect_env : 'on-direct-obs'
