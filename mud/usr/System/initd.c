@@ -18,6 +18,10 @@ static int create(varargs int clone) {
     telnet_manager = find_object("/usr/System/sys/telnetd");
     "/kernel/sys/userd" -> set_telnet_manager(0, telnet_manager);
 
+    if(!find_object("/usr/System/obj/wiztool")) {
+        compile_object("/usr/System/obj/wiztool");
+    }
+
     rsrc::create();
 
     rsrc::add_owner("IFLib");

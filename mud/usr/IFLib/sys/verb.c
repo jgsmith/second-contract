@@ -62,7 +62,7 @@ object *get_verb_handlers(string verb) {
   for(i = 0, n = sizeof(candidates); i < n; i++) 
     if(candidates[i][0..strlen(verb)] != verb) candidates[i] = nil;
   handlers = ({ });
-  // TODO: sort array of candidates so the short matches are first
+  /* TODO: sort array of candidates so the short matches are first */
   for(i = 0, n = sizeof(candidates); i < n; i++) {
     if(candidates[i]) handlers += ({ verbs[candidates[i]] });
   }

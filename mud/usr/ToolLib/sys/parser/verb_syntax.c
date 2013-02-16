@@ -1,5 +1,5 @@
 # include <toollib.h>
-# include <toollib/verb_syntaxd.h>
+# include <toollib/verb_syntax.h>
 # include <type.h>
 
 string syntax_bnf;
@@ -32,7 +32,7 @@ mixed *compile_syntax(string syntax) {
   int i, n;
 
   pat = parse_string(syntax_bnf, syntax);
-  // calculate weight here based on pat
+  /* calculate weight here based on pat */
   if(!pat) return nil;
 
   weight = 0;
@@ -75,7 +75,7 @@ mixed _direct_obj(string *bits) {
     case "livings": type_n = ANY_LIVING|PLURAL; break;
     case "player": type_n = TARGET_PLAYER; break;
     case "players": type_n = TARGET_PLAYER|PLURAL; break;
-    default: return 0; // fail
+    default: return 0; /* fail */
   }
   ret[0][1] = type_n;
   return ret;
@@ -95,7 +95,7 @@ mixed _direct_obj_env(string *bits) {
     case "close": env_n = ENV_CLOSE; break;
     case "on": env_n = ENV_ON; break;
     case "near": env_n = ENV_NEAR; break;
-    default: return 0; // fail
+    default: return 0;
   }
   ret[0][2] = env_n;
   return ret;
@@ -127,7 +127,7 @@ mixed _indirect_obj(string *bits) {
     case "livings": type_n = ANY_LIVING|PLURAL; break;
     case "player": type_n = TARGET_PLAYER; break;
     case "players": type_n = TARGET_PLAYER|PLURAL; break;
-    default: return 0; // fail
+    default: return 0;
   }
   ret[0][1] = type_n;
   return ret;
@@ -147,7 +147,7 @@ mixed _indirect_obj_env(string *bits) {
     case "close": env_n = ENV_CLOSE; break;
     case "on": env_n = ENV_ON; break;
     case "near": env_n = ENV_NEAR; break;
-    default: return 0; // fail
+    default: return 0;
   }
   ret[0][2] = env_n;
   return ret;

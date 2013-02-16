@@ -10,6 +10,9 @@ static mixed * _add_pair(mixed *args) {
 }
 
 static mixed * _make_pair(mixed *args) {
+  args[0] = args[0][1..strlen(args[0])-2];
+  args[0] = implode(explode(args[0], "\\n"), "\n");
+  args[0] = implode(explode(args[0], "\\\""), "\"");
   return ({ ([ args[0] : args[2] ]) });
 }
 
@@ -90,7 +93,7 @@ string to_json(mixed data) {
     case T_FLOAT: return ""+data;
     case T_STRING:
       return "\"" + data + "\"";
-    //case T_OBJECT: return data->to_json();
+    case T_OBJECT: return data->to_json();
     case T_ARRAY:
       vals = ({ });
       for(i = 0, n = sizeof(data); i < n; i++)

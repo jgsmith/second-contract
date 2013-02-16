@@ -140,7 +140,7 @@ mixed get_property(string *path) {
   }
 }
 
-// all properties are read-only for scripting purposes
+/* all properties are read-only for scripting purposes */
 void set_property(string *path, mixed value) {
 }
 
