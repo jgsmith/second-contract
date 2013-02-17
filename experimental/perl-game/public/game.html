@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="/playing/game/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/playing/game/css/game.css" rel="stylesheet">
+    <script src="/playing/game/js/jquery-1.8.3.min.js"></script>
+    <script src="/playing/game/js/jquery-ui-1.8.16.custom.min.js"></script>
+    <script src="/playing/game/js/mithgrid.min.js"></script>
+    <script src="/playing/game/js/bootstrap.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+
+  <div class="container">
+    <div class="row">
+      <div class="span12" style="background-color: #333; height: 60px;">
+        <div id="connection-status" class="btn btn-danger" style="float: right; margin-top: 15px; margin-right: 10px;">Disconnected</div>
+        <h2 id="room-name"></h2>
+      </div>
+    </div>
+    <div class="row">
+      <div class="span8">
+        <div id="room-info">
+          <div id="room-minimap"></div>
+          <div id="room-description"></div>
+          <div id="room-weather"></div>
+          <div id="room-senses"></div>
+          <div id="room-items"></div>
+          <div id="room-npcs"></div>
+          <div id="room-exits"></div>
+        </div>
+        <div class="well">
+        <ul class="nav nav-tabs" id="outputTabs">
+          <li><a href="#default-output" data-toggle="tab">Default</a></li>
+          <li><a href="#combat-output" data-toggle="tab">Combat</a></li>
+          <li><a href="#channels-output" data-toggle="tab">Channels</a></li>
+          <li><a href="#debug-output" data-toggle="tab">Debug</a></li>
+        </ul>
+        <div class="tab-content">
+          <div class="tab-pane active output-pane" id="default-output"></div>
+          <div class="tab-pane output-pane" id="combat-output"></div>
+          <div class="tab-pane output-pane" id="channels-output"></div>
+          <div class="tab-pane output-pane" id="debug-output"></div>
+        </div>
+        </div>
+        <form id="send-command"><input id="cmd-line"></form>
+      </div>
+      <div class="span4">
+        <div id="character-sheet" class="well">
+          <h3 id="character-name"></h3>
+          <div>
+            Level <span id="level"></span>
+                  <span id="cardinality"></span>
+          </div>
+          <table border="0" width="100%">
+          <tr><td style="width: 2em; text-align: right;">HP</td><td>
+          <div class="progress progress-danger">
+            <div id="hp-percent" class="bar" style="width: 0%;"></div>
+          </div>
+          </td></tr>
+          <tr><td style="width: 2em; text-align: right;">SP</td><td>
+          <div class="progress">
+            <div id="sp-percent" class="bar" style="width: 0%;"></div>
+          </div>
+          </td></tr>
+          <tr><td style="width: 2em; text-align: right;">XP</td><td>
+          <div class="progress progress-success">
+            <div id="xp-percent" class="bar" style="width: 0%;"></div>
+          </div>
+          </td></tr>
+          <tr><td style="width: 2em; text-align: right;">CR</td><td>
+          <div class="progress progress-warning">
+            <div id="cr-percent" class="bar" style="width: 0%;"></div>
+          </div>
+          </td></tr>
+          <tr><td style="width: 2em; text-align: right;">WT</td><td>
+          <div class="progress progress-warning">
+            <div id="wt-percent" class="bar" style="width: 0%;"></div>
+          </div>
+          </td></tr>
+          </table><br/>
+          <ul class="nav nav-tabs" id="charTabs">
+            <li><a href="#inventory-info" data-toggle="tab" title="Inventory"><i class="icon-white icon-briefcase"></i></a></li>
+            <li><a href="#body-info" data-toggle="tab" title="Health and Body"><i class="icon-white icon-heart"></i></a></li>
+            <li><a href="#skill-info" data-toggle="tab">Skills</a></li>
+            <li><a href="#stat-info" data-toggle="tab">Stats</a></li>
+            <li><a href="#ability-info" data-toggle="tab">Abilities</a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="inventory-info"></div>
+            <div class="tab-pane" id="body-info">
+        <table width="100%" border="0">
+          <tr><td width="30%">Position</td><td><span id="position"></span></td></tr>
+        </table>
+        <h4>Ingested</h4>
+        <table width="100%" border="0">
+          <tr><td width="30%">Food</td><td>
+          <div class="progress">
+            <div id="food-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Drink</td><td>
+          <div class="progress">
+            <div id="drink-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Alcohol</td><td>
+          <div class="progress">
+            <div id="alcohol-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Caffeine</td><td>
+          <div class="progress">
+            <div id="caffeine-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Poison</td><td>
+          <div class="progress">
+            <div id="poison-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+        </table>
+        <h4>Limbs</h4>
+        <table width="100%" border="0">
+          <tr><td width="30%">Head</td><td>
+          <div class="progress">
+            <div id="head-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Neck</td><td>
+          <div class="progress">
+            <div id="neck-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Torso</td><td>
+          <div class="progress">
+            <div id="torso-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td colspan=2>&nbsp;</td></tr>
+          <tr><td width="30%">Left Arm</td><td>
+          <div class="progress">
+            <div id="leftarm-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Left Leg</td><td>
+          <div class="progress">
+            <div id="leftleg-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Right Arm</td><td>
+          <div class="progress">
+            <div id="rightarm-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Right Leg</td><td>
+          <div class="progress">
+            <div id="rightleg-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td colspan=2>&nbsp;</td></tr>
+          <tr><td width="30%">Left Hand</td><td>
+          <div class="progress">
+            <div id="lefthand-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Left Foot</td><td>
+          <div class="progress">
+            <div id="leftfoot-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Right Hand</td><td>
+          <div class="progress">
+            <div id="righthand-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+          <tr><td width="30%">Right Foot</td><td>
+          <div class="progress">
+            <div id="rightfoot-percent" class="bar" style="width: 0%;"></div>
+          </div></td></tr>
+        </table>
+            </div>
+            <div class="tab-pane" id="skill-info">
+              <h4>Primary</h4>
+                <table width="100%" border="0" id="primary-skills">
+                </table>
+              <h4>Secondary</h4>
+                <table width="100%" border="0" id="secondary-skills">
+                </table>
+              <h4>Other</h4>
+                <table width="100%" border="0" id="other-skills">
+                </table>
+            </div>
+            <div class="tab-pane" id="stat-info">
+        <table width="100%" border="0">
+          <tr><td colspan="2"><h4>Stats</h4></td></tr>
+          <tr><td>agility</td><td id="agility-stat"></td></tr>
+          <tr><td>charisma</td><td id="charisma-stat"></td></tr>
+          <tr><td>coordination</td><td id="coordination-stat"></td></tr>
+          <tr><td>durability</td><td id="durability-stat"></td></tr>
+          <tr><td>intelligence</td><td id="intelligence-stat"></td></tr>
+          <tr><td>luck</td><td id="luck-stat"></td></tr>
+          <tr><td>speed</td><td id="speed-stat"></td></tr>
+          <tr><td>strength</td><td id="strength-stat"></td></tr>
+          <tr><td>wisdom</td><td id="wisdom-stat"></td></tr>
+          <tr><td colspan="2"><h4>Misc.</h4></td></tr>
+          <tr><td>heart rate</td><td id="heartrate-stat"></td></tr>
+          <tr><td>heal rate</td><td id="healrate-stat"></td></tr>
+        </table>
+            </div>
+            <div class="tab-pane" id="ability-info">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <div id="page-display" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3 id="page-title"></h3>
+      </div>
+      <div class="modal-body output-pane" id="page-display-body" style="white-space:pre-wrap;">
+      </div>
+      <div class="modal-footer">
+        <a href="#" id="page-display-close" class="btn">Close</a>
+      </div>
+    </div>
+    <div id="news-display" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>News</h3>
+      </div>
+      <div class="modal-body output-pane" id="news-display-body">
+      </div>
+      <div class="modal-footer">
+        <a href="#" id="news-display-close" class="btn">Close</a>
+      </div>
+    </div>
+    <div id="login-form" class="modal hide fade">
+      <div class="modal-header">
+        <!-- button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button -->
+        <h3>Login</h3>
+      </div>
+      <div class="modal-body">
+        <div id="login-form-error" class="alert alert-error"></div>
+        <form class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="inputUsername">Name</label>
+            <div class="controls">
+              <input type="text" id="inputUsername" placeholder="Character Name">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="inputPassword">Password</label>
+            <div class="controls">
+              <input type="password" id="inputPassword">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <!-- a href="#" class="btn">Cancel</a -->
+        <a href="#" id="new-character" class="btn">Create a Character</a>
+        <a href="#" id="login-submit" class="btn btn-primary">Login</a>
+      </div>
+    </div>
+    <div id="new-char-form" class="modal hide fade">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h3>Create a Character</h3>
+      </div>
+      <div class="modal-body">
+        <div id="new-char-form-error" class="alert alert-error"></div>
+        <form class="form-horizontal">
+          <div class="control-group">
+            <label class="control-label" for="newUsername">Name</label>
+            <div class="controls">
+              <input type="text" id="newUsername" placeholder="Character Name">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newCapName">Display Name</label>
+            <div class="controls">
+              <input type="text" id="newCapName" placeholder="Character's Displayed Name">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newPassword">Password</label>
+            <div class="controls">
+              <input type="password" id="newPassword">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newPassword2">Password Again</label>
+            <div class="controls">
+              <input type="password" id="newPassword2">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newGender">Gender</label>
+            <div class="controls">
+              <select id="newGender">
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="neutral">Neutral</option>
+                <option value="none">None</option>
+              </select>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newRealName">Real Name (optional)</label>
+            <div class="controls">
+              <input type="text" id="newRealName">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newEmail">Email Address</label>
+            <div class="controls">
+              <input type="text" id="newEmail">
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="newAgeCheck">Are you 13 years of age or older?</label>
+            <div class="controls">
+              <select id="newAgeCheck">
+                <option value="no">No</option>
+                <option value="yes">Yes</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <a href="#" id="new-char-cancel" class="btn">Cancel</a>
+          <a href="#" id="new-char-submit" class="btn btn-primary">Create Character</a>
+        </div>
+      </div>
+    </div>
+  <script src="/playing/game/js/game.js"></script>
+  </body>
+</html>

@@ -1,0 +1,80 @@
+html, body {
+/*  background-color: #888; */
+}
+
+#character-sheet .progress {
+  margin-bottom: 3px;
+  height: 10px;
+  margin-left: 10px;
+  margin-left: 10px;
+  border: 1px solid #333;
+  background-color: #222;
+}
+
+#character-sheet h3 {
+  text-align: center;
+}
+
+#skill-info, #body-info, #inventory-info {
+  font-size: 80%;
+  line-height: 1.2;
+}
+
+#inventory-info h6 {
+  margin-bottom: 0px;
+}
+
+#skill-info .progress, #body-info .progress {
+  margin-bottom: 1px;
+  height: 8px;
+  border-left: 1px solid #333;
+  border-right: 1px solid #333;
+  background-color: #222;
+}
+
+#skill-info .progress {
+  height: 4px;
+  margin-bottom: 0px;
+  border: none;
+}
+
+#room-name {
+  margin-left: 10px;
+}
+
+#default-output, #combat-output, #channels-output, #debug-output {
+  height: 250px;
+  overflow-y: scroll;
+  white-space: pre-wrap;
+}
+
+#room-info {
+  height: 250px;
+  overflow-y: scroll;
+}
+
+#room-minimap {
+  float: right;
+  margin-left: 3px;
+  margin-bottom: 3px;
+}
+
+#room-minimap span {
+  white-space: pre;
+}
+
+#prompt, #default-output, #room-info, #combat-output, .output-pane {
+  font-size: 12px;
+/*  background-color: #000; */
+  font-family: Courier;
+  line-height: 1.1;
+  padding: 2px;
+}
+
+#room-exits {
+  padding-top: 0.5em;
+}
+
+#cmd-line {
+  width: 100%;
+}
