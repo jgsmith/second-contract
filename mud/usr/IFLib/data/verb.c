@@ -10,6 +10,7 @@
  */
 # include <iflib.h>
 # include <iflib/verb.h>
+# include <worldlib/terrain.h>
 
 string *verbs;
 string help;
@@ -156,19 +157,26 @@ void set_see_also(string *v) {
   see_alsos = v;
 }
 
-string *get_see_alsos() { return see_alsos; }
+string *get_see_also() { return see_alsos; }
 
 /*
  * info:
+ *   array of [ $action, %args ]
  *   action: action this verb maps to (required)
  *   args: mapping of additional constant args to include in action call
  */
+
 void add_syntax(string s, mapping info) {
   if(info["action"]) syntaxes[s] = info;
 }
 
 mapping get_syntax(string s) {
   return syntaxes[s];
+}
+
+mixed *get_syntax_actions(string s) {
+  if(syntaxes[s]) return syntaxes[s];
+  return ({ });
 }
 
 string *get_syntaxes() { return map_indices(syntaxes); }

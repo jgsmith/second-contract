@@ -4,7 +4,7 @@
 
 whitespace = /[ \b]+/
 
-_word = /[a-z][-a-z]*/
+_word = /[a-z]+/
 qstring = /'[^']*'/
 
 syntax : bit
@@ -24,8 +24,10 @@ slot : _word
 word : _word
 word : 'direct'
 word : 'indirect'
-word : object_type
-word : indirect_env
+word : 'direct-obs'
+word : distance
+word : location
+word : word '-' word
 
 word_list : word
 word_list : word_list '|' word
@@ -38,30 +40,46 @@ indirect_object : 'indirect' ? _indirect
 indirect_object : 'indirect' ':' object_type ? indirect_obj
 indirect_object : 'indirect' ':' object_type ':' indirect_env ? _indirect_obj_env
 
+#
+# details can be objects, but they are not manipulable. If a verb requires
+# that the item be movable or otherwise detachable from its environmental
+# relationships, then the verb should use object. Otherwise, 'detail' will
+# match anything that has the 'detail:...' properties.
+#
+# So, we can have "look <direct:detail:backdrop-me>" to match any detail
+# in an object in the current scene. But we might want to use
+# "examine <direct:detail:near-me>" to restrict close examination to anything
+# in "arms-reach".
+#
+# To reach any player in the world: "<direct:player:backdrop-world>"
+#
+object_type : 'detail'
 object_type : 'object'
 object_type : 'living'
 object_type : 'player'
+object_type : 'details'
 object_type : 'objects'
 object_type : 'livings'
 object_type : 'players'
 
-# in actor's environment
-direct_env : 'here'
-direct_env : 'here-me'
-direct_env : 'me-here'
-# in actor's environment and "close" to actor
-direct_env : 'close'
-# in actor's inventory
-direct_env : 'me'
-# in actor's inventory and worn or wielded
-direct_env : 'on'
-# not as close as 'close' but not as far as 'here'
-direct_env : 'near'
+distance : 'in'
+distance : 'on'
+distance : 'close'
+distance : 'near'
+distance : 'vicinity'
+distance : 'far'
+distance : 'backdrop'
+
+location : 'me'
+location : 'scene'
+location : 'area'
+location : 'region'
+location : 'world'
+
+direct_env : distance '-' location ? _concat
 
 # any of the direct object environments
 indirect_env : direct_env
+
 # or in relation to the direct objects
-indirect_env : 'in-direct-obs'
-indirect_env : 'close-direct-obs'
-indirect_env : 'near-direct-obs'
-indirect_env : 'on-direct-obs'
+indirect_env : distance '-' 'direct-obs' ? _concat

@@ -58,7 +58,7 @@ mixed *compile_syntax(string syntax) {
 }
 
 mixed _direct(varargs string *bits) {
-  return ({ ({ DIRECT_OBJECT, ANY_OBJECT, ENV_ME_HERE }) });
+  return ({ ({ DIRECT_OBJECT, ANY_OBJECT, ENV_NEAR|ENV_ME }) });
 }
 
 mixed _direct_obj(string *bits) {
@@ -69,6 +69,8 @@ mixed _direct_obj(string *bits) {
   if(!ret) return 0;
 
   switch(bits[2]) {
+    case "detail": type_n = ANY_DETAIL; break;
+    case "details": type_n = ANY_DETAIL|PLURAL; break;
     case "object": type_n = ANY_OBJECT; break;
     case "objects": type_n = ANY_OBJECT|PLURAL; break;
     case "living": type_n = ANY_LIVING; break;
@@ -84,17 +86,30 @@ mixed _direct_obj(string *bits) {
 mixed _direct_obj_env(string *bits) {
   int env_n;
   mixed ret;
+  string *stmp;
+
   ret = _direct_obj(bits);
   if(!ret) return 0;
 
-  switch(bits[4]) {
-    case "here": env_n = ENV_HERE; break;
-    case "me": env_n = ENV_ME; break;
-    case "me-here": env_n = ENV_ME_HERE; break;
-    case "here-me": env_n = ENV_HERE_ME; break;
-    case "close": env_n = ENV_CLOSE; break;
+  stmp = explode(bits[4], "-");
+  if(sizeof(stmp) > 2) stmp[1] = implode(stmp[1..], "-");
+
+  switch(stmp[0]) {
+    case "in": env_n = ENV_IN; break;
     case "on": env_n = ENV_ON; break;
+    case "close": env_n = ENV_CLOSE; break;
     case "near": env_n = ENV_NEAR; break;
+    case "vicinity": env_n = ENV_VICINITY; break;
+    case "far": env_n = ENV_FAR; break;
+    case "backdrop": env_n = ENV_BACKDROP; break;
+    default: return 0;
+  }
+  switch(stmp[1]) {
+    case "me": env_n |= ENV_ME; break;
+    case "scene": env_n |= ENV_SCENE; break;
+    case "area": env_n |= ENV_AREA; break;
+    case "region": env_n |= ENV_REGION; break;
+    case "world": env_n |= ENV_WORLD; break;
     default: return 0;
   }
   ret[0][2] = env_n;
@@ -110,7 +125,7 @@ mixed _slot_qstring(mixed *bits) {
 }
 
 mixed _indirect(varargs string *bits) {
-  return ({ ({ INDIRECT_OBJECT, ANY_OBJECT, ENV_ME_HERE }) });
+  return ({ ({ INDIRECT_OBJECT, ANY_OBJECT, ENV_NEAR|ENV_ME }) });
 }
 
 mixed _indirect_obj(string *bits) {
@@ -121,6 +136,8 @@ mixed _indirect_obj(string *bits) {
   if(!ret) return 0;
 
   switch(bits[2]) {
+    case "detail": type_n = ANY_DETAIL; break;
+    case "details": type_n = ANY_DETAIL|PLURAL; break;
     case "object": type_n = ANY_OBJECT; break;
     case "objects": type_n = ANY_OBJECT|PLURAL; break;
     case "living": type_n = ANY_LIVING; break;
@@ -136,20 +153,38 @@ mixed _indirect_obj(string *bits) {
 mixed _indirect_obj_env(string *bits) {
   int env_n;
   mixed ret;
+  string *stmp;
+
   ret = _indirect_obj(bits);
   if(!ret) return 0;
 
-  switch(bits[4]) {
-    case "here": env_n = ENV_HERE; break;
-    case "me": env_n = ENV_ME; break;
-    case "me-here": env_n = ENV_ME_HERE; break;
-    case "here-me": env_n = ENV_HERE_ME; break;
-    case "close": env_n = ENV_CLOSE; break;
+  stmp = explode(bits[4], "-");
+  if(sizeof(stmp) > 2) stmp[1] = implode(stmp[1..], "-");
+
+  switch(stmp[0]) {
+    case "in": env_n = ENV_IN; break;
     case "on": env_n = ENV_ON; break;
+    case "close": env_n = ENV_CLOSE; break;
     case "near": env_n = ENV_NEAR; break;
+    case "vicinity": env_n = ENV_VICINITY; break;
+    case "far": env_n = ENV_FAR; break;
+    case "backdrop": env_n = ENV_BACKDROP; break;
     default: return 0;
   }
+  switch(stmp[1]) {
+    case "me": env_n |= ENV_ME; break;
+    case "scene": env_n |= ENV_SCENE; break;
+    case "area": env_n |= ENV_AREA; break;
+    case "region": env_n |= ENV_REGION; break;
+    case "world": env_n |= ENV_WORLD; break;
+    case "direct-obs": env_n |= ENV_DIRECT_OBS; break;
+    default: return 0;
+  }
+
   ret[0][2] = env_n;
   return ret;
 }
 
+mixed _concat(mixed *args) {
+  return ({ implode(args, "") });
+}

@@ -17,7 +17,7 @@ int query_timeout(object connection) {
 
 string query_banner(object connection) {
     string banner;
-    banner = read_file("/txt/welcome.txt");
-    banner += "\n\nWhat's your name? ";
+    banner = status()[0] + "    Second Contract 0.0\n";
+    banner += read_file("/txt/welcome.txt");
     return banner;
 }

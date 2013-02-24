@@ -1,4 +1,27 @@
 # include <type.h>
+# include <toollib.h>
+
+string syntax_bnf;
+
+void update_syntax_bnf() {
+  int i, sz;
+  string *lines;
+  string grammar;
+
+  grammar = read_file(JSON_BNF);
+  lines = explode(grammar, "\n");
+  for(i = 0, sz = sizeof(lines); i < sz; i++) {
+    if(lines[i] && strlen(lines[i]) && lines[i][0] == '#') {
+      lines[i] = nil;
+    }
+  }
+  lines -= ({ nil });
+  syntax_bnf = implode(lines, "\n");
+}
+
+static void create(varargs int clone) {
+  update_syntax_bnf();
+}
 
 static mixed * _empty_object(mixed *args) { return ({ ([ ]) }); }
 
@@ -54,30 +77,9 @@ static mixed * _parse_string(mixed *args) {
 mixed from_json(string json) {
   mixed *result;
 
-  result = parse_string(
-    "whitespace = /[ \b\t\n]+/\n"+
-    "number = /-?(0|[1-9][0-9]*)(\\.[0-9]+)?([Ee][+-]?[0-9]+)?/\n"+
-    "string = /\"([^\\\\]|\\\\([\"\\\\\\/bfnrt]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*\"/\n"+
-    "json: object\n"+
-    "json: array\n"+
-    "object: '{' '}' ? _empty_object\n"+
-    "object: '{' members '}' ? _object\n"+
-    "members: pair\n"+
-    "members: members ',' pair ? _add_pair\n"+
-    "pair: string ':' value ? _make_pair\n"+
-    "array: '[' ']' ? _empty_array\n"+
-    "array: '[' elements ']' ? _array\n"+
-    "elements: value ? _add_value\n"+
-    "elements: elements ',' value ? _add_value\n"+
-    "value: string ? _parse_string\n"+
-    "value: number ? _parse_number\n"+
-    "value: object\n"+
-    "value: array\n"+
-    "value: 'true' ? _true\n"+
-    "value: 'false' ? _false\n"+
-    "value: 'null' ? _null\n"+
-    ""
-  , json);
+  json = implode(explode(json, "\n"), " ");
+
+  result = parse_string(syntax_bnf, json);
   if(result) return result[0];
   return nil;
 }

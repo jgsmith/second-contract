@@ -1,11 +1,11 @@
 # include <iflib.h>
 # include <iflib/verb.h>
+# include <worldlib/terrain.h>
 # include <toollib.h>
 # include <type.h>
 
 mapping verbs;
 mapping syntaxes;
-object syntax_parser;
 
 static void create() {
   verbs = ([ ]);
@@ -13,8 +13,6 @@ static void create() {
   syntaxes = ([
     "": ({ ({ 100 }), "" }),
   ]);
-
-  syntax_parser = find_object(VERB_SYNTAX_D);
 }
 
 void add_verb(object VERB_DATA v) {
@@ -30,7 +28,7 @@ void add_verb(object VERB_DATA v) {
   names = v -> get_syntaxes();
   for(i = 0, n = sizeof(names); i < n; i++)
     if(!syntaxes[names[i]]) 
-      syntaxes[names[i]] = syntax_parser -> compile_syntax(names[i]);
+      syntaxes[names[i]] = VERB_SYNTAX_P -> compile_syntax(names[i]);
 }
 
 void remove_verb(object VERB_DATA v) {

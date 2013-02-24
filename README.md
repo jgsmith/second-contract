@@ -24,20 +24,23 @@ MUDLib is not subject to the same license. Any files you modify or create
 in the following directories are subject to this GNU Affero GPL (with '/'
 being taken as the root of this repository):
 
-* /include/devlib/
-* /include/iflib/
-* /include/system/
-* /include/toollib/
-* /include/worldlib/
-* /usr/DevLib/
-* /usr/IFLib/
-* /usr/System/
-* /usr/ToolLib/
-* /usr/WorldLib/
+* /mud/include/devlib/
+* /mud/include/gamelib/
+* /mud/include/iflib/
+* /mud/include/system/
+* /mud/include/toollib/
+* /mud/include/worldlib/
+* /mud/usr/DevLib/
+* /mud/usr/GameLib/
+* /mud/usr/IFLib/
+* /mud/usr/System/
+* /mud/usr/ToolLib/
+* /mud/usr/WorldLib/
 
 The following files are also subject to the GNU Affero GPL:
 
-* /include/devlib.h
-* /include/iflib.h
-* /include/toollib.h
-* /include/worldlib.h
+* /mud/include/devlib.h
+* /mud/include/gamelib.h
+* /mud/include/iflib.h
+* /mud/include/toollib.h
+* /mud/include/worldlib.h

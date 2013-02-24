@@ -16,13 +16,21 @@
 # define OPTIONAL_SPACES 16
 # define TARGET_PLAYER 17
 # define QUOTED_STRING 18
+# define ANY_DETAIL 19
 # define PLURAL 32
 
-# define ENV_ME_HERE 1
-# define ENV_HERE 2
-# define ENV_ME 3
-# define ENV_HERE_ME 4
-# define ENV_CLOSE 5
-# define ENV_ON 6
-# define ENV_NEAR 7
-# define ENV_DIRECT_OBS 8
+# define ENV_IN        1
+# define ENV_ON        2
+# define ENV_CLOSE     3
+# define ENV_NEAR      4
+# define ENV_VICINITY  5
+# define ENV_FAR       6
+# define ENV_BACKDROP  7
+
+# define ENV_ME        16
+# define ENV_SCENE     32
+# define ENV_AREA      48
+# define ENV_REGION    64
+# define ENV_WORLD     80
+
+# define ENV_DIRECT_OBS 256

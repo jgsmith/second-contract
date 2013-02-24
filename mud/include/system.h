@@ -1,0 +1,5 @@
+# define AUTH_D    "/usr/System/sys/auth"
+# define MAPPING_D "/usr/System/sys/mapping"
+# define STRING_D  "/usr/System/sys/string"
+# define TELNET_D  "/usr/System/sys/telnetd"
+# define ERROR_D   "/usr/System/sys/error"

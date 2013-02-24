@@ -1,0 +1,21 @@
+whitespace = /[ \b\t\n\r]+/
+number = /-?(0|[1-9][0-9]*)(\.[0-9]+)?([Ee][+-]?[0-9]+)?/
+string = /"([^"\\]|\\(["\\\/bfnrt]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*"/
+json: object
+json: array
+object: '{' '}' ? _empty_object
+object: '{' members '}' ? _object
+members: pair
+members: members ',' pair ? _add_pair
+pair: string ':' value ? _make_pair
+array: '[' ']' ? _empty_array
+array: '[' elements ']' ? _array
+elements: value ? _add_value
+elements: elements ',' value ? _add_value
+value: array
+value: object
+value: string ? _parse_string
+value: number ? _parse_number
+value: 'true' ? _true
+value: 'false' ? _false
+value: 'null' ? _null
