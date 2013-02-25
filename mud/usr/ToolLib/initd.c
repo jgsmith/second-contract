@@ -18,6 +18,8 @@ static int create(varargs int clone) {
   if(!find_object(VERB_SYNTAX_P)) compile_object(VERB_SYNTAX_P);
   if(!find_object(EVENT_SCRIPT_P)) compile_object(EVENT_SCRIPT_P);
 
+  if(!find_object(BASE64_D)) compile_object(BASE64_D);
+
   for(i = 0, n = sizeof(files); i < n; i++)
     if(!find_object(files[i])) compile_object(files[i]);
 }
