@@ -15,6 +15,7 @@ inherit access API_ACCESS;
 static int create(varargs int clone) {
     object driver;
     object telnet_manager;
+    object http_manager;
     object rsrc_manager;
     object objreg_manager;
 
@@ -27,6 +28,12 @@ static int create(varargs int clone) {
 
     telnet_manager = find_object(TELNET_D);
     "/kernel/sys/userd" -> set_telnet_manager(0, telnet_manager);
+
+    if(!find_object(HTTP_D)) {
+      compile_object(HTTP_D);
+    }
+    http_manager = find_object(HTTP_D);
+    "/kernel/sys/userd" -> set_binary_manager(1, http_manager);
 
     if(!find_object("/usr/System/obj/wiztool")) {
         compile_object("/usr/System/obj/wiztool");
