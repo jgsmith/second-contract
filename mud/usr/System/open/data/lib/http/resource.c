@@ -4,6 +4,7 @@
 
 object request;
 object response;
+string base;
 
 /* We have a few convenience methods that let us set up common auth
  * requirements.
@@ -28,6 +29,20 @@ object get_request() { return request; }
 
 void set_response(object r) { response = r; }
 object get_response() { return response; }
+
+void set_base(string b) { base = b; }
+
+string get_resource_id() {
+  string path;
+
+  if(request) {
+    path = request -> get_path_info();
+    if(strlen(path) > strlen(base) && path[0..strlen(base)] == base+"/") {
+      return path[strlen(base)+1..];
+    }
+  }
+  return nil;
+}
 
 /*
  * If using the default authorization handler, this will return the
@@ -72,7 +87,7 @@ mixed is_authorized(string auth) {
 }
 
 int forbidden() { 
-  return sizeof(({ request->get_method() }) & this_object()->allowed_methods());
+  return sizeof(({ request->get_method() }) & this_object()->allowed_methods()) == 0;
 }
 
 int allow_missing_post() { return 0; }

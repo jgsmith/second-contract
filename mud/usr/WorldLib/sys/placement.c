@@ -298,7 +298,10 @@ object *get_within_proximate_distance(object *origins, int distance, varargs int
 
   /* we have a single item */
   if(origins[0] -> is_detail()) {
-    /* details handle their own relationships, so we ask them */
+    /* details handle their own relationships, so we ask them. Details only
+     * relate to details they contain, so we can't climb out of the object
+     * in which the detail is located.
+     */
     return origins[0] -> get_within_proximate_distance(distance, relation);
   }
   else {

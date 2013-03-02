@@ -53,6 +53,10 @@ private int int_from_list(string list, string word, varargs int offset) {
   return -1;
 }
 
+int query_in_list(string list, string word) {
+  return int_from_list(list, word) != -1;
+}
+
 string preposition_name(int prep) {
   return word_from_list("prepositions", prep);
 }

@@ -124,7 +124,10 @@ int parse_http_request(string chunk) {
   if(chunk != buffer) buffer = buffer + chunk;
 
   if(still_reading_headers) {
-    if(sizeof(explode(buffer+" ", "\n\n")) > 1) {
+    if(sizeof(explode(buffer+" ", "\n\n")) > 1 || buffer[strlen(buffer)-2..] == "\n\n") {
+      still_reading_headers = FALSE;
+    }
+    if(sizeof(explode(buffer+" ", "\x0d\x0a\x0d\x0a")) > 1 || buffer[strlen(buffer)-4..] == "\x0d\x0a\x0d\x0a") {
       still_reading_headers = FALSE;
     }
     else {
@@ -161,10 +164,12 @@ string get_method() { return request_method; }
 
 string get_uri() { return request_uri; }
 
-string *get_header(string nom) {
+string get_path_info() { return path_info; }
+
+string get_header(string nom) {
   nom = STRING_D -> lower_case(nom);
-  if(headers[nom]) return headers[nom];
-  return ({ });
+  if(headers[nom]) return implode(headers[nom], ", ");
+  return nil;
 }
 
 mapping get_headers() { return headers; }

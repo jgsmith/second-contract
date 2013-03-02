@@ -9,6 +9,9 @@ static int create(varargs int clone) {
   if(!find_object(ENGLISH_D)) compile_object(ENGLISH_D);
   if(!find_object(VERB_DATA)) compile_object(VERB_DATA);
   if(!find_object(VERB_D)) compile_object(VERB_D);
+
+  if(!find_object("/usr/IFLib/data/resource/verb"))
+    compile_object("/usr/IFLib/data/resource/verb");
 }
 
 void initialize_data() {
@@ -22,6 +25,9 @@ void initialize_data() {
    * directory.
    */
   /* /usr/WorldLib/json/verbs/$verb.json */
+
+  HTTP_D -> add_resource_handler("/foo", "/usr/IFLib/data/resource/verb");
+
   dir = get_dir("/usr/IFLib/json/verbs/*");
   for(i = 0, n = sizeof(dir[0]); i < n; i++) {
     if(dir[1][i] > 0 && dir[0][i][0] != '.') {

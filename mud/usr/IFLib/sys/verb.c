@@ -15,6 +15,11 @@ static void create() {
   ]);
 }
 
+int query_verb(string v) {
+  if(verbs[v]) return TRUE;
+  return FALSE;
+}
+
 void add_verb(object VERB_DATA v) {
   string *names;
   int i, n;
