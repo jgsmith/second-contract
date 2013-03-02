@@ -5,7 +5,8 @@
 # define ACTOR_HEAR 16
 
 # define ACTOR_MANIPULATE 128
-# define ACTOR_FIGHT      256
+# define ACTOR_COMBAT     256
+# define ACTOR_MOVE       512
 
 # define ACTOR_STANDING 1024
 # define ACTOR_SITTING  2048
@@ -31,3 +32,16 @@
 # define WEATHER_SNOWING 1
 # define WEATHER_RAINING 2
 # define WEATHER_CLOUDY  4
+
+# define ARG_DIRECT_OBJ 1
+# define ARG_INDIRECT_OBJ 2
+# define ARG_IMPLEMENT_OBJ 4
+# define ARG_COMMUNICATION 8
+
+# define ARG_LIVING  1
+# define ARG_PLAYER  2
+# define ARG_DISTANT 4
+# define ARG_WIELDED 8
+# define ARG_WORN    16
+# define ARG_IN_INVENTORY 32
+# define ARG_IN_DIRECT_OBS 64

@@ -15,7 +15,8 @@
 string *verbs;
 string help;
 string *see_alsos;
-mapping syntaxes;
+int args_used;
+int direct_obj_flags, indirect_obj_flags, implement_obj_flags;
 int actor_reqs;
 string *climates;
 int respirations;
@@ -27,13 +28,138 @@ static void create(varargs int clone) {
   verbs = ({ });
   help = "";
   see_alsos = ({ });
-  syntaxes = ([ ]);
   actor_reqs = 0;
   climates = ({ });
   terrains = 0;
   weathers = 0;
   seasons = 0;
   respirations = 0;
+}
+
+mapping get_properties() {
+  mapping env, actor, args;
+  env = ([
+    "respiration": ({ }),
+    "timing": ({ }),
+    "terrain": ({ }),
+    "climate": climates,
+    "weather": ({ }),
+  ]);
+
+  if(respirations & RESP_AIR) env["respiration"] |= ({ "air" });
+  if(respirations & RESP_WATER) env["respiration"] |= ({ "water" });
+  if(respirations & RESP_VACUUM) env["respiration"] |= ({ "vacuum" });
+  if(respirations & RESP_METHANE) env["respiration"] |= ({ "methane" });
+
+  if(seasons & SEASON_SPRING) env["timing"] |= ({ "spring" });
+  if(seasons & SEASON_SUMMER) env["timing"] |= ({ "summer" });
+  if(seasons & SEASON_FALL) env["timing"] |= ({ "fall" });
+  if(seasons & SEASON_WINTER) env["timing"] |= ({ "winter" });
+  if(seasons & SEASON_DIURNAL) env["timing"] |= ({ "diurnal" });
+  if(seasons & SEASON_NOCTURNAL) env["timing"] |= ({ "nocturnal" });
+
+  if(terrains & TERRAIN_OUTDOORS) env["terrain"] |= ({ "outdoors" });
+  if(terrains & TERRAIN_INDOORS) env["terrain"] |= ({ "indoors" });
+  if(terrains & TERRAIN_ROAD) env["terrain"] |= ({ "road" });
+  if(terrains & TERRAIN_UNDERWATER) env["terrain"] |= ({ "underwater" });
+  if(terrains & TERRAIN_SURFACE) env["terrain"] |= ({ "surface" });
+  if(terrains & TERRAIN_MIDAIR) env["terrain"] |= ({ "midair" });
+  if(terrains & TERRAIN_SWAMP) env["terrain"] |= ({ "swamp" });
+  if(terrains & TERRAIN_WOODS) env["terrain"] |= ({ "woods" });
+  if(terrains & TERRAIN_JUNGLE) env["terrain"] |= ({ "jungle" });
+  if(terrains & TERRAIN_ROUGH) env["terrain"] |= ({ "rough" });
+  if(terrains & TERRAIN_UNDERGROUND) env["terrain"] |= ({ "underground" });
+  if(terrains & TERRAIN_SPACE) env["terrain"] |= ({ "space" });
+  if(terrains & TERRAIN_MAGMA) env["terrain"] |= ({ "magma" });
+  if(terrains & TERRAIN_PLASMA) env["terrain"] |= ({ "plasma" });
+  if(terrains & TERRAIN_PLANAR) env["terrain"] |= ({ "planar" });
+  if(terrains & TERRAIN_SNOW) env["terrain"] |= ({ "snow" });
+  if(terrains & TERRAIN_SAND) env["terrain"] |= ({ "sand" });
+  if(terrains & TERRAIN_ICE) env["terrain"] |= ({ "ice" });
+  if(terrains & TERRAIN_BIOLOGICAL) env["terrain"] |= ({ "biological" });
+  if(terrains & TERRAIN_SEAFLOOR) env["terrain"] |= ({ "seafloor" });
+  if(terrains & TERRAIN_WATERSHALLOW) env["terrain"] |= ({ "water-shallow" });
+  if(terrains & TERRAIN_INDOORSWINDOW) env["terrain"] |= ({ "indoors-window" });
+  if(terrains & TERRAIN_ROOFTOP) env["terrain"] |= ({ "rooftop" });
+  if(terrains & TERRAIN_ALL_OUTDOORS) env["terrain"] |= ({ "any-outdoors" });
+  if(terrains & TERRAIN_ALL_INDOORS) env["terrain"] |= ({ "any-indoors" });
+  if(terrains & TERRAIN_ALL_WATER) env["terrain"] |= ({ "any-water" });
+  if(terrains & TERRAIN_SEE_WEATHER) env["terrain"] |= ({ "sees-weather" });
+
+  if(weathers & WEATHER_SNOWING) env["weather"] |= ({ "snowing" });
+  if(weathers & WEATHER_RAINING) env["weather"] |= ({ "raining" });
+  if(weathers & WEATHER_CLOUDY) env["weather"] |= ({ "cloudy" });
+
+  actor = ([
+    "act": ({ }),
+    "sense": ({ }),
+    "position": ({ }),
+  ]);
+
+  if(actor_reqs & ACTOR_MANIPULATE) actor["act"] |= ({ "manipulate" });
+  if(actor_reqs & ACTOR_COMBAT) actor["act"] |= ({ "combat" });
+  if(actor_reqs & ACTOR_MOVE) actor["act"] |= ({ "move" });
+
+  if(actor_reqs & ACTOR_SEE) actor["sense"] |= ({ "see" });
+  if(actor_reqs & ACTOR_SMELL) actor["sense"] |= ({ "smell" });
+  if(actor_reqs & ACTOR_TOUCH) actor["sense"] |= ({ "touch" });
+  if(actor_reqs & ACTOR_TASTE) actor["sense"] |= ({ "taste" });
+  if(actor_reqs & ACTOR_HEAR) actor["sense"] |= ({ "hear" });
+
+  if(actor_reqs & ACTOR_STANDING) actor["position"] |= ({ "standing" });
+  if(actor_reqs & ACTOR_SITTING) actor["position"] |= ({ "sitting" });
+  if(actor_reqs & ACTOR_LYING) actor["position"] |= ({ "lying" });
+  if(actor_reqs & ACTOR_FLYING) actor["position"] |= ({ "flying" });
+  if(actor_reqs & ACTOR_LEANING) actor["position"] |= ({ "leaning" });
+  if(actor_reqs & ACTOR_KNEELING) actor["position"] |= ({ "kneeling" });
+  if(actor_reqs & ACTOR_FLOATING) actor["position"] |= ({ "floating" });
+  if(actor_reqs & ACTOR_SWIMMING) actor["position"] |= ({ "swimming" });
+
+  args = ([
+    "direct": ([
+      "used": args_used & ARG_DIRECT_OBJ != 0,
+      "requirements": ({ }),
+    ]),
+    "indirect": ([
+      "used": args_used & ARG_INDIRECT_OBJ != 0,
+      "requirements": ({ }),
+    ]),
+    "implement": ([
+      "used": args_used & ARG_IMPLEMENT_OBJ != 0,
+      "requirements": ({ }),
+    ]),
+    "communication": args_used & ARG_COMMUNICATION != 0,
+  ]);
+
+  if(direct_obj_flags & ARG_LIVING) args["direct"]["requirements"] |= ({ "living" });
+  if(direct_obj_flags & ARG_PLAYER) args["direct"]["requirements"] |= ({ "player" });
+  if(direct_obj_flags & ARG_DISTANT) args["direct"]["requirements"] |= ({ "distant" });
+  if(direct_obj_flags & ARG_WIELDED) args["direct"]["requirements"] |= ({ "wielded" });
+  if(direct_obj_flags & ARG_WORN) args["direct"]["requirements"] |= ({ "worn" });
+  if(direct_obj_flags & ARG_IN_INVENTORY) args["direct"]["requirements"] |= ({ "in-inventory" });
+
+  if(indirect_obj_flags & ARG_LIVING) args["indirect"]["requirements"] |= ({ "living" });
+  if(indirect_obj_flags & ARG_PLAYER) args["indirect"]["requirements"] |= ({ "player" });
+  if(indirect_obj_flags & ARG_DISTANT) args["indirect"]["requirements"] |= ({ "distant" });
+  if(indirect_obj_flags & ARG_WIELDED) args["indirect"]["requirements"] |= ({ "wielded" });
+  if(indirect_obj_flags & ARG_WORN) args["indirect"]["requirements"] |= ({ "worn" });
+  if(indirect_obj_flags & ARG_IN_INVENTORY) args["indirect"]["requirements"] |= ({ "in-inventory" });
+  if(indirect_obj_flags & ARG_IN_DIRECT_OBS) args["indirect"]["requirements"] |= ({ "in-direct-obs" });
+
+  if(implement_obj_flags & ARG_LIVING) args["implement"]["requirements"] |= ({ "living" });
+  if(implement_obj_flags & ARG_PLAYER) args["implement"]["requirements"] |= ({ "player" });
+  if(implement_obj_flags & ARG_DISTANT) args["implement"]["requirements"] |= ({ "distant" });
+  if(implement_obj_flags & ARG_WIELDED) args["implement"]["requirements"] |= ({ "wielded" });
+  if(implement_obj_flags & ARG_WORN) args["implement"]["requirements"] |= ({ "worn" });
+  if(implement_obj_flags & ARG_IN_INVENTORY) args["implement"]["requirements"] |= ({ "in-inventory" });
+  return ([
+    "see-also": see_alsos,
+    "help": help,
+    "verb": verbs,
+    "arguments": args,
+    "environment": env,
+    "actor": actor,
+  ]);
 }
 
 mixed get_property(string *path) {
@@ -100,9 +226,9 @@ mixed get_property(string *path) {
           return sizeof(climates) == 0 || sizeof( ({ path[2] }) & climates) != 0;
         case "weather":
           switch(path[2]) {
-            case "snowing": return !weathers || weathers & WEATHER_SNOWING;
-            case "raining": return !weathers || weathers & WEATHER_RAINING;
-            case "cloudy": return !weathers || weathers & WEATHER_CLOUDY;
+            case "snowing": return weathers & WEATHER_SNOWING;
+            case "raining": return weathers & WEATHER_RAINING;
+            case "cloudy": return weathers & WEATHER_CLOUDY;
           }
           break;
       }
@@ -112,7 +238,8 @@ mixed get_property(string *path) {
         case "act":
           switch(path[2]) {
             case "manipulate": return actor_reqs & ACTOR_MANIPULATE;
-            case "fight": return actor_reqs & ACTOR_FIGHT;
+            case "combat": return actor_reqs & ACTOR_COMBAT;
+            case "move": return actor_reqs & ACTOR_MOVE;
           }
           break;
         case "sense":
@@ -167,19 +294,17 @@ string *get_see_also() { return see_alsos; }
  */
 
 void add_syntax(string s, mapping info) {
-  if(info["action"]) syntaxes[s] = info;
 }
 
 mapping get_syntax(string s) {
-  return syntaxes[s];
+  return ([ ]);
 }
 
 mixed *get_syntax_actions(string s) {
-  if(syntaxes[s]) return syntaxes[s];
   return ({ });
 }
 
-string *get_syntaxes() { return map_indices(syntaxes); }
+string *get_syntaxes() { return ({ }); }
 
 int get_actor_requirements() { return actor_reqs; }
 void set_actor_requirements(int x) { actor_reqs = x; }

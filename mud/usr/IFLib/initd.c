@@ -26,7 +26,7 @@ void initialize_data() {
    */
   /* /usr/WorldLib/json/verbs/$verb.json */
 
-  HTTP_D -> add_resource_handler("/foo", "/usr/IFLib/data/resource/verb");
+  HTTP_D -> add_resource_handler("/api/iflib/verb", "/usr/IFLib/data/resource/verb");
 
   dir = get_dir("/usr/IFLib/json/verbs/*");
   for(i = 0, n = sizeof(dir[0]); i < n; i++) {

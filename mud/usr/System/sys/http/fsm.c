@@ -651,7 +651,7 @@ mixed o18(object resource, object request, object response, mapping metadata) { 
     if(is_status_code(result)) return result;
 
     if(request->get_method() != "HEAD") {
-      if(typeof(result) == T_STRING) {
+      if(typeof(result) == T_STRING || typeof(result) == T_ARRAY) {
         response->set_body(result);
       }
       encode_body(resource, response);

@@ -4,70 +4,78 @@
 # include <toollib.h>
 # include <type.h>
 
-mapping verbs;
-mapping syntaxes;
+mapping verb_data;
+mapping verb_handlers;
 
 static void create() {
-  verbs = ([ ]);
-
-  syntaxes = ([
-    "": ({ ({ 100 }), "" }),
-  ]);
+  verb_data = ([ ]);
+  verb_handlers = ([ ]);
 }
 
 int query_verb(string v) {
-  if(verbs[v]) return TRUE;
+  if(verb_handlers[v]) return TRUE;
   return FALSE;
 }
 
-void add_verb(object VERB_DATA v) {
-  string *names;
-  int i, n;
-
-  names = v -> get_verbs();
-  for(i = 0, n = sizeof(names); i < n; i++) {
-    if(verbs[names[i]]) verbs[names[i]] |= ({ v });
-    else verbs[names[i]] = ({ v });
-  }
-
-  names = v -> get_syntaxes();
-  for(i = 0, n = sizeof(names); i < n; i++)
-    if(!syntaxes[names[i]]) 
-      syntaxes[names[i]] = VERB_SYNTAX_P -> compile_syntax(names[i]);
+string *get_verb_ids() {
+  return map_indices(verb_data);
 }
 
-void remove_verb(object VERB_DATA v) {
+/* returns the identifier of the verb data resource */
+string add_verb(object VERB_DATA v, varargs string id) {
   string *names;
   int i, n;
 
   names = v -> get_verbs();
   for(i = 0, n = sizeof(names); i < n; i++) {
-    if(verbs[names[i]]) {
-      verbs[names[i]] -= ({ v });
-      if(sizeof(verbs[names[i]]) == 0) verbs[names[i]] = nil;
+    if(verb_handlers[names[i]]) verb_handlers[names[i]] |= ({ v });
+    else verb_handlers[names[i]] = ({ v });
+  }
+
+  if(!id) {
+    do {
+      id = "";
+      for(i = 0; i < 5; i++) {
+        n = random(20);
+        id += "bcdfghjklmnpqrstvwxz"[n..n];
+        n = random(6);
+        id += "aeiouy"[n..n];
+      }
+    } while(verb_data[id]);
+  }
+  verb_data[id] = v;
+  return id;
+}
+
+object get_verb(string id) {
+  return verb_data[id];
+}
+
+void remove_verb(string id) {
+  string *names;
+  object v;
+  int i, n;
+
+  v = verb_data[id];
+
+  names = v -> get_verbs();
+  for(i = 0, n = sizeof(names); i < n; i++) {
+    if(verb_handlers[names[i]]) {
+      verb_handlers[names[i]] -= ({ v });
+      if(sizeof(verb_handlers[names[i]]) == 0) verb_handlers[names[i]] = nil;
     }
   }
+
+  verb_data[id] = nil;
 }
 
-/*
-  when parsing, we select the first word as a verb. If it's not,
-  we test if it's an adverb and move on to the second word.
- */
 object *get_verb_handlers(string verb) {
-  string *candidates;
-  object *handlers;
-  int i, n;
-  if(verbs[verb]) return verbs[verb];
-
-  /* we might want to find a key that matches verb if verb is an
-     abbreviation */
-  candidates = map_indices(verbs);
-  for(i = 0, n = sizeof(candidates); i < n; i++) 
-    if(candidates[i][0..strlen(verb)] != verb) candidates[i] = nil;
-  handlers = ({ });
-  /* TODO: sort array of candidates so the short matches are first */
-  for(i = 0, n = sizeof(candidates); i < n; i++) {
-    if(candidates[i]) handlers += ({ verbs[candidates[i]] });
-  }
-  return handlers;
+  if(verb_handlers[verb]) return verb_handlers[verb];
+  return ({ });
 }
+
+void replace_verb(string id, object VERB_DATA v) {
+  remove_verb(id);
+  add_verb(v, id);
+}
+
