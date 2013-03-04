@@ -7,3 +7,5 @@
 # define ERROR_D   "/usr/System/sys/error"
 
 # define HTTP_USER "/usr/System/obj/http/rest"
+
+# define HTTP_SYSTEM_RESOURCE "/usr/System/data/resource/system"

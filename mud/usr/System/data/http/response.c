@@ -38,6 +38,7 @@ void output(object target) {
   if(status) {
     target -> message("HTTP/1.0 " + status + " " +  HTTP_D -> status_message(status) + "\n");
 
+    headers["Access-Control-Allow-Origin"] = "*";
     if(body != nil) {
       if(!headers["content-length"]) {
         length = 0;

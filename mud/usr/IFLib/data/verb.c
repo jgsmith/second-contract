@@ -11,6 +11,7 @@
 # include <iflib.h>
 # include <iflib/verb.h>
 # include <worldlib/terrain.h>
+# include <kernel/kernel.h>
 
 string *verbs;
 string help;
@@ -23,6 +24,7 @@ int respirations;
 int terrains;
 int weathers;
 int seasons;
+int disabled;
 
 static void create(varargs int clone) {
   verbs = ({ });
@@ -34,6 +36,14 @@ static void create(varargs int clone) {
   weathers = 0;
   seasons = 0;
   respirations = 0;
+  disabled = 1;
+}
+
+static int can_modify() {
+  if(SYSTEM()) return TRUE;
+  if(object_name(previous_object()) != HTTP_VERB_RESOURCE) return TRUE;
+  error("Verbs may only be modified by System or through the web administrative interface.");
+  return FALSE;
 }
 
 mapping get_properties() {
@@ -159,6 +169,7 @@ mapping get_properties() {
     "arguments": args,
     "environment": env,
     "actor": actor,
+    "disabled": disabled,
   ]);
 }
 
@@ -270,18 +281,25 @@ mixed get_property(string *path) {
 
 /* all properties are read-only for scripting purposes */
 void set_property(string *path, mixed value) {
+  if(!can_modify()) return;
 }
 
 void set_verbs(string *v) {
-  verbs = v;
+  /* TODO: notify VERB_D that the set of verbs has changed. - makes it
+   * easier than relying on the rest resource object to do it through an
+   * update call -- if we know our identifier...
+   */
+  if(can_modify()) verbs = v;
 }
 string *get_verbs() { return verbs; }
 
-void set_help(string h) { help = h; }
+void set_help(string h) { 
+  if(can_modify()) help = h; 
+}
 string get_help() { return help; }
 
 void set_see_also(string *v) {
-  see_alsos = v;
+  if(can_modify()) see_alsos = v;
 }
 
 string *get_see_also() { return see_alsos; }
@@ -292,9 +310,6 @@ string *get_see_also() { return see_alsos; }
  *   action: action this verb maps to (required)
  *   args: mapping of additional constant args to include in action call
  */
-
-void add_syntax(string s, mapping info) {
-}
 
 mapping get_syntax(string s) {
   return ([ ]);
@@ -307,16 +322,22 @@ mixed *get_syntax_actions(string s) {
 string *get_syntaxes() { return ({ }); }
 
 int get_actor_requirements() { return actor_reqs; }
-void set_actor_requirements(int x) { actor_reqs = x; }
+void set_actor_requirements(int x) { if(can_modify()) actor_reqs = x; }
 
 string *get_climates() { return climates; }
-void set_climates(string *c) { climates = c; }
+void set_climates(string *c) { if(can_modify()) climates = c; }
 
 int get_terrains() { return terrains; }
-void set_terrains(int x) { terrains = x; }
+void set_terrains(int x) { if(can_modify()) terrains = x; }
 
 int get_weathers() { return weathers; }
-void set_weathers(int x) { weathers = x; }
+void set_weathers(int x) { if(can_modify()) weathers = x; }
 
 int get_seasons() { return seasons; }
-void set_seasons(int x) { seasons = x; }
+void set_seasons(int x) { if(can_modify()) seasons = x; }
+
+int get_disabled() { return disabled; }
+
+void set_disabled(int x) {
+  if(can_modify()) disabled = x;
+}

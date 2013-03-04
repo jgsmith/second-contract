@@ -33,7 +33,7 @@ mixed to_json(mapping metadata) {
 
   if(get_resource_id()) {
     return JSON_P -> to_json(data_for_verb(get_resource_id()) + ([
-      "@id": get_request() -> get_uri(),
+      "id": get_resource_id(),
     ]));
   }
   else {
@@ -43,7 +43,7 @@ mixed to_json(mapping metadata) {
     for(i = 0, n = sizeof(verbs); i < n; i++) {
       list += ({ 
         JSON_P -> to_json(data_for_verb(verbs[i]) + ([
-          "@id": get_request() -> get_uri() + "/" + verbs[i],
+          "id": verbs[i],
         ]))
       });
     }

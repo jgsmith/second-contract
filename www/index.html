@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Second Contract Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    </style>
+    <link href="css/bootstrap-responsive.min.css" rel="stylesheet" media="screen">
+  </head>
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <button type="button" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="brand" href="#">Project name</a>
+          <div class="nav-collapse collapse">
+            <p class="navbar-text pull-right">
+              Logged in as <a href="#" class="navbar-link">Username</a>
+            </p>
+            <ul class="nav" id="top-nav">
+              <li class="active"><a href="#">System</a></li>
+              <li><a href="#iflib">IFLib</a></li>
+              <li><a href="#worldlib">WorldLib</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+    <div class="container-fluid" id="sc-admin">
+      <div class="row-fluid">
+        <div class="span2" id="sidebar"></div>
+        <div class="span10" id="main"></div>
+      </div>
+      <footer></footer>
+    </div>
+    <div style="visibility: hidden;">
+      <div id="system-template">
+        <h1>System</h1>
+        <div class="row-fluid">
+          <div class="span6">
+            <h2>Time</h2>
+            <table>
+              <tr>
+                <td align="right">Started at:</td><td>{{(new Date(starttime*1000)).toLocaleString()}}</td>
+              </tr><tr>
+                <td align="right">Running since:</td><td>{{(new Date(boottime*1000)).toLocaleString()}}</td>
+              </tr><tr>
+                <td align="right">Uptime:</td><td>{{parseInt(uptime/(60*60*24*7),10)}}w {{parseInt(uptime/(60*60*24), 10)%7}}d {{parseInt(uptime/(60*60),10)%24}}h {{parseInt(uptime/60,10)%60}}m {{uptime%60}}s</td>
+              </tr>
+            </table>
+            <h2>Resources</h2>
+            <dl>
+              <dt>Memory</dt>
+              <dd>
+            <div class="progress">
+              <div class="bar" style="background: transparent; text-shadow: none; width: {{parseInt((static_memory_size-static_memory_used)*100/(static_memory_size+dynamic_memory_size), 10)}}%;"></div>
+              <div class="bar" style="width: {{parseInt(static_memory_used * 100 / (static_memory_size+dynamic_memory_size), 10)}}%;" title="{{static_memory_used}}/{{static_memory_size}}"></div>
+              <div class="bar bar-success" style="width: {{parseInt(dynamic_memory_used * 100 / (dynamic_memory_size+static_memory_size), 10)}}%;" title="{{dynamic_memory_used}}/{{dynamic_memory_size}}"></div>
+            </div>
+              </dd>
+              <dt>Swap</dt>
+              <dd><div class="progress">
+                <div class="bar" style="width: {{parseInt(swap_used*100/swap_size, 10)}}%;" title="{{swap_used}}/{{swap_size}}"></div>
+              </div></dd>
+              <dt>Users</dt>
+              <dd><div class="progress">
+                  <div class="bar" style="width: {{parseInt(user_used*100/user_size, 10)}}%;" title="{{user_used}}/{{user_size}}"></div>
+                </div>
+              </dd>
+              <dt>Callouts</dt>
+              <dd><div class="progress">
+                <div class="bar" style="width: {{parseInt(call_out_long*100/call_out_size, 10)}}%;"></div>
+                <div class="bar bar-success" style="width: {{parseInt(call_out_short*100/call_out_size, 10)}}%;"></div>
+              </div></dd>
+              <dt>Objects</dt>
+              <dd><div class="progress">
+                <div class="bar" style="width: {{parseInt(objects*100/object_table_size, 10)}}%;" title="{{objects}}/{{object_table_size}}"></div>
+              </div></dd>
+            </dl>
+          </div>
+          <div class="span6">
+            <h2>Settings</h2>
+            <dl>
+              <dt>Game Name</dt>
+              <dd>
+                 <form class="form-inline">
+                  <input type="text" id="system-name" placeholder="Name of the game" value="{{ name }}">
+                  <button class="btn" type="button" id="save-system-name">Save</button>
+                 </form>
+              </dd>
+              <dt>Telnet Ports</dt>
+              <dd>{{telnet_ports.join(", ")}}</dd>
+              <dt>Binary Ports</dt>
+              <dd>{{binary_ports.join(", ")}}</dd>
+              <dt>Swap Sector Size</dt>
+              <dd>{{sectorsize}} bytes</dd>
+              <dt>Server Version</dt>
+              <dd>{{version}}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div id="iflib-template">
+        <h1>IFLib</h1>
+      </div>
+      <div id="worldlib-template">
+        <h1>WorldLib</h1>
+      </div>
+      <div id="verb-template">
+        <h1>Verb</h1>
+        <form>
+          <label>Verbs:</label>
+          <input id="verb-verbs" name="verbs" type="text" value="{{ verb.join(', ') }}" />
+        </form>
+      </div>
+      <div id="verb-list-template">
+        
+      </div>
+      <div id="verb-list-item-template">
+        <a href="#verb/{{ id }}">{{ verb.join(', ') }}</a>
+      </div>
+    </div>
+    <script type="text/javascript" src="js/jquery-min.js"></script>
+    <script type="text/javascript" src="js/underscore-min.js"></script>
+    <script type="text/javascript" src="js/backbone-min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/sc-admin.js"></script>
+  </body>
+</html>

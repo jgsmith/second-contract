@@ -70,8 +70,15 @@ void remove_verb(string id) {
 }
 
 object *get_verb_handlers(string verb) {
-  if(verb_handlers[verb]) return verb_handlers[verb];
-  return ({ });
+  object *list;
+  int i, n;
+
+  if(verb_handlers[verb]) list = verb_handlers[verb] + ({ });
+  else list = ({ });
+
+  for(i = 0, n = sizeof(list); i < n; i++)
+    if(list[i]->is_disabled()) list[i] = nil;
+  return list - ({ nil });
 }
 
 void replace_verb(string id, object VERB_DATA v) {

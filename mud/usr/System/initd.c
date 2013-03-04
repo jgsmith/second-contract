@@ -35,6 +35,12 @@ static int create(varargs int clone) {
     http_manager = find_object(HTTP_D);
     "/kernel/sys/userd" -> set_binary_manager(1, http_manager);
 
+    if(!find_object(HTTP_SYSTEM_RESOURCE)) {
+      compile_object(HTTP_SYSTEM_RESOURCE);
+    }
+
+    http_manager -> add_resource_handler("/api/system", HTTP_SYSTEM_RESOURCE);
+
     if(!find_object("/usr/System/obj/wiztool")) {
         compile_object("/usr/System/obj/wiztool");
     }
