@@ -12,13 +12,13 @@ directives are enclosed in double curly braces ('{{' and '}}').
 Synopsis
 --------
 
-  # include <toollib.h>
-
-  object parsed_template;
-  string rendered_template
-
-  parsed_template  = TEMPLATE_P -> parse_template("...");
-  rendered_template = parsed_template->render(data_mapping, pov_object);
+    # include <toollib.h>
+    
+    object parsed_template;
+    string rendered_template
+    
+    parsed_template  = TEMPLATE_P -> parse_template("...");
+    rendered_template = parsed_template->render(data_mapping, pov_object);
 
 Grammar Directives
 ------------------
@@ -49,16 +49,16 @@ Cases:
 
 For example, the following template would result in a number of messages:
 
-  "<actor> <hit> <direct> with <instrument>."
+    "<actor> <hit> <direct> with <instrument>."
 
 From the actor's perspective:
 
-  "You hit the nail with the hammer."
+    "You hit the nail with the hammer."
 
 From the nail's perspective:
 
-  "Bob hits you with the hammer."
+    "Bob hits you with the hammer."
 
 From the hammer's perspective:
 
-  "Bob hits the nail with you."
+    "Bob hits the nail with you."
