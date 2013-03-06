@@ -2,6 +2,8 @@
 # include <system/http.h>
 # include <toollib.h>
 # include <status.h>
+# include <type.h>
+# include <gamelib.h>
 
 inherit resource HTTP_RESOURCE_LIB;
 
@@ -14,8 +16,40 @@ void create(varargs int clone) {
   }
 }
 
+int is_authorized(string auth) { return 1; }
+
+int forbidden() { return 0; }
+
+/* this isn't a collection of resources */
+int resource_exists() {
+  return typeof(get_resource_id()) == T_NIL;
+}
+
 mixed *content_types_provided() {
   return ({ ({ "application/json", "to_json" }) });
+}
+
+mixed *content_types_accepted() {
+  return ({ ({ "application/json", "from_json" }) });
+}
+
+int valid_entity_length(int length) {
+  return length <= status(ST_STRSIZE);
+}
+
+mixed *allowed_methods() {
+  return resource::allowed_methods() - ({ "DELETE" }) + ({ "POST", "PUT" });
+}
+
+mixed from_json(mapping metadata) {
+  mixed info;
+  string json;
+
+  json = implode(get_request() -> get_body(), "");
+  info = JSON_P -> from_json(json);
+  if(typeof(info) == T_NIL) return 400;
+  if(typeof(info["name"]) != T_NIL) GAME_D -> set_name(info["name"]);
+  return 200;
 }
 
 mixed to_json(mapping metadata) {
@@ -24,7 +58,7 @@ mixed to_json(mapping metadata) {
   info = status();
 
   return JSON_P -> to_json(([
-    "name": "Second Contract",
+    "name": GAME_D -> get_name(),
     "version": info[ST_VERSION],
     "starttime": info[ST_STARTTIME],
     "boottime": info[ST_BOOTTIME],
@@ -47,5 +81,8 @@ mixed to_json(mapping metadata) {
     "user_used": sizeof(users()),
     "telnet_ports": info[ST_TELNETPORTS],
     "binary_ports": info[ST_BINARYPORTS],
+    "string_size": info[ST_STRSIZE],
+    "array_size": info[ST_ARRAYSIZE],
+    "precompiled_objects": info[ST_PRECOMPILED],
   ]));
 }

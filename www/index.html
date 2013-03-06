@@ -75,8 +75,8 @@
               <dd>
             <div class="progress">
               <div class="bar" style="background: transparent; text-shadow: none; width: {{parseInt((static_memory_size-static_memory_used)*100/(static_memory_size+dynamic_memory_size), 10)}}%;"></div>
-              <div class="bar" style="width: {{parseInt(static_memory_used * 100 / (static_memory_size+dynamic_memory_size), 10)}}%;" title="{{static_memory_used}}/{{static_memory_size}}"></div>
-              <div class="bar bar-success" style="width: {{parseInt(dynamic_memory_used * 100 / (dynamic_memory_size+static_memory_size), 10)}}%;" title="{{dynamic_memory_used}}/{{dynamic_memory_size}}"></div>
+              <div class="bar" style="width: {{parseInt(static_memory_used * 100 / (static_memory_size+dynamic_memory_size), 10)}}%;" title="{{parseInt(static_memory_used/1024,10)}}k/{{parseInt(static_memory_size/1024,10)}}k"></div>
+              <div class="bar bar-success" style="width: {{parseInt(dynamic_memory_used * 100 / (dynamic_memory_size+static_memory_size), 10)}}%;" title="{{parseInt(dynamic_memory_used/1024,10)}}k/{{parseInt(dynamic_memory_size/1024,10)}}k"></div>
             </div>
               </dd>
               <dt>Swap</dt>
@@ -115,6 +115,10 @@
               <dd>{{binary_ports.join(", ")}}</dd>
               <dt>Swap Sector Size</dt>
               <dd>{{sectorsize}} bytes</dd>
+              <dt>Maximum String Length</dt>
+              <dd>{{string_size}} bytes</dd>
+              <dt>Maximum Array and Mapping Size</dt>
+              <dd>{{array_size}} entries</dd>
               <dt>Server Version</dt>
               <dd>{{version}}</dd>
             </dl>

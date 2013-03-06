@@ -63,7 +63,6 @@ SC.Views.Verb = Backbone.View.extend({
   },
 
   render: function() {
-    console.log(this.model.toJSON());
     this.$el.html(this.template(this.model.toJSON()));
     return this.el;
   },
@@ -102,7 +101,6 @@ SC.Views.VerbList = Backbone.View.extend({
   },
 
   render: function() {
-    console.log("Rendering verb list");
     _.each(this.model.models, function(verb) {
       this.appendNewVerb(verb);
     }, this);
@@ -110,7 +108,6 @@ SC.Views.VerbList = Backbone.View.extend({
   },
 
   appendNewVerb: function(verb) {
-    console.log("appending", verb);
     this.$el.append(new SC.Views.VerbListItem({model:verb}).render());
   }
 });
@@ -148,8 +145,18 @@ SC.Views.System = Backbone.View.extend({
     this.template = _.template( $("#system-template").html() );
   },
 
+  events: {
+    "click #save-system-name": "saveSystemInfo"
+  },
+
+  saveSystemInfo: function() {
+    this.model.set({
+      name: $("#system-name").val()
+    });
+    this.model.save();
+  },
+
   render: function() {
-    console.log(this.model.toJSON());
     console.log($("#system-template").html());
     this.$el.html( this.template(this.model.toJSON()) );
     return this.el;
@@ -235,6 +242,9 @@ SC.Models.system.fetch({
   success: function() {
     SC.App = new SC.Router;
     $("a.brand").text(SC.Models.system.attributes.name);
+    SC.Models.system.on("change:name", function(model, name) {
+      $("a.brand").text(name);
+    });
     Backbone.history.start();
   }
 });

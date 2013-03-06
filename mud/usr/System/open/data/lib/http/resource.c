@@ -37,7 +37,7 @@ string get_resource_id() {
 
   if(request) {
     path = request -> get_path_info();
-    if(strlen(path) > strlen(base) && path[0..strlen(base)] == base+"/") {
+    if(strlen(path) > strlen(base)+1 && path[0..strlen(base)] == base+"/") {
       return path[strlen(base)+1..];
     }
   }
@@ -68,7 +68,7 @@ int service_available() { return 1; }
 mixed is_authorized(string auth) { 
   string *bits;
 
-  if(auth_flags & HTTP_ALLOWS_PUBLIC_READ && (request->get_method() == "GET" || request->get_method() == "HEAD")) {
+  if(auth_flags & HTTP_ALLOWS_PUBLIC_READ && (request->get_method() == "GET" || request->get_method() == "HEAD" || request->get_method() == "OPTIONS")) {
     return TRUE;
   }
 
@@ -102,13 +102,18 @@ int valid_content_headers(mapping headers) { return 1; }
 
 int valid_entity_length(int length) { return 1; }
 
-mapping options() { return ([ ]); }
+string *allowed_methods();
+
+mapping options() { return ([ 
+  "Access-Control-Allow-Methods": implode(allowed_methods(), ", "),
+  "Access-Control-Allow-Headers": get_request()->get_header("Access-Control-Request-Headers"),
+]); }
 
 string *allowed_methods() { 
   string *allowed;
   int full_access;
 
-  allowed = ({ });
+  allowed = ({ "OPTIONS" });
 
   if(auth_flags & HTTP_ALLOWS_PUBLIC_READ) {
     allowed |= ({ "GET", "HEAD" });

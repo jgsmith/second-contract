@@ -3,3 +3,5 @@
 # define COMPILE_PATH "/usr/GameLib/events/obj/handlers/"
 
 # define GAMELIB_INIT "/usr/GameLib/initd"
+
+# define GAME_D "/usr/GameLib/sys/game"

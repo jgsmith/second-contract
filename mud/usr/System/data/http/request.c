@@ -1,6 +1,7 @@
 # include <system.h>
 
 string *content;
+int expected_content_length, content_length;
 string buffer;
 mapping headers;
 string request_method;
@@ -9,8 +10,10 @@ string server_protocol;
 string path_info;
 string query_string;
 string script_name;
-int still_reading_headers;
+int still_reading_headers, reading_content;
 mapping env;
+
+int get_content_length();
 
 void create(varargs int clone) {
   if(clone) {
@@ -18,6 +21,7 @@ void create(varargs int clone) {
     env = ([ ]);
     buffer = "";
     still_reading_headers = TRUE;
+    reading_content = FALSE;
   }
 }
 
@@ -123,6 +127,15 @@ int parse_http_request(string chunk) {
   /* this is due to chunk coming through twice at the beginning */
   if(chunk != buffer) buffer = buffer + chunk;
 
+  if(reading_content) {
+    if(content_length >= expected_content_length) return 1;
+
+    content += ({ chunk });
+    content_length += strlen(chunk);
+    if(content_length < expected_content_length) return -2;
+    return 1;
+  }
+
   if(still_reading_headers) {
     if(sizeof(explode(buffer+" ", "\n\n")) > 1 || buffer[strlen(buffer)-2..] == "\n\n") {
       still_reading_headers = FALSE;
@@ -147,7 +160,18 @@ int parse_http_request(string chunk) {
         buffer = chunk;
         return -100 + r;
       }
-      buffer = r < strlen(chunk) ? chunk[r..] : "";
+      chunk = chunk[r..];
+      if(strlen(chunk) >= 2 && chunk[0..1] == "\x0a\x0a") chunk = chunk[2..];
+      else if(strlen(chunk) >= 3 && (chunk[0..2] == "\x0a\x0d\x0a" || chunk[0..2] == "\x0d\x0a\x0a")) chunk = chunk[3..];
+      else if(strlen(chunk) >= 4 && chunk[0..3] == "\x0d\x0a\x0d\x0a") chunk = chunk[4..];
+        
+      content = ({ chunk });
+      content_length = strlen(content[0]);
+      expected_content_length = get_content_length();
+      reading_content = 1;
+      if(content_length < expected_content_length) {
+        return -2;
+      }
       return r;
     }
   }
@@ -183,3 +207,5 @@ int get_content_length() {
   }
   return -1;
 }
+
+string *get_body() { return content; }

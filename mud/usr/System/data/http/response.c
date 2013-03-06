@@ -1,4 +1,5 @@
 # include <system.h>
+# include <toollib.h>
 # include <type.h>
 
 /*
@@ -30,27 +31,55 @@ void add_to_body(string s) {
   body += ({ s });
 }
 
+void remove_header(string name) {
+  headers[name] = nil;
+  headers[STRING_D -> lower_case(name)] = nil;
+}
+
+void add_header(string name, string value) {
+  if(!headers[name]) headers[name] = ({ value });
+  else headers[name] |= ({ value });
+}
+
+void add_headers(mapping h) {
+  string *hs;
+  int i, n;
+
+  hs = map_indices(h);
+  for(i = 0, n = sizeof(hs); i < n; i++) {
+    if(typeof(h[hs[i]]) == T_ARRAY) {
+      if(!headers[hs[i]]) headers[hs[i]] = h[hs[i]];
+      else headers[hs[i]] |= h[hs[i]];
+    }
+    else {
+      if(!headers[hs[i]]) headers[hs[i]] = ({ h[hs[i]] });
+      else headers[hs[i]] |= ({ h[hs[i]] });
+    }
+  }
+}
+
 void output(object target) {
   string *keys;
-  int i, n;
+  int i, n, j, m;
   int length;
 
   if(status) {
     target -> message("HTTP/1.0 " + status + " " +  HTTP_D -> status_message(status) + "\n");
 
-    headers["Access-Control-Allow-Origin"] = "*";
+    headers["Access-Control-Allow-Origin"] = ({ "*" });
     if(body != nil) {
-      if(!headers["content-length"]) {
+      if(!headers["Content-Length"]) {
         length = 0;
         for(i = 0, n = sizeof(body); i < n; i++) length += strlen(body[i]);
-        headers["content-length"] = length;
+        headers["Content-Length"] = ({ length });
       }
-      if(!headers["content-type"]) headers["content-type"] = "application/json";
+      if(!headers["Content-Type"]) headers["Content-Type"] = ({ "application/json" });
     }
 
     keys = map_indices(headers);
     for(i = 0, n = sizeof(keys); i < n; i++) {
-      target -> message(keys[i] + ": " + headers[keys[i]] + "\n");
+      for(j = 0, m = sizeof(headers[keys[i]]); j < m; j++)
+        target -> message(keys[i] + ": " + headers[keys[i]][j] + "\n");
     }
     target -> message("\n");
     if(body) {

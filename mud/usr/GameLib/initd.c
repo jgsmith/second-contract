@@ -9,4 +9,5 @@ static int create(varargs int clone) {
   int i, n;
 
   if(!find_object(EVENT_CODE_D)) compile_object(EVENT_CODE_D);
+  if(!find_object(GAME_D)) compile_object(GAME_D);
 }

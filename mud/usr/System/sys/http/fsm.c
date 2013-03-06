@@ -88,6 +88,12 @@ static string unquote_header(string v) {
 }
 
 static string _get_acceptable_content_type_handler(object resource, object request) {
+  string handler;
+  mixed *types;
+  types = resource -> content_types_accepted();
+  /* set the default handler as the first one */
+  if(sizeof(types)) handler = types[0][1];
+  return handler;
 }
 
 static void encode_body_if_set(object resource, object request) {
@@ -121,7 +127,7 @@ static mixed _handle_304(object resource, object response) {
  * but we expect everything to go fairly quickly for now since we're dealing
  * with quick modification of core resources.
  */
-mixed run(object resource) {
+atomic void run(object resource) {
   string state;
   mapping metadata;
   object response;
@@ -137,7 +143,7 @@ mixed run(object resource) {
     result = call_other(this_object(), state, resource, resource->get_request(), response, metadata);
     if( is_bad_result( result ) ) {
       response->set_status(500);
-      response->set_header("Content-Type", "text/plain");
+      response->add_header("Content-Type", "text/plain");
       response->set_body( ({ "Got bad state: " + (result ? result : "undef") }) );
       break;
     }
@@ -153,7 +159,7 @@ mixed run(object resource) {
     }
     else {
       response -> set_status( 500 );
-      response->set_header("Content-Type", "text/plain");
+      response->add_header("Content-Type", "text/plain");
       response->set_body( ({ "Got bad state: " + (result ? result : "undef") }) );
       break;
     }
@@ -163,11 +169,11 @@ mixed run(object resource) {
 static void add_caching_headers(object resource, object response) {
   string t;
   if(t = resource->generate_etag())
-    response->set_header("Etag", ensure_quoted_header(t));
+    response->add_header("Etag", ensure_quoted_header(t));
   if(t = resource->expires())
-    response->set_header("Expires", t);
+    response->add_header("Expires", t);
   if(t = resource->last_modified())
-    response->set_header("Last-Modified", t);
+    response->add_header("Last-Modified", t);
 }
 
 static int handle_304(object resource, object response) {
@@ -179,7 +185,7 @@ static int handle_304(object resource, object response) {
 }
 
 mixed b13(object resource, object request, object response, mapping metadata) { /* service_available */
-  return resource->service_available() ? "b12" : 503;
+  return resource->service_available() ? "b12" : 500;
 }
 
 mixed b12(object resource, object request, object response, mapping metadata) { /* known_method */
@@ -197,7 +203,7 @@ mixed b10(object resource, object request, object response, mapping metadata) { 
   method = request->get_method();
   if( sizeof( ({ method }) & resource->allowed_methods() ) ) return "b9";
 
-  response -> set_header("Allow", implode(resource->allowed_methods(), ", "));
+  response -> add_header("Allow", implode(resource->allowed_methods(), ", "));
   return 405;
 }
 
@@ -214,7 +220,7 @@ mixed b8(object resource, object request, object response, mapping metadata) { /
     if( result ) return "b7";
   }
   if( typeof(result) == T_STRING && result ) {
-    response -> set_header( "WWW-Authenticate", result );
+    response -> add_header( "WWW-Authenticate", result );
   }
   return 401;
 }
@@ -234,6 +240,7 @@ mixed b6(object resource, object request, object response, mapping metadata) { /
   for(i = 0, n = sizeof(header_keys); i < n; i++)
     if(strlen(header_keys[i]) > 8 && header_keys[i][0..7] == "content-")
       content_headers[header_keys[i]] = headers[header_keys[i]];
+  if(!content_headers["content-length"] && sizeof(({ request->get_method() }) & ({ "POST", "PUT" }))) return 411;
   return resource->valid_content_headers( content_headers ) ? "b5" : 501;
 }
 
@@ -247,7 +254,7 @@ mixed b4(object resource, object request, object response, mapping metadata) { /
 
 mixed b3(object resource, object request, object response, mapping metadata) { /* method_is_options */
   if( request->get_method() == "OPTIONS" ) {
-    response->set_headers( resource -> options() );
+    response->add_headers( resource -> options() );
     return 200;
   }
   return "c3";
@@ -285,7 +292,7 @@ mixed d5(object resource, object request, object response, mapping metadata) { /
   if( language ) {
     metadata["Language"] = language;
     if(!(typeof(language) == T_INT && language == 1))
-      response->set_header("Content-Language", language);
+      response->add_header("Content-Language", language);
     return "e5";
   }
   return 406;
@@ -316,13 +323,13 @@ mixed f6(object resource, object request, object response, mapping metadata) { /
 
   if( charset = metadata["Charset"] )
     metadata["Content-Type"] -> add_param("charset", charset);
-  response -> set_header( "Content-Type", metadata["Content-Type"] );
+  response -> add_header( "Content-Type", metadata["Content-Type"] );
 
   if( request -> get_header("Accept-Encoding") ) return "f7";
 
   if( encoding = choose_encoding( resource->encodings_provided(), "identity;q=1.0,*;q=0.5" ) ) {
     if(encoding != "identity")
-      response->set_header("Content-Encoding", encoding);
+      response->add_header("Content-Encoding", encoding);
     metadata["Content-Encoding"] = encoding;
     return "g7";
   }
@@ -334,7 +341,7 @@ mixed f7(object resource, object request, object response, mapping metadata) { /
 
   if( encoding = choose_encoding( resource->encodings_provided(), request->get_header("Accept-Encoding") ) ) {
     if(encoding != "identity")
-      response->set_header("Content-Encoding", encoding);
+      response->add_header("Content-Encoding", encoding);
     metadata["Content-Encoding"] = encoding;
     return "g7";
   }
@@ -355,7 +362,7 @@ mixed g7(object resource, object request, object response, mapping metadata) { /
   if(sizeof(resource->languages_provided()))
     variances += ({ "Accept-Language" });
   if(sizeof(variances) > 0)
-    response -> set_header("Vary", implode(variances, ", "));
+    response -> add_header("Vary", implode(variances, ", "));
   return resource -> resource_exists() ? "g8" : "h7";
 }
 
@@ -418,7 +425,7 @@ mixed i4(object resource, object request, object response, mapping metadata) { /
 
   if(uri = resource->moved_permanently()) {
     if(is_status_code(uri)) return uri;
-    response -> set_header("Location", uri);
+    response -> add_header("Location", uri);
     return 301;
   }
   return "p3";
@@ -575,7 +582,7 @@ mixed n11(object resource, object request, object response, mapping metadata) { 
 
   if(resource -> post_is_create()) {
     if(!resource->create_path_after_handler()) 
-      if(_n11_create_path(resource, request, response) == 500) return 500;
+      if(_n11_create_path(resource, request, response) >= 500) return 500;
     handler = _get_acceptable_content_type_handler(resource, request);
     if(is_status_code(handler)) return handler;
 
@@ -583,10 +590,14 @@ mixed n11(object resource, object request, object response, mapping metadata) { 
     if(is_status_code(result)) return result;
 
     if(resource->create_path_after_handler())
-      if(_n11_create_path(resource, request, response) == 500) return 500;
+      if(_n11_create_path(resource, request, response) >= 500) return 500;
   }
   else {
-    result = resource->process_post();
+    handler = _get_acceptable_content_type_handler(resource, request);
+    if(is_status_code(handler)) return handler;
+
+    result = call_other(resource, handler, metadata);
+    /* result = resource->process_post(); */
     if(result) {
       if(is_status_code(result)) return result;
       encode_body_if_set( resource, response );
@@ -598,7 +609,7 @@ mixed n11(object resource, object request, object response, mapping metadata) { 
 
   if( is_redirect( response ) ) {
     if( response -> location() ) return 303;
-    else return 500;
+    else return 506;
   }
 
   return "p11";
