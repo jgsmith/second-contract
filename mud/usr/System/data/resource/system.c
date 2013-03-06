@@ -84,5 +84,6 @@ mixed to_json(mapping metadata) {
     "string_size": info[ST_STRSIZE],
     "array_size": info[ST_ARRAYSIZE],
     "precompiled_objects": info[ST_PRECOMPILED],
+    "mudlib_version": MUDLIB_VERSION,
   ]));
 }

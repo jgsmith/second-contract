@@ -1,0 +1,65 @@
+#
+# This parses the string templates in messages and such
+#
+
+_word = /[^:{}<>$|]+/
+
+message : bits
+
+word : _word
+word : '.'
+word : 'if'
+word : 'else'
+word : 'then'
+word : 'unless'
+word : 'chooseOne'
+
+start_substitution : '{{'
+start_command : '{{#'
+start_comment : '{{!'
+start_command_end : '{{/'
+end_command : '}}'
+
+colon_name : words ':' words
+colon_name : colon_name ':' words
+
+bos : '<'
+eos : '>'
+
+varname : '$' word ? _varname
+
+bit : start_command command end_command ? _pass_second
+bit : start_comment words end_command ? _comment
+bit : start_substitution expression end_command ? _pass_second
+bit : bos substitution eos ? _pass_second
+bit : words
+
+bits : bits bit ? _add_bit
+bits : bit ? _create_template_obj
+
+command : choose_one
+command : if
+command : unless
+command : if_then_else
+
+substitution: word  ? _simple_substitution
+substitution: word ':' word ? _targeted_substitution
+
+choose_one : 'chooseOne' word_list ? _choose_one_word
+choose_one : 'chooseOne' property ? _choose_one_value
+
+words: word
+words: words word
+
+word_list : words ? _create_word_list
+word_list : word_list '|' words ? _append_word_list
+
+property : colon_name ? _default_property
+property : expression '.' colon_name ? _exp_property
+
+if : 'if' expression end_command bits start_command_end 'if' ? _if
+unless : 'unless' expression end_command bits start_command_end 'unless' ? _unless
+if_then_else : 'if' expression end_command bits start_command 'else' end_command bits start_command_end 'if' ? _if_else
+
+expression : property
+expression : varname

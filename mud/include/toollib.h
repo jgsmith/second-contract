@@ -3,6 +3,9 @@
 # define VERB_SYNTAX_P  "/usr/ToolLib/sys/parser/verb_syntax"
 # define EVENT_SCRIPT_P "/usr/ToolLib/sys/parser/event_script"
 # define GRAMMAR_P      "/usr/ToolLib/sys/parser/grammar"
+# define TEMPLATE_P     "/usr/ToolLib/sys/parser/template"
+
+# define ENGLISH_D "/usr/ToolLib/sys/english"
 
 # define BASE64_D "/usr/ToolLib/sys/base64"
 

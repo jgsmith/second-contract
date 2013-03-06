@@ -9,3 +9,12 @@
 # define HTTP_USER "/usr/System/obj/http/rest"
 
 # define HTTP_SYSTEM_RESOURCE "/usr/System/data/resource/system"
+
+/* The version is "SC MAJOR.YYJJJN"
+ *  date -u '+SC 0.%g%j0'
+ * MAJOR: 0 (alpha/beta)
+ * YY: 13 (for 2013)
+ * JJJ: day of the year
+ * N: release for that day
+ */
+# define MUDLIB_VERSION "SC 0.130650"

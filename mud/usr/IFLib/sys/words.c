@@ -38,14 +38,14 @@ static void create(varargs int clone) {
   ]);
 }
 
-private string word_from_list(string list, int pos, varargs int offset){
+static string word_from_list(string list, int pos, varargs int offset){
   if(!words[list]) return "";
   pos -= offset;
   if(pos < 0 || pos >= sizeof(words[list])) return "";
   return words[list][pos];
 }
 
-private int int_from_list(string list, string word, varargs int offset) {
+static int int_from_list(string list, string word, varargs int offset) {
   int i, n;
   if(!words[list]) return -1;
   for(i = 0, n = sizeof(words[list]); i < n; i++)
@@ -91,7 +91,7 @@ int distance_number(string d) {
   return int_from_list("distances", d);
 }
 
-private string *gather_strings_from_bits(string list, int d) {
+static string *gather_strings_from_bits(string list, int d) {
   int mask, i, n;
   string *ret;
   if(!words[list]) return ({ });
@@ -103,7 +103,7 @@ private string *gather_strings_from_bits(string list, int d) {
   return ret;
 }
 
-private int gather_int_from_strings(string list, string *bits) {
+static int gather_int_from_strings(string list, string *bits) {
   int mask, i, n;
   int ret;
   if(!bits || sizeof(bits) == 0) return 0;

@@ -6,7 +6,7 @@
 # include <iflib.h>
 
 static int create(varargs int clone) {
-  if(!find_object(ENGLISH_D)) compile_object(ENGLISH_D);
+  if(!find_object(WORDS_D)) compile_object(WORDS_D);
   if(!find_object(VERB_DATA)) compile_object(VERB_DATA);
   if(!find_object(VERB_D)) compile_object(VERB_D);
 

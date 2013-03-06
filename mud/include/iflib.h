@@ -7,4 +7,4 @@
 
 # define VERB_D    "/usr/IFLib/sys/verb"
 # define ADVERB_D  "/usr/IFLib/sys/adverb"
-# define ENGLISH_D "/usr/IFLib/sys/english"
+# define WORDS_D "/usr/IFLib/sys/words"
