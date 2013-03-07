@@ -36,7 +36,7 @@
           <a class="brand" href="#">Project name</a>
           <div class="nav-collapse collapse">
             <p class="navbar-text pull-right">
-              Logged in as <a href="#" class="navbar-link">Username</a>
+              Logged in as <a href="#login" class="navbar-link" id="logged-in-as">Nobody</a>
             </p>
             <ul class="nav" id="top-nav">
               <li class="active"><a href="#">System</a></li>
@@ -121,12 +121,15 @@
               <dd>{{array_size}} entries</dd>
               <dt>Server Version</dt>
               <dd>{{version}}</dd>
+              <dt>Mudlib Version</dt>
+              <dd>{{mudlib_version}}</dd>
             </dl>
           </div>
         </div>
       </div>
       <div id="iflib-template">
         <h1>IFLib</h1>
+        <a href="#iflib/verb">Verbs</a>
       </div>
       <div id="worldlib-template">
         <h1>WorldLib</h1>
@@ -142,7 +145,7 @@
         
       </div>
       <div id="verb-list-item-template">
-        <a href="#verb/{{ id }}">{{ verb.join(', ') }}</a>
+        <a href="#iflib/verb/{{ id }}">{{ verb.join(', ') }}</a>
       </div>
     </div>
     <script type="text/javascript" src="js/jquery-min.js"></script>
