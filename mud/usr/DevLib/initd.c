@@ -1,8 +1,17 @@
 # include <devlib.h>
+# include <devlib/template.h>
+# include <devlib/compiler.h>
 
 static int create(varargs int clone) {
-  if(!find_object(EVENT_DATA)) compile_object(EVENT_DATA);
+  string *files;
+  int i, n;
 
-  if(!find_object(EVENTS_D)) compile_object(EVENTS_D);
-  if(!find_object(EVENT_SCRIPT_D)) compile_object(EVENT_SCRIPT_D);
+  files = ({
+    EVENT_DATA,
+    TEMPLATE_DATA, TMPL_POS_DATA, TMPL_VERB_DATA,
+    EVENTS_D, EVENT_SCRIPT_D,
+  });
+
+  for(i = 0, n = sizeof(files); i < n; i++)
+    if(!find_object(files[i])) compile_object(files[i]);
 }

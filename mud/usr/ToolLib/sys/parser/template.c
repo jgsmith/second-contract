@@ -2,53 +2,19 @@
 # include <toollib.h>
 # include <toollib/template.h>
 
-string syntax_bnf;
-
-void update_syntax_bnf() {
-  int i, sz;
-  string *lines;
-  string grammar;
-
-  grammar = read_file(TEMPLATE_BNF);
-  lines = explode(grammar, "\n");
-  for(i = 0, sz = sizeof(lines); i < sz; i++) {
-    if(lines[i] && strlen(lines[i]) && lines[i][0] == '#') {
-      lines[i] = nil;
-    }
-  }
-  lines -= ({ nil });
-  syntax_bnf = implode(lines, "\n");
-  syntax_bnf = implode(explode(syntax_bnf, "\\n"), "\n");
-  syntax_bnf = implode(explode(syntax_bnf, "\\b"), "\b");
-  syntax_bnf = implode(explode(syntax_bnf, "\\t"), "\t");
-  syntax_bnf = implode(explode(syntax_bnf, "\\r"), "\r");
-}
+inherit parser LIB_PARSER;
 
 static void create(varargs int clone) {
-  update_syntax_bnf();
+  set_bnf_file(TEMPLATE_BNF);
 }
 
 mixed parse_template(string str) {
   mixed *result;
-  result = parse_string(syntax_bnf, str);
+
+  return parser::parse(str);
 
   if(typeof(result) == T_ARRAY) return result[0];
   return nil;
-}
-
-mixed _create_template_obj(mixed *args) {
-  object ob;
-
-  ob = new_object(TEMPLATE_DATA);
-  ob -> add_bit(args[0]);
-  return ({ ob });
-}
-
-mixed _add_bit(mixed *args) {
-  if(sizeof(args) > 1) {
-    args[0] -> add_bit(args[1]);
-  }
-  return args[0..0];
 }
 
 mixed _pass_second(mixed *args) {
@@ -56,11 +22,7 @@ mixed _pass_second(mixed *args) {
 }
 
 mixed _varname(mixed *args) {
-  object ob;
-
-  ob = new_object(TMPL_VAR_DATA);
-  ob -> set_variable(args[1]);
-  return ({ ob });
+  return ({ ({ "var", args[1] }) });
 }
 
 mixed _comment(mixed *args) {
@@ -68,62 +30,69 @@ mixed _comment(mixed *args) {
 }
 
 mixed _simple_substitution(mixed *args) {
-  object ob;
+  string name;
+  int pos;
 
-  ob = new_object(TMPL_POS_DATA);
-  ob -> set_name("last_var");
+  name = "last_substitution";
 
   switch(args[0]) {
     case "this": case "actor": 
-      ob -> set_name(args[0]);
-      ob -> set_pos(POS_NOMINATIVE);
+      name = args[0];
+      pos = POS_NOMINATIVE;
       break;
     case "direct": case "indirect": case "instrument":
-      ob -> set_name(args[0]);
-      ob -> set_pos(POS_OBJECTIVE);
+      name = args[0];
+      pos = POS_OBJECTIVE;
       break;
-    case "nominative": ob -> set_pos(POS_NOMINATIVE); break;
-    case "objective": ob -> set_pos(POS_OBJECTIVE); break;
-    case "possessive": ob -> set_pos(POS_POSSESSIVE); break;
-    case "name": ob -> set_pos(POS_NAME); break;
-    case "possessive-noun": ob -> set_pos(POS_POSSESSIVE_NOUN); break;
-    case "reflexive": ob -> set_pos(POS_REFLEXIVE); break;
+    case "nominative":
+      pos = POS_NOMINATIVE; break;
+    case "objective":
+      pos = POS_OBJECTIVE; break;
+    case "possessive":
+      pos = POS_POSSESSIVE; break;
+    case "name":
+      pos = POS_NAME; break;
+    case "possessive-noun":
+      pos = POS_POSSESSIVE_NOUN; break;
+    case "reflexive":
+      pos = POS_REFLEXIVE; break;
     default:
-      ob -> set_verb(args[0]);
-      ob -> set_pos(POS_VERB);
-      break;
+      return ({ ({ "verb", name, args[0] }) });
   }
-  return ({ ob });
+  return ({ ({ "substitution", name, pos }) });
 }
 
 mixed _targeted_substitution(mixed *args) {
-  object ob;
-  ob = new_object(TMPL_POS_DATA);
+  string name;
+  int pos;
 
-  ob -> set_name("last_var");
+  name = "last_substitution";
   switch(args[0]) {
     case "this": case "actor": case "direct": case "indirect": case "instrument"
 :
-      ob -> set_name(args[0]);
-      ob -> set_pos(POS_NOMINATIVE);
+      name = args[0];
+      pos = POS_NOMINATIVE;
       break;
     case "verb":
-      ob -> set_pos(POS_VERB);
-      ob -> set_verb(args[2]);
-      return ({ ob });
+      return ({ ({ "verb", name, args[2] }) });
   }
   switch(args[2]) {
-    case "nominative": ob -> set_pos(POS_NOMINATIVE); break;
-    case "name": ob -> set_pos(POS_NAME); break;
-    case "objective": ob -> set_pos(POS_OBJECTIVE); break;
-    case "possessive": ob -> set_pos(POS_POSSESSIVE); break;
-    case "possessive-noun": ob -> set_pos(POS_POSSESSIVE_NOUN); break;
-    case "reflexive": ob -> set_pos(POS_REFLEXIVE); break;
+    case "nominative":
+      pos = POS_NOMINATIVE; break;
+    case "name":
+      pos = POS_NAME; break;
+    case "objective":
+      pos = POS_OBJECTIVE; break;
+    case "possessive":
+      pos = POS_POSSESSIVE; break;
+    case "possessive-noun":
+      pos = POS_POSSESSIVE_NOUN; break;
+    case "reflexive":
+      pos = POS_REFLEXIVE; break;
     default: 
-      ob -> set_verb(args[2]); ob -> set_pos(POS_VERB);
-      break;
+      return ({ ({ "verb", name, args[2] }) });
   }
-  return ({ ob });
+  return ({ ({ "substitution", name, pos }) });
 }
 
 mixed _choose_one_word(mixed *args) {

@@ -14,6 +14,7 @@
 # include <kernel/kernel.h>
 
 string *verbs;
+string brief;
 string help;
 string *see_alsos;
 int args_used;
@@ -25,10 +26,12 @@ int terrains;
 int weathers;
 int seasons;
 int disabled;
+string *action;
 
 static void create(varargs int clone) {
   verbs = ({ });
   help = "";
+  brief = "";
   see_alsos = ({ });
   actor_reqs = 0;
   climates = ({ });
@@ -298,28 +301,23 @@ void set_help(string h) {
 }
 string get_help() { return help; }
 
+void set_brief(string b) {
+  if(can_modify()) brief = b;
+}
+
+string get_brief() { return brief; }
+
 void set_see_also(string *v) {
   if(can_modify()) see_alsos = v;
 }
 
+void set_action(string *acts) {
+  action = acts;
+}
+
+string *get_action() { return action; }
+
 string *get_see_also() { return see_alsos; }
-
-/*
- * info:
- *   array of [ $action, %args ]
- *   action: action this verb maps to (required)
- *   args: mapping of additional constant args to include in action call
- */
-
-mapping get_syntax(string s) {
-  return ([ ]);
-}
-
-mixed *get_syntax_actions(string s) {
-  return ({ });
-}
-
-string *get_syntaxes() { return ({ }); }
 
 int get_actor_requirements() { return actor_reqs; }
 void set_actor_requirements(int x) { if(can_modify()) actor_reqs = x; }
@@ -340,4 +338,8 @@ int get_disabled() { return disabled; }
 
 void set_disabled(int x) {
   if(can_modify()) disabled = x;
+}
+
+int uses_args(int args) {
+  return args_used & args == args;
 }

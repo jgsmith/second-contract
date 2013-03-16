@@ -1,6 +1,7 @@
 # include <kernel/kernel.h>
 # include <system.h>
 # include <worldlib.h>
+# include <worldlib/proximity.h>
 
 /*
  * tracks user accounts/passwords
@@ -47,25 +48,24 @@ mapping get_templates(varargs int tiers) {
 
 }
 
-object create_character(string name, string cap_name, string template) {
+atomic object create_character(string name, string cap_name, string template) {
   object ob;
 
   if(!SYSTEM()) {
     /* specifically, it's the login/character creation process managed by
      * System - but it could be through the web interface as well.
      */
-    ERROR_D -> message("Only System may create new characters for players.\n");
-    return nil;
+    error("Only System may create new characters for players.\n");
   }
 
   name = STRING_D -> lower_case(name);
   if(character_exists(name)) return nil;
 
-  ob = HOSPITAL_D -> create_object("character-archetypes", template);
+  ob = HOSPITAL_D -> create_placed_object("character-archetypes", template, HOSPITAL_D -> get_world_object(), PROX_INSIDE);
   if(!ob) return nil; /* oops! couldn't create the character */
 
-  ob -> set_property(({ "basic", "name" }), name);
-  ob -> set_property(({ "basic", "capitalized-name" }), cap_name);
+  ob -> set_name(name);
+  ob -> set_cap_name(cap_name);
 
   MAPPING_D -> specific_mapping(characters, name)[name] = ob;
   

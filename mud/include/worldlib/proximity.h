@@ -1,3 +1,5 @@
+# define LOCATION_DATA "/usr/WorldLib/data/location"
+
 # define PROX_INSIDE  0
 # define PROX_CLOSE   1
 # define PROX_AGAINST 2
@@ -9,9 +11,12 @@
 # define PROX_BEFORE  8
 # define PROX_BESIDE  9
 # define PROX_CONTAINS 10
+
+# define PROX_MAX 10
+
+/* The following are useful, but not considered proper relationships */
 # define PROX_GUARD   11
 # define PROX_BLOCK   12
-# define PROX_MAX 12
 
 # define DISTANCE_IN 0
 # define DISTANCE_ON 1

@@ -26,7 +26,7 @@ static int create(varargs int clone) {
     }
 
     if(find_object(LOG_D)) {
-      driver -> set_error_manager(find_object(LOG_D));
+     /* driver -> set_error_manager(find_object(LOG_D)); */
     }
 
     if(!find_object(TELNET_D)) {

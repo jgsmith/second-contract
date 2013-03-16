@@ -7,4 +7,6 @@
 
 # define VERB_D    "/usr/IFLib/sys/verb"
 # define ADVERB_D  "/usr/IFLib/sys/adverb"
-# define WORDS_D "/usr/IFLib/sys/words"
+# define WORDS_D   "/usr/IFLib/sys/words"
+# define BINDER_D  "/usr/IFLib/sys/binder"
+# define IFPARSER_D "/usr/IFLib/sys/parser"

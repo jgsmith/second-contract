@@ -2,64 +2,79 @@
 # This parses the string templates in messages and such
 #
 
-_word = /[^:{}<>$|]+/
+# For now, most of the {{...}} pieces are commented out since they aren't 
+# quite right yet.
 
 message : bits
 
-word : _word
-word : '.'
-word : 'if'
-word : 'else'
-word : 'then'
-word : 'unless'
-word : 'chooseOne'
+_word = /[^:{}<>$|]+/
 
-start_substitution : '{{'
-start_command : '{{#'
+_ = /[ \b\n\t]+/
+
+#start_command : '{{'
+#start_command_end : '{{/'
 start_comment : '{{!'
-start_command_end : '{{/'
 end_command : '}}'
 
-colon_name : words ':' words
-colon_name : colon_name ':' words
+#point = /[.]/
+
+#bar = /[ \b\n\t]*[|][ \b\n\t]*/
+colon : ':'
+
+#true_ : 'true'
+#false_ : 'false'
 
 bos : '<'
 eos : '>'
 
-varname : '$' word ? _varname
+#dollar_ : '$'
 
-bit : start_command command end_command ? _pass_second
+
+word : _word
+#word : true_
+#word : false_
+
+#colon_name : word colon word
+#colon_name : colon_name colon word
+
+#varname : dollar_ word ? _varname
+
+#bit : start_command command end_command ? _pass_second
 bit : start_comment words end_command ? _comment
-bit : start_substitution expression end_command ? _pass_second
+#bit : start_command expression end_command ? _pass_second
 bit : bos substitution eos ? _pass_second
 bit : words
 
-bits : bits bit ? _add_bit
-bits : bit ? _create_template_obj
+bits : bits bit
+bits : bit
 
-command : choose_one
-command : if
-command : unless
-command : if_then_else
+#command : choose_one
+#command : if
+#command : unless
+#command : if_then_else
 
 substitution: word  ? _simple_substitution
-substitution: word ':' word ? _targeted_substitution
+substitution: word colon word ? _targeted_substitution
 
-choose_one : 'chooseOne' word_list ? _choose_one_word
-choose_one : 'chooseOne' property ? _choose_one_value
+#choose_one : '#chooseOne' word_list ? _choose_one_word
+#choose_one : '#chooseOne' property ? _choose_one_value
 
 words: word
 words: words word
 
-word_list : words ? _create_word_list
-word_list : word_list '|' words ? _append_word_list
+#word_list : words ? _create_word_list
+#word_list : word_list bar words ? _append_word_list
 
-property : colon_name ? _default_property
-property : expression '.' colon_name ? _exp_property
+#property : colon_name ? _default_property
+#property : expression point colon_name ? _exp_property
 
-if : 'if' expression end_command bits start_command_end 'if' ? _if
-unless : 'unless' expression end_command bits start_command_end 'unless' ? _unless
-if_then_else : 'if' expression end_command bits start_command 'else' end_command bits start_command_end 'if' ? _if_else
+#if : '#if' _ expression _ end_command bits start_command '/if' ? _if
 
-expression : property
-expression : varname
+#if_then_else : '#if' _ expression _ end_command bits start_command '#else' end_command bits start_command '/if' ? _if_else
+
+#unless : '#unless' _ expression _ end_command bits start_command '/unless' ? _unless
+
+#expression : property
+#expression : varname
+#expression : true_
+#expression : false_

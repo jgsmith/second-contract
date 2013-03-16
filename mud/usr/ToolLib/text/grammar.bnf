@@ -1,0 +1,130 @@
+#
+# This is a grammar for player action command parsing.
+#
+
+whitespace = /[ \b\t\n]/
+
+_word = /[a-z][-a-z]*/
+string = /"[^"]*"/
+number = /[1-9][0-9]*/
+
+sentence : commands
+sentence : commands ',' string
+
+commands : command
+commands : commands 'then' command ? _commands
+
+command : tritransitive_verb ? _command
+command : bitransitive_verb ? _command
+command : transitive_verb ? _command
+command : verb_only ? _command
+
+verb_only : adverbs verb adverbs
+
+transitive_verb : verb_only direct_noun_phrase adverbs
+transitive_verb : adverbs direct_noun_phrase verb_only
+
+bitransitive_verb : verb_only indirect_noun_phrase direct_noun_phrase adverbs
+bitransitive_verb : transitive_verb indirect_noun_phrase adverbs
+bitransitive_verb : adverbs direct_noun_phrase indirect_noun_phrase verb_only
+bitransitive_verb : adverbs indirect_noun_phrase transitive_verb
+
+tritransitive_verb : bitransitive_verb instrument_noun_phrase adverbs
+tritransitive_verb : adverbs instrument_noun_phrase bitransitive_verb
+
+tritransitive_verb : verb_only indirect_noun_phrase instrument_noun_phrase direct_noun_phrase adverbs
+tritransitive_verb : transitive_verb instrument_noun_phrase indirect_noun_phrase adverbs
+tritransitive_verb : adverbs direct_noun_phrase instrument_noun_phrase indirect_noun_phrase verb_only
+tritransitive_verb : adverbs indirect_noun_phrase instrument_noun_phrase adverbs transitive_verb
+
+adverbs :
+adverbs : adverb
+adverbs : adverbs adverb
+adverbs : adverbs 'and' adverb ? _remove_and
+
+word : _word
+word : verb
+word : 'front'
+#word : adverb
+
+instrument_preposition : 'with'
+instrument_preposition : 'using'
+
+rel_preposition : 'in'
+rel_preposition : 'on'
+rel_preposition : 'against'
+rel_preposition : 'close'
+rel_preposition : 'close' 'to' ? _rel_prep
+rel_preposition : 'under'
+rel_preposition : 'near'
+rel_preposition : 'over'
+rel_preposition : 'behind'
+rel_preposition : 'before'
+rel_preposition : 'in' 'front' 'of' ? _rel_prep
+rel_preposition : 'beside'
+rel_preposition : 'containing'
+rel_preposition : 'holding'
+rel_preposition : 'with'
+rel_preposition : 'guarding'
+rel_preposition : 'blocking'
+
+indirect_preposition : 'from'
+indirect_preposition : 'to'
+indirect_preposition : 'at'
+indirect_preposition : 'through'
+indirect_preposition : 'from' rel_preposition
+indirect_preposition : 'to' rel_preposition
+
+
+direct_noun_phrase : objects ? _direct_noun_phrase
+
+indirect_noun_phrase : indirect_preposition objects ? _indirect_noun_phrase
+instrument_noun_phrase : instrument_preposition objects ? _instrument_noun_phrase
+
+noun_phrase : opt_quantifier adjectives word
+
+objects : noun ? _init_object_set
+objects : objects conjunction noun ? _object_set
+
+noun : 'all' ? _noun_phrase
+noun : noun_phrase ? _noun_phrase
+noun : noun rel_preposition noun_phrase ? _noun_path
+
+conjunction : 'and' ? _noop
+
+adjectives :
+adjectives : word
+adjectives : adjectives word
+
+article : 'the'
+article : 'a'
+article : 'an'
+article : 'any'
+article : 'my'
+article : 'her'
+article : 'his'
+article : 'its'
+article : 'their'
+
+quantifier : article
+quantifier : article number
+quantifier : number
+quantifier : 'all'
+quantifier : fraction
+
+quantifiers : quantifier
+quantifiers : quantifiers 'of' quantifier
+
+opt_quantifier :
+opt_quantifier : quantifiers
+
+fraction : number '/' number
+
+verb : v ? _verb
+
+adverb : adv ? _adverb
+
+#
+# The verbs and adverbs are added to the grammar as they are added in the
+# IFLib verb/adverb systems.
+#

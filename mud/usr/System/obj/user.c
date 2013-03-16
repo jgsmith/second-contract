@@ -3,6 +3,7 @@
 # include <kernel/access.h>
 # include <system.h>
 # include <worldlib.h>
+# include <iflib.h>
 
 inherit LIB_USER;
 inherit user API_USER;
@@ -62,6 +63,21 @@ static void create(int clone)
     }
 }
 
+atomic void enter_game() {
+  Character -> set_iflib_driver(this_object());
+  Character -> call_event_handler("scan:brief", ([ "actor": Character ]));
+}
+
+atomic object create_character(string email, string name, string cap_name, string template, int gender) {
+  object char;
+
+  char = CHARACTER_D -> create_character(name, cap_name, "human");
+  if(!char) return nil;
+  char -> set_gender(gender);
+  AUTH_D -> add_character(email, char);
+  return char;
+}
+
 /*
  * NAME:        login()
  * DESCRIPTION:        login a new user
@@ -79,14 +95,14 @@ int login(string str)
         }
         str = STRING_D -> lower_case(str);
         if(AUTH_D -> user_exists(str)) {
-          previous_object() -> message("Password:");
+          previous_object() -> message("Password: ");
           email = str;
           state[previous_object()] = STATE_LOGIN;
           return MODE_NOECHO;
         }
         if(str == "n") {
           /* new user */
-          previous_object() -> message("What's your e-mail?");
+          previous_object() -> message("What's your e-mail? ");
           state[previous_object()] = STATE_NEWACCOUNT;
           return MODE_ECHO;
         }
@@ -123,6 +139,9 @@ void logout(int quit)
  */
 int receive_message(string str)
 {
+    string *bits;
+    string tmp;
+
     if (previous_program() == LIB_CONN) {
         string cmd;
         object user, *users;
@@ -135,14 +154,35 @@ int receive_message(string str)
                 cmd = cmd[1 ..];
             }
 
-            if (!wiztool || !query_editor(wiztool) || cmd != str) {
+            if ((!wiztool || !query_editor(wiztool) || cmd != str) && (strlen(cmd) > 0 && cmd[0] != '%')) {
                 /* check standard commands */
                 if (strlen(cmd) != 0) {
+                  if(cmd == "quit") {
+                    message("Please come again!\n");
+                    return MODE_DISCONNECT;
+                  }
+                  if(!IFPARSER_D -> run_command(Character, cmd)) {
+                    message("what?\n");
+                  }
                 }
             }
 
-            if (str && str != "" && str[0..0] == "%" && wiztool) {
-                wiztool->input(str[1..]);
+            if (cmd && cmd != "" && cmd[0..0] == "%") {
+              bits = explode(cmd[1..], " ");
+              switch(bits[0]) {
+                case "help":
+                  tmp = VERB_D -> get_verb_help(bits[1]);
+                  if(tmp) {
+                    message("\nHelp for " + bits[1] + "\n\n" + tmp + "\n");
+                  }
+                  else {
+                    message("\nNo help available for " + bits[1] + ".\n");
+                  }
+                  break;
+                default:
+                  if( wiztool) wiztool->input(cmd[1..]);
+                  else message("Unknown command (" + bits[0] + ")\n");
+              }
             }
             break;
 
@@ -153,7 +193,7 @@ int receive_message(string str)
               message("\nThat user already has an account.");
               return MODE_DISCONNECT;
             }
-            message("Select a password:");
+            message("Select a password: ");
             state[previous_object()] = STATE_NEWACCOUNT_PASSWORD;
             return MODE_NOECHO;
 
@@ -163,7 +203,7 @@ int receive_message(string str)
               message("\nThat user already has account.");
               return MODE_DISCONNECT;
             }
-            message("\nRetype password:");
+            message("\nRetype password: ");
             state[previous_object()] = STATE_NEWACCOUNT_PASSWORD2;
             return MODE_NOECHO;
 
@@ -178,7 +218,7 @@ int receive_message(string str)
             }
             AUTH_D -> set_user_password(email, newpasswd);
             message("\nNow we'll walk you through creating your first character.");
-            message("\n\nWhat name do you wish?");
+            message("\n\nWhat name do you wish? ");
             state[previous_object()] = STATE_NEW_CHARACTER;
             return MODE_ECHO;
 
@@ -189,27 +229,27 @@ int receive_message(string str)
             }
             if(AUTH_D -> character_exists(str)) {
               message("\nA character by that name already exists.\n");
-              message("\nWhat name do you wish?");
+              message("\nWhat name do you wish? ");
               return MODE_ECHO;
             }
-            message("\nAre you sure you want \"" + str + "\"? (Y/n)");
+            message("\nAre you sure you want \"" + str + "\"? (Y/n) ");
             Name = str;
             state[previous_object()] = STATE_NEW_CHAR_NAME_CONFIRM;
             return MODE_ECHO;
 
         case STATE_NEW_CHAR_NAME_CONFIRM:
             if(str == "Y" || str == "y" || str == "") {
-              message("\nHow would you like your name capitalized?");
+              message("\nHow would you like your name capitalized? ");
               state[previous_object()] = STATE_NEW_CHAR_CAP_NAME;
             }
             else {
-              message("\n\nWhat name do you wish?");
+              message("\n\nWhat name do you wish? ");
               state[previous_object()] = STATE_NEW_CHARACTER;
             }
             return MODE_ECHO;
 
         case STATE_NEW_CHAR_CAP_NAME:
-            message("\nAre you sure you want your name capitalized as \"" + str + "\"? (Y/n)");
+            message("\nAre you sure you want your name capitalized as \"" + str + "\"? (Y/n) ");
             CapName = str;
             state[previous_object()] = STATE_NEW_CHAR_CAP_NAME_CONFIRM;
             return MODE_ECHO;
@@ -220,7 +260,7 @@ int receive_message(string str)
               state[previous_object()] = STATE_NEW_CHAR_GENDER;
             }
             else {
-              message("\nHow would you like your name capitalized?");
+              message("\nHow would you like your name capitalized? ");
               state[previous_object()] = STATE_NEW_CHAR_CAP_NAME;
             }
             return MODE_ECHO;
@@ -237,9 +277,13 @@ int receive_message(string str)
             }
 
             message("\nPreparing to enter the game as " + CapName + ".\n");
-            Character = CHARACTER_D -> create_character(Name, CapName, "human");
-            Character -> set_gender(Gender);
-            AUTH_D -> add_character(email, Character);
+            Character = create_character(email, Name, CapName, "human", Gender);
+            if(!Character) {
+              message("\nSomething went wrong somewhere. We can't seem to find your character.\nPlease try again later.\n\n");
+              return MODE_DISCONNECT;
+            }
+            enter_game();
+            message((email == "admin") ? "# " : "> ");
             state[previous_object()] = STATE_NORMAL;
             return MODE_ECHO;
             
@@ -248,23 +292,23 @@ int receive_message(string str)
                 previous_object()->message("\nBad password.\n");
                 return MODE_DISCONNECT;
             }
-            message("\n");
             connection(previous_object());
+            message("\n");
             if((chars = AUTH_D -> get_characters(email)) && sizeof(chars)) {
-              message("Please select a character to play:\n");
+              message("\n\nPlease select a character to play:\n");
               for(i = 0, n = sizeof(chars); i < n; i++) {
                 message((i+1) + ") " + chars[i] -> get_name() + "\n");
               }
               if(n < 5) {
                 message("\nOr \"N\" to create a new character. You may have up to 5 characters.\n");
               }
-              message("\nPlease enter an option:");
+              message("\nPlease enter an option: ");
               state[previous_object()] = STATE_SELECT_CHARACTER;
               return MODE_ECHO;
             }
             else {
               message("\nNow we'll walk you through creating your first character.");
-              message("\n\nWhat name do you wish?");
+              message("\n\nWhat name do you wish? ");
               state[previous_object()] = STATE_NEW_CHARACTER;
               return MODE_ECHO;
             }
@@ -282,18 +326,19 @@ int receive_message(string str)
               return MODE_DISCONNECT;
             }
             if(str == "N" || str == "n") { /* new character! */
-              message("\n\nWhat name do you wish?");
+              message("\n\nWhat name do you wish? ");
               state[previous_object()] = STATE_NEW_CHARACTER;
               return MODE_ECHO;
             }
             if(sscanf(str, "%d", i)) {
-              i --;
-              if(i < 0 || i > sizeof(chars)) {
+              if(i < 1 || i > sizeof(chars)) {
                 message("\nThat isn't a valid option.\n");
                 return MODE_ECHO;
               }
+              i --;
               message("\nEntering the game as " + chars[i]->get_cap_name() + ".\n\n");
               Character = chars[i];
+              enter_game();
               /* connection(previous_object()); */
               state[previous_object()] = STATE_NORMAL;
               return MODE_ECHO;
@@ -306,7 +351,7 @@ int receive_message(string str)
                 message("\nBad password.\n");
                 break;
             }
-            message("\nNew password:");
+            message("\nNew password: ");
             oldpassword = str;
             state[previous_object()] = STATE_NEWPASSWD1;
             return MODE_NOECHO;
@@ -314,9 +359,9 @@ int receive_message(string str)
         case STATE_NEWPASSWD1:
             newpasswd = str;
             if(AUTH_D -> user_exists(email))
-              message("\nRetype new password:");
+              message("\nRetype new password: ");
             else
-              message("\nRetype password:");
+              message("\nRetype password: ");
             state[previous_object()] = STATE_NEWPASSWD2;
             return MODE_NOECHO;
 

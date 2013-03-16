@@ -18,7 +18,7 @@ void set_level(int x) {
 static do_log(string file, string content) {
   if(content[strlen(content)-1] != '\n')
     content += "\n";
-  write_file(file, content);
+  write_file(file, "--- " + ctime(time()) + "\n" + content);
 }
 
 static string ensure_dir(string dir) {
@@ -35,13 +35,13 @@ void log(string type, string content, varargs int level) {
 
   if(level > log_level) return;
 
-  user = previous_object() -> query_owner();
+  user = previous_object() ? previous_object() -> query_owner() : "Unknown";
   if(sscanf(type, "%*s:..%*s") != 0)
     error("Illegal log name");
 
   switch(user) {
-    case "system":
-    case "kernel":
+    case "System":
+    case "Kernel":
       basedir = "/log/";
       break;
     default:
@@ -127,8 +127,10 @@ void compile_error(string file, int line, string err) {
   object obj;
 
   log("compile", file += ", " + line + ": " + err + "\n", 0);
-  send_message(file);
   if(this_user() && (obj = this_user() -> query_user())) {
     obj -> message(file);
+  }
+  else if(this_user()) {
+    this_user() -> message(file);
   }
 }

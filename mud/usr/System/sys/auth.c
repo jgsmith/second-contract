@@ -91,6 +91,17 @@ int add_character(string email, object char) {
   if(!user_m[email]) return 0;
 
   if(!user_m[email]["characters"]) user_m[email]["characters"] = ({ });
-  user_m[email]["characters"] += char;
+  user_m[email]["characters"] += ({ char });
   return 1;
+}
+
+object *get_characters(string email) {
+  mapping user_m;
+
+  user_m = MAPPING_D -> specific_mapping(accounts, email);
+
+  if(!user_m[email]) return ({ });
+
+  if(user_m[email]["characters"]) return user_m[email]["characters"];
+  return ({ });
 }

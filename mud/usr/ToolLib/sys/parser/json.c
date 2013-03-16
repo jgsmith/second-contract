@@ -1,26 +1,10 @@
 # include <type.h>
 # include <toollib.h>
 
-string syntax_bnf;
-
-void update_syntax_bnf() {
-  int i, sz;
-  string *lines;
-  string grammar;
-
-  grammar = read_file(JSON_BNF);
-  lines = explode(grammar, "\n");
-  for(i = 0, sz = sizeof(lines); i < sz; i++) {
-    if(lines[i] && strlen(lines[i]) && lines[i][0] == '#') {
-      lines[i] = nil;
-    }
-  }
-  lines -= ({ nil });
-  syntax_bnf = implode(lines, "\n");
-}
+inherit parser LIB_PARSER;
 
 static void create(varargs int clone) {
-  update_syntax_bnf();
+  set_bnf_file(JSON_BNF);
 }
 
 static mixed * _empty_object(mixed *args) { return ({ ([ ]) }); }

@@ -43,8 +43,6 @@ void create() {
     PROX_BEHIND,
     PROX_BESIDE,
     PROX_INSIDE,
-    PROX_GUARD,
-    PROX_BLOCK,
   });
 }
 
@@ -55,7 +53,7 @@ int get_relation(object contained, object container) {
   int i, j, n;
 
   if(container -> is_detail() || contained -> is_detail()) {
-    ERROR_D -> message("Relationships between details are not supported in the global position system.");
+    error("Relationships between details are not supported in the global position system.");
     return -1;
   }
 
@@ -122,7 +120,7 @@ object *get_deep_inventory(object container, int distance) {
   return items;
 }
 
-int remove_relation(object contained, object container, int relation) {
+atomic int remove_relation(object contained, object container, int relation) {
   mapping forward_m, reverse_m;
   string f_key, r_key;
   mixed *info;
@@ -130,7 +128,7 @@ int remove_relation(object contained, object container, int relation) {
   int i, j, n;
 
   if(container -> is_detail() || contained -> is_detail()) {
-    ERROR_D -> message("Relationships between details are not supported in the global position system.");
+    error("Relationships between details are not supported in the global position system.");
     return 0;
   }
   if(!relation) relation = PROX_INSIDE;
@@ -163,7 +161,7 @@ int remove_relation(object contained, object container, int relation) {
   return 1;
 }
 
-int add_relation(object contained, object container, int distance, varargs int relation) {
+atomic int add_relation(object contained, object container, int distance, varargs int relation) {
   mapping forward_m, reverse_m;
   string f_key, r_key;
   int opposite_rel;
@@ -171,7 +169,7 @@ int add_relation(object contained, object container, int distance, varargs int r
 
   /* for now, we don't handle the relationships involving details */
   if(container -> is_detail() || contained -> is_detail()) {
-    ERROR_D -> message("Relationships between details are not supported in the global position system.");
+    error("Relationships between details are not supported in the global position system.");
     return 0;
   }
 
@@ -210,7 +208,7 @@ object environment(object thing) {
   /* for now, details don't have environments :-/ */
   /* if(thing -> is_detail()) return nil; */
   if(thing -> is_detail()) {
-    ERROR_D -> message("Relationships between details are not supported in the global position system.");
+    error("Relationships between details are not supported in the global position system.");
     return nil;
   }
 
@@ -250,14 +248,14 @@ object environment(object thing) {
  * relationship with the object removed unless it's INSIDE/ON the object.
  */
 
-int move_object(object mover, object destination, int relationship, varargs int distance) {
+atomic int move_object(object mover, object destination, int relationship, varargs int distance) {
   object env, *items;
   int tmp;
   int i, n;
 
   /* can't move details and can't move into a detail */
   if(mover -> is_detail() || destination -> is_detail()) {
-    ERROR_D -> message("Relationships between details are not supported in the global position system.");
+    error("Relationships between details are not supported in the global position system.");
     return 0;
   }
 

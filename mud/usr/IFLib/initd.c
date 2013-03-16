@@ -9,6 +9,9 @@ static int create(varargs int clone) {
   if(!find_object(WORDS_D)) compile_object(WORDS_D);
   if(!find_object(VERB_DATA)) compile_object(VERB_DATA);
   if(!find_object(VERB_D)) compile_object(VERB_D);
+  if(!find_object(ADVERB_D)) compile_object(ADVERB_D);
+  if(!find_object(BINDER_D)) compile_object(BINDER_D);
+  if(!find_object(IFPARSER_D)) compile_object(IFPARSER_D);
 
   if(!find_object("/usr/IFLib/data/resource/verb"))
     compile_object("/usr/IFLib/data/resource/verb");
@@ -35,14 +38,11 @@ void initialize_data() {
       if(json) {
         ob = new_object(VERB_DATA);
         ob -> set_verbs(json["verbs"]);
+        ob -> set_brief(json["brief"]);
         ob -> set_help(json["help"]);
-        ob -> set_see_also(json["see_also"]);
-        if(json["syntaxes"]) {
-          stmp = map_indices(json["syntaxes"]);
-          for(j = 0, m = sizeof(stmp); j < m; j++) {
-            ob -> add_syntax(stmp[j], json["syntaxes"][stmp[j]]);
-          }
-        }
+        ob -> set_see_alsos(json["see_also"]);
+        ob -> set_action(json["action"]);
+        
         /* still need actor requirements, climates, terrains, weathers,
          * and seasons */
         VERB_D -> add_verb(ob);

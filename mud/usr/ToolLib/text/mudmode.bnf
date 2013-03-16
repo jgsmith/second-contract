@@ -1,0 +1,73 @@
+escaped = /\\/
+
+quote = /"/
+
+floats = /[\-]?[0-9]*[.][0-9]+/
+
+array_start = /[(][{][ ]*/
+array_end = /[ ]*[}][)]/
+array_sep = /[ ]*,[ ]*/
+
+map_start = /[(][\[][ ]*/
+map_end = /[ ]*[\]][)]/
+map_sep = /[ ]*:[ ]*/
+
+ints = /[\-]?[0-9]+/
+
+char = /./
+
+var: float
+var: int
+var: string
+var: array
+var: map
+
+string: quote quote ? _empty_string
+string: quote chars quote ? _concat_string
+
+array: array_start array_end ? _empty_array
+array: array_start array_elements array_end ? _array
+
+map: map_start map_end ? _empty_map
+map: map_start map_elements map_end ? _map
+
+array_elements: element
+array_elements: array_elements array_sep element
+array_elements: array_elements array_sep
+
+element: int
+element: float
+element: string
+element: array
+element: map
+
+map_elements: element map_sep element
+map_elements: map_elements array_sep element map_sep element
+map_elements: map_elements array_sep
+
+chars: char
+chars: escaped escaped
+chars: escaped quote
+chars: array_start
+chars: array_end
+chars: map_start
+chars: map_end
+chars: array_sep
+chars: map_sep
+chars: floats
+chars: ints
+chars: chars char
+chars: chars escaped escaped
+chars: chars escaped quote
+chars: chars array_start
+chars: chars array_end
+chars: chars map_start
+chars: chars map_end
+chars: chars array_sep
+chars: chars map_sep
+chars: chars floats
+chars: chars ints
+
+int: ints ? _convert_int
+
+float: floats ? _convert_float

@@ -4,35 +4,42 @@
 # include <system.h>
 # include <worldlib.h>
 # include <toollib.h>
+# include <worldlib/proximity.h>
 
 static int create(varargs int clone) {
+
+  if(!find_object(DETAIL_DATA)) compile_object(DETAIL_DATA);
+  if(!find_object(EXIT_DATA))   compile_object(EXIT_DATA);
+  if(!find_object(LOCATION_DATA))   compile_object(LOCATION_DATA);
+
+  if(!find_object(THING_OBJ))   compile_object(THING_OBJ);
+  if(!find_object(WARD_OBJ))    compile_object(WARD_OBJ);
 
   if(!find_object(PLACEMENT_D)) compile_object(PLACEMENT_D);
   if(!find_object(EXITS_D))     compile_object(EXITS_D);
   if(!find_object(HOSPITAL_D))  compile_object(HOSPITAL_D);
   if(!find_object(CHARACTER_D))  compile_object(CHARACTER_D);
-
-  if(!find_object(THING_OBJ))   compile_object(THING_OBJ);
-  if(!find_object(WARD_OBJ))    compile_object(WARD_OBJ);
-
-  if(!find_object(DETAIL_DATA)) compile_object(DETAIL_DATA);
-  if(!find_object(EXIT_DATA))   compile_object(EXIT_DATA);
+  if(!find_object(PROXIMITY_D))  compile_object(PROXIMITY_D);
 }
 
 private int configure_object(object ob, mixed json) {
   int i, n;
   string *props;
+  string *events;
   if(json["properties"]) {
     /* read through each property and call set_property... */
     props = map_indices(json["properties"]);
     for(i = 0, n = sizeof(props); i < n; i++) {
       ob -> set_property(explode(props[i], ":"), json["properties"][props[i]]);
     }
+    if(json["events"]) {
+      events = map_indices(json["events"]);
+    }
   }
   return TRUE;
 }
 
-void initialize_data() {
+atomic void initialize_data() {
   object ob;
   string *fnames, *wards;
   mixed *dir;
@@ -86,6 +93,7 @@ void initialize_data() {
             if(configure_object(ob, json)) {
               HOSPITAL_D -> add_object(wards[i], ob);
             }
+            else { destruct_object(ob); }
           }
         }
       }
@@ -104,6 +112,7 @@ void initialize_data() {
           if(configure_object(ob, json)) {
             HOSPITAL_D -> add_object(wards[i], ob);
           }
+          else { destruct_object(ob); }
         }
       }
       if(sizeof(tmp_delayed)) {
