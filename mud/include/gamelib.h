@@ -5,3 +5,5 @@
 # define GAMELIB_INIT "/usr/GameLib/initd"
 
 # define GAME_D "/usr/GameLib/sys/game"
+
+# define THING_EVENT_HANDLER_INHERIT "/usr/GameLib/lib/event_handlers"

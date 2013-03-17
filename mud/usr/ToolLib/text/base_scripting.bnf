@@ -1,0 +1,200 @@
+#
+# We want this to almost be LPC, but with some sugar to make event handlers
+# easier to use to stitch everything together.
+#
+
+whitespace = /[ \b\t\n]/
+
+# the idea is that we start each component with a letter, end with a letter,
+# and allow any number of hyphens as long as they are separated by letters
+_ident   = /[a-zA-Z][_a-zA-Z0-9]*/
+_int_const = /[1-9][0-9]*/
+_zero      = /0/
+_string = /"([^\\"]|(\\[\\"nbte]))*"/
+_char_const = /'([^\\']|(\\[\\'nbte]))'/
+
+event_body : data_declarations stmt_list
+
+int_const : _int_const ? _int_const
+int_const : _zero ? _int_const
+int_const : _char_const ? _char_const
+
+# We allow implied concatenation of string constants
+string : _string ? _string_const
+string : string _string ? _string_const
+
+nil : 'nil' 
+false : 'false' 
+true : 'true' 
+
+ident: _ident
+
+data_declarations :
+data_declarations : data_declaration ? _stmt_list
+data_declarations : data_declarations data_declaration ? _stmt_list
+
+data_declaration : type_specifier 'array' ident ';' ? _array_decl
+data_declaration : type_specifier ident ';' ? _decl
+data_declaration : type_specifier 'array' ident '=' exp ';' ? _array_decl_with_assignment
+data_declaration : type_specifier ident '=' exp ';' ? _decl_with_assignment
+
+type_specifier : 'int'
+type_specifier : 'float'
+type_specifier : 'string'
+type_specifier : 'object'
+type_specifier : 'mapping'
+type_specifier : 'mixed'
+
+message : string ? _constant
+message : exp
+messages : message ? _list
+messages : messages ',' messages ? _list
+
+message_output : ':' messages ? _message_output
+
+event_invocation : '[' exp '#' colon_name ']' ? _event
+event_invocation : '[' exp '#' colon_name ':' opt_event_arg_list_comma ']' ? _event_with_args
+
+if_stmt : 'if' '(' f_list_exp ')' stmt ? _if
+
+stmt : list_exp ';' ? _pass_first
+stmt : compound_stmt
+stmt : message_output ';' ? _pass_first
+stmt : if_stmt
+stmt : if_stmt 'else' stmt ? _if_else
+stmt : 'do' stmt 'while' '(' f_list_exp ')' ';' ? _do_while
+stmt : 'while' '(' f_list_exp ')' stmt ? _while_do
+stmt : 'for' '(' opt_list_exp ';' f_opt_list_exp ';' opt_list_exp ')' stmt ? _for
+stmt : 'catch' compound_stmt opt_caught_stmt ? _catch
+stmt : 'switch' '(' f_list_exp ')' compound_stmt ? _switch
+stmt : 'case' exp ':' stmt ? _case
+stmt : 'case' exp '..' exp ':' stmt ? _case_range
+stmt : 'default' ':' stmt ? _default
+stmt : 'break' ';' ? _simple_command
+stmt : 'continue' ';' ? _simple_command
+stmt : 'return' exp ';' ? _return
+stmt : ';' ? _noop
+
+compound_stmt : '{' stmt_list '}' ? _compound_stmt
+
+stmt_list :
+stmt_list : stmt  ? _stmt_list
+stmt_list : stmt_list stmt  ? _stmt_list
+
+opt_caught_stmt : 
+opt_caught_stmt : ':' stmt ? _pass_second
+
+primary_p1_exp : int_const ? _constant
+primary_p1_exp : event_invocation
+#primary_p1_exp : float_const 
+primary_p1_exp : nil ? _nil_const
+primary_p1_exp : true ? _true_const
+primary_p1_exp : false ? _false_const
+primary_p1_exp : string ? _constant
+primary_p1_exp : '(' '{' opt_arg_list_comma '}' ')' ? _array
+primary_p1_exp : '(' '[' opt_assoc_arg_list_comma ']' ')' ? _map
+primary_p1_exp : ident  ? _var_ref
+primary_p1_exp : '(' list_exp ')' ? _pass_second
+primary_p1_exp : ident '(' opt_arg_list_comma ')' ? _function_call
+primary_p1_exp : 'catch' '(' list_exp ')' ? _catch_expr
+primary_p1_exp : primary_p2_exp '.' colon_name 
+
+primary_p2_exp : primary_p1_exp
+primary_p2_exp : primary_p2_exp '[' f_list_exp ']'
+primary_p2_exp : primary_p2_exp '[' f_opt_list_exp '..' f_opt_list_exp ']'
+
+postfix_exp : primary_p2_exp
+
+prefix_exp : postfix_exp
+prefix_exp : '-' cast_exp ? _unaryop
+prefix_exp : '+' cast_exp ? _unaryop
+prefix_exp : '!' cast_exp ? _unaryop
+prefix_exp : '~' cast_exp ? _unaryop
+
+cast_exp : prefix_exp
+
+mult_oper_exp : cast_exp
+mult_oper_exp : mult_oper_exp '*' cast_exp ? _binop
+mult_oper_exp : mult_oper_exp '/' cast_exp ? _binop
+mult_oper_exp : mult_oper_exp '%' cast_exp ? _binop
+
+add_oper_exp : mult_oper_exp
+add_oper_exp : add_oper_exp '+' mult_oper_exp ? _binop
+add_oper_exp : add_oper_exp '-' mult_oper_exp ? _binop
+
+shift_oper_exp : add_oper_exp
+shift_oper_exp : shift_oper_exp '<<' add_oper_exp ? _binop
+shift_oper_exp : shift_oper_exp '>>' add_oper_exp ? _binop
+
+rel_oper_exp : shift_oper_exp
+rel_oper_exp : rel_oper_exp '<' shift_oper_exp ? _binop
+rel_oper_exp : rel_oper_exp '>' shift_oper_exp ? _binop
+rel_oper_exp : rel_oper_exp '<=' shift_oper_exp ? _binop
+rel_oper_exp : rel_oper_exp '>=' shift_oper_exp ? _binop
+
+equ_oper_exp : rel_oper_exp
+equ_oper_exp : equ_oper_exp '==' rel_oper_exp ? _binop
+exu_oper_exp : equ_oper_exp '!=' rel_oper_exp ? _binop
+
+bitand_oper_exp : equ_oper_exp
+bitand_oper_exp : bitand_oper_exp '&' equ_oper_exp ? _binop
+
+bitxor_oper_exp : bitand_oper_exp
+bitxor_oper_exp : bitxor_oper_exp '^' bitand_oper_exp ? _binop
+
+bitor_oper_exp : bitxor_oper_exp
+bitor_oper_exp : bitor_oper_exp '|' bitxor_oper_exp ? _binop
+
+and_oper_exp : bitor_oper_exp
+and_oper_exp : and_oper_exp '&&' bitxor_oper_exp ? _binop
+
+or_oper_exp : and_oper_exp
+or_oper_exp : or_oper_exp '||' and_oper_exp ? _binop
+
+cond_exp : or_oper_exp
+cond_exp : or_oper_exp '?' list_exp ':' cond_exp ? _trinary
+cond_exp : or_oper_exp '//' cond_exp ? _binop
+
+exp : cond_exp
+exp : cond_exp '=' exp ? _assignment
+
+list_exp : exp ? _list_exp
+list_exp : list_exp ',' exp ? _list_exp
+
+opt_list_exp :
+opt_list_exp : list_exp
+
+f_list_exp : list_exp
+
+f_opt_list_exp : opt_list_exp
+
+arg_list : exp ? _list
+arg_list : arg_list ',' exp ? _list
+
+opt_arg_list :
+opt_arg_list : arg_list
+
+opt_arg_list_comma :
+opt_arg_list_comma : arg_list
+opt_arg_list_comma : arg_list ',' ? _pass_first
+
+assoc_exp : exp ':' exp ? _assoc_exp
+
+assoc_arg_list : assoc_exp ? _list
+assoc_arg_list : assoc_arg_list ',' assoc_exp ? _list
+
+opt_assoc_arg_list_comma :
+opt_assoc_arg_list_comma : assoc_arg_list
+opt_assoc_arg_list_comma : assoc_arg_list ',' ? _pass_first
+
+#event_arg : colon_name ':' cond_exp ? _event_arg
+event_arg : ident ':' cond_exp ? _event_arg
+
+event_arg_list : event_arg ? _stmt_list
+event_arg_list : event_arg_list event_arg ? _stmt_list
+
+opt_event_arg_list_comma :
+opt_event_arg_list_comma : event_arg_list
+opt_event_arg_list_comma : event_arg_list ',' ? _pass_first
+
+colon_name = /[a-z]+(-[a-z]+)*(:[a-z]+(-[a-z]+)*)*/

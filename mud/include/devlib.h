@@ -4,3 +4,5 @@
 # define EVENT_SCRIPT_D "/usr/DevLib/sys/event_script"
 
 # define EVENT_DATA "/usr/DevLib/data/event"
+
+# define COMPILER_LIB "/usr/DevLib/lib/compiler"

@@ -1,0 +1,10 @@
+#
+# We want this to almost be LPC, but with some sugar to make event handlers
+# easier to use to stitch everything together.
+#
+
+event_body : data_declarations stmt_list
+
+@include base_scripting.bnf
+
+stmt : 'return' exp ';' ? _return
