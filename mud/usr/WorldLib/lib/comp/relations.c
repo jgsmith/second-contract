@@ -14,6 +14,14 @@ object *inventory; /* a list of things targeting us */
 object LOCATION_DATA *targets; /* a list of things we're targeting */
 object LOCATION_DATA current_location; /* where we are at the moment */
 
+void create(varargs int clone) {
+  if(clone) {
+    inventory = ({ });
+    targets = ({ });
+    current_location = nil;
+  }
+}
+
 /* each item in inventory is an object - no details target us */
 /* each item in targets is a LOCATION_DATA object that captures the:
  *    * object
@@ -118,6 +126,7 @@ atomic static int add_relation(int prox, object LOCATION_DATA target) {
 
 atomic int remove_relation(object target) {
   int i, n, rflag;
+
   if(sizeof(({ target }) & inventory)) {
     inventory -= ({ target });
     target -> remove_relation(this_object());
@@ -166,7 +175,7 @@ static int _call_move_event(int async, string type, varargs object ob, mapping a
   object EVENT_DATA e;
   mixed ret;
 
-  e = EVENTS_D -> create_event("pre-move:release");
+  e = EVENTS_D -> create_event(type);
   if(ob) e -> set_object(ob);
   if(args) e -> set_args(args);
   if(async) {
@@ -213,9 +222,14 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
   if(!location) return FALSE;
 
   env = get_environment();
-  if(env) {
-    if(location -> get_object() != env) {
-      if(!_call_move_event(
+  if(env) { 
+    /* if we're somewhere in the game... */
+
+    if(location -> get_object() != env) { 
+
+      /* and we're moving to a new scene, path, or terrain... */
+
+      if(!_call_move_event( /* does our current environment let us go? */
         FALSE, 
         "pre-move:release", 
         env, 
@@ -223,7 +237,7 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
           "direct": ({ this_object() }) 
         ])
       )) return FALSE;
-      if(!_call_move_event(
+      if(!_call_move_event( /* does our new environment let us enter? */
         FALSE, 
         "pre-move:receive", 
         location->get_object(), 
@@ -232,10 +246,20 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
         ])
       )) return FALSE;
       /* now we know that the locations will accept the move */
-      if(!_call_move_event(
+      if(!_call_move_event( /* do we accept the change? */
         FALSE, 
         "pre-move:accept"
       )) return FALSE;
+
+      /* now that everyone is fine with the change, we make the change and
+       * then let everyone know that we've done the change
+       */
+      items = env -> get_deep_inventory() - ({ this_object() }) - this_object() -> get_deep_inventory();
+      for(i = 0, n = sizeof(items); i < n; i++) remove_relation(items[i]);
+      remove_relation(env);
+
+      add_relation(prox, location);
+
       _call_move_event(TRUE, "post-move:release", env, ([
         "direct": ({ this_object() }),
       ]));
@@ -244,9 +268,7 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
       ]));
       _call_move_event(TRUE, "post-move:accept");
 
-      /* now sever relations with current_location and anything in it */
-      /* then establish required relationship with new location */
-
+      return TRUE;
     }
     else { /* we're just changing within our location, so we're okay */
       /* we want to send an event with current and new coordinates */
@@ -254,16 +276,16 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
        * add_relation will just replace the current relationship.
        */
 
-      if(!add_relation(prox, location)) return FALSE;
-
-      /* now we want to remove ourselves from relations with other objects
-       * in this scene
+      /* sever relations with nearby items in the scene, and move to new 
+       * relationship/detail 
        */
 
       items = env -> get_deep_inventory() - ({ this_object() }) - this_object() -> get_deep_inventory();
       for(i = 0, n = sizeof(items); i < n; i++) remove_relation(items[i]);
-      
+
+      add_relation(prox, location);
       current_location = location;
+
       switch(env->get_type()) {
         case SCENE_THING:
           _call_move_event(TRUE, "motion:in-scene", this_object(), ([
@@ -286,9 +308,7 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
         default: return FALSE;
       }
 
-      /* sever relations with nearby items in the scene, and move to new 
-       * relationship/detail 
-       */
+      return TRUE;
     }
   }
   else { /* we don't have an environment yet, so we're getting one */
@@ -310,6 +330,9 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
     _call_move_event(TRUE, "post-move:accept");
 
     /* establish relationship with new location */
+    add_relation(prox, location);
+    current_location = location;
+    return TRUE;
   }
 
   /* if we get here, then it didn't work */

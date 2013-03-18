@@ -11,7 +11,7 @@ object iflib_driver;
 
 static void create(varargs int clone) {
   if(clone) {
-    thing::create();
+    thing::create(clone);
   }
 }
 

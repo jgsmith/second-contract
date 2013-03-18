@@ -60,13 +60,15 @@ atomic object create_object(string ward, string ur_name) {
 /*
  * Creates an object and places it somewhere.
  */
-atomic object create_placed_object(string ward, string ur_name, object dest, int relation) {
+object create_placed_object(string ward, string ur_name, object dest, int relation) {
   object thing;
   object loc;
 
   thing = create_object(ward, ur_name);
+  if(!thing) return nil;
   /* now we can add things like clothing or other inventory */
 
+  (users())[0]->message("We have a thing");
   /* finally, we place the item in the environment */
   loc = new_object(LOCATION_DATA);
   loc -> set_object(dest);

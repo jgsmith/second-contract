@@ -75,7 +75,7 @@ string compile_handlers(mapping code) {
   return src;
 }
 
-mixed set_event_handlers(mapping code) {
+atomic int set_event_handlers(mapping code) {
   object ob;
   string daemon;
   mixed res;

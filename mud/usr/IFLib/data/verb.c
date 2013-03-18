@@ -11,7 +11,9 @@
 # include <iflib.h>
 # include <iflib/verb.h>
 # include <worldlib/terrain.h>
+# include <devlib.h>
 # include <kernel/kernel.h>
+# include <type.h>
 
 string *verbs;
 string brief;
@@ -40,6 +42,7 @@ static void create(varargs int clone) {
   seasons = 0;
   respirations = 0;
   disabled = 1;
+  args_used = 0;
 }
 
 static int can_modify() {
@@ -341,5 +344,20 @@ void set_disabled(int x) {
 }
 
 int uses_args(int args) {
-  return args_used & args == args;
+  if(typeof(args_used) == T_NIL) return TRUE;
+  if(!args_used && !args) return TRUE;
+  return (args_used & args) == args;
+}
+
+int actor_allowed(object ob) {
+  object EVENT_DATA e;
+  int i, n;
+
+  if(!action || !sizeof(action)) return TRUE;
+  for(i = 0, n = sizeof(action); i < n; i++) {
+    e = EVENTS_D -> create_event("pre-" + action[i]);
+    e -> set_object(ob);
+    if(!EVENTS_D -> call_event(e)) return FALSE;
+  }
+  return TRUE;
 }

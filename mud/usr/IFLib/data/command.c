@@ -2,6 +2,8 @@
 # include <iflib/binder.h>
 # include <worldlib/proximity.h>
 # include <type.h>
+# include <toollib.h>
+# include <devlib.h>
 
 /*
  * All the data associated with the command as well as some logic to run it
@@ -64,11 +66,14 @@ int execute(object actor) {
   int num_args;
   object *verb_obj;
   string *bits;
+  string *actions;
   string tmp;
   int i, n;
   object BINDER_MATCH direct_obs;
   object BINDER_MATCH indirect_obs;
   object BINDER_MATCH instrument_obs;
+  object EVENT_DATA e;
+  object EVENT_SET e_set, estmp;
 
   num_args = 0;
   if(sizeof(direct) > 0) num_args |= 1;
@@ -76,88 +81,128 @@ int execute(object actor) {
   if(sizeof(instrument) > 0) num_args |= 4;
 
   verb_obj = VERB_D -> get_verb_handlers(verb, num_args);
-  if(!verb_obj || !sizeof(verb_obj)) {
-    bits = ({ "You", "can't" });
-    actor->message("adverbs: " + implode(adverbs, " ") + "\n");
-    if(sizeof(adverbs) > 2) {
-      bits += ({ implode(adverbs[0..sizeof(adverbs)-2], ", "), "and", adverbs[sizeof(adverbs)-1] });
-    }
-    else if(sizeof(adverbs) == 2) {
-      bits += ({ adverbs[0], "and", adverbs[1] });
-    }
-    else {
-      bits += adverbs;
-    }
-    bits += ({ verb });
-    if(sizeof(direct)) {
-      tmp = "";
-      for(i = 0, n = sizeof(direct); i < n; i++) {
-        tmp += unparse_noun_phrase(direct[i]);
-        if(n > 2 && i == n-2) {
-          tmp += ", and ";
-        }
-        else if(n == 2 && i == 0) {
-          tmp += " and ";
-        }
-        else if(n > 1) {
-          tmp += ", ";
-        }
-      }
-      bits += ({ tmp });
-    }
-    if(sizeof(indirect)) {
-      tmp = "";
-      for(i = 0, n = sizeof(indirect); i < n; i++) {
-        tmp += indirect[i][0] + " " + implode(indirect[i][1], " ");
-        if(n > 2 && i == n-2) {
-          tmp += ", and ";
-        }
-        else if(n == 2 && i == 0) {
-          tmp += " and ";
-        }
-        else if(n > 1) {
-          tmp += ", ";
-        }
-      }
-      bits += ({ tmp });
-    }
-    if(sizeof(instrument)) {
-      tmp = "";
-      for(i = 0, n = sizeof(instrument); i < n; i++) {
-        tmp += instrument[i][0] + " " + implode(instrument[i][1], " ");
-        if(n > 2 && i == n-2) {
-          tmp += ", and ";
-        }
-        else if(n == 2 && i == 0) {
-          tmp += " and ";
-        }
-        else if(n > 1) {
-          tmp += ", ";
-        }
-      }
-      bits += ({ tmp });
-    }
-    /* we want this to be a pending fail message since we might have other
-     * options.
+  if(verb_obj) {
+    verb_obj -= ({ nil });
+    /*
+     * we want to go through the adverbs and combine their modifications
+     *
+     * two adverbs can't modify the same aspect of the verb
      */
-    actor -> message(implode(bits - ({ nil, "" }), " ") + ".\n");
-    return FALSE;
   }
-  /*
-   * we want to go through the adverbs and combine their modifications
-   *
-   * two adverbs can't modify the same aspect of the verb
-   */
+  while(verb_obj && sizeof(verb_obj)) {
+    if(direct && sizeof(direct))
+      direct_obs = BINDER_D -> bind_direct(actor, BINDER_MATCH_SINGULAR, direct);
+    /* we need to construct an event chain that will be executed with this
+     * set of objects.
+     */
+    if(instrument && sizeof(instrument))
+      instrument_obs = BINDER_D -> bind_instrument(actor, instrument);
 
-  if(direct && sizeof(direct))
-    direct_obs = BINDER_D -> bind_direct(actor, BINDER_MATCH_SINGULAR, direct);
-  /* we need to construct an event chain that will be executed with this
-   * set of objects.
-   */
-  if(instrument && sizeof(instrument))
-    instrument_obs = BINDER_D -> bind_instrument(actor, instrument);
+    if(indirect && sizeof(indirect)) {
+      indirect_obs = BINDER_D -> bind_indirect(actor, indirect, direct_obs);
+    }
 
-  if(indirect && sizeof(indirect)) {
-    indirect_obs = BINDER_D -> bind_indirect(actor, indirect, direct_obs);
+    /* now go through and see which verb handlers work with the current
+     * set of objects - use the first one that matches
+     */
+
+    /* build out the event set for the first verb handler */
+    actions = verb_obj[0]->get_action();
+
+    for(i = 0, n = sizeof(actions); i < n; i++) {
+      estmp = EVENTS_D -> create_event_set();
+      e = EVENTS_D -> create_event("pre-" + actions[i]);
+      e -> set_object(actor);
+      e -> set_args(([
+        "actor": actor,
+        "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
+        "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
+        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
+      ]));
+      estmp -> add_guard(e);
+      e = EVENTS_D -> create_event(actions[i]);
+      e -> set_object(actor);
+      e -> set_args(([
+        "actor": actor,
+        "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
+        "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
+        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
+      ]));
+      estmp -> add_consequent(e);
+      e = EVENTS_D -> create_event("post-"+actions[i]);
+      e -> set_object(actor);
+      e -> set_args(([
+        "actor": actor,
+        "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
+        "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
+        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
+      ]));
+      if(e_set) e_set -> add_next(estmp);
+      else e_set = estmp;
+    }
+    /* if successful, then return - otherwise, remove the handler and
+     * try again
+     */
+    if(EVENTS_D -> run_event_set(e_set)) return TRUE;
+    verb_obj = verb_obj[1..];
   }
+  
+  /* if we get here, we weren't able to act on the command */
+  bits = ({ "You", "can't" });
+  if(adverbs && sizeof(adverbs))
+    bits += ({ ENGLISH_D -> item_list(adverbs) });
+  bits += ({ verb });
+  if(sizeof(direct)) {
+    tmp = "";
+    for(i = 0, n = sizeof(direct); i < n; i++) {
+      tmp += unparse_noun_phrase(direct[i]);
+      if(n > 2 && i == n-2) {
+        tmp += ", and ";
+      }
+      else if(n == 2 && i == 0) {
+        tmp += " and ";
+      }
+      else if(n > 1) {
+        tmp += ", ";
+      }
+    }
+    bits += ({ tmp });
+  }
+  if(sizeof(indirect)) {
+    tmp = "";
+    for(i = 0, n = sizeof(indirect); i < n; i++) {
+      tmp += indirect[i][0] + " " + implode(indirect[i][1], " ");
+      if(n > 2 && i == n-2) {
+        tmp += ", and ";
+      }
+      else if(n == 2 && i == 0) {
+        tmp += " and ";
+      }
+      else if(n > 1) {
+        tmp += ", ";
+      }
+    }
+    bits += ({ tmp });
+  }
+  if(sizeof(instrument)) {
+    tmp = "";
+    for(i = 0, n = sizeof(instrument); i < n; i++) {
+      tmp += instrument[i][0] + " " + implode(instrument[i][1], " ");
+      if(n > 2 && i == n-2) {
+        tmp += ", and ";
+      }
+      else if(n == 2 && i == 0) {
+        tmp += " and ";
+      }
+      else if(n > 1) {
+        tmp += ", ";
+      }
+    }
+    bits += ({ tmp });
+  }
+  /* we want this to be a pending fail message since we might have other
+   * options.
+   */
+  actor -> message(implode(bits - ({ nil, "" }), " ") + ".\n");
+  return FALSE;
 }

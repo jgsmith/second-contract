@@ -52,7 +52,6 @@ string compile_events(string events) {
 
   fname = COMPILE_PATH + "handlers_" + handler_count;
   handler_count++;
-  (users())[0] -> message("Compiling " + fname + ": [" + content + "]");
   err = catch( ob = compile_object(fname, content) );
   if(err) error("Unable to compile handlers: " + err);
   return fname;

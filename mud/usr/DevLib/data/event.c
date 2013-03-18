@@ -20,7 +20,7 @@ void set_object(object ob) {
   if(!target || target == previous_object()) target = ob;
 }
 
-mapping get_args() { return args + ([ ]); }
+mapping get_args() { return args ? args + ([ ]) : ([ ]); }
 void set_args(mapping a) {
   if(!args) args = a;
 }

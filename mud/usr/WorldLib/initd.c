@@ -33,14 +33,20 @@ private int configure_object(object ob, mixed json) {
       ob -> set_property(explode(props[i], ":"), json["properties"][props[i]]);
     }
     if(json["events"]) {
-      events = map_indices(json["events"]);
+      ob -> add_event_handlers(json["events"]);
     }
   }
   return TRUE;
 }
 
-atomic void initialize_data() {
+void debug(string msg) {
+  find_object(DRIVER) -> message(msg);
+}
+
+void initialize_data() {
   object ob;
+  object *obs;
+  mapping ward;
   string *fnames, *wards;
   mixed *dir;
   mixed json;
@@ -89,6 +95,7 @@ atomic void initialize_data() {
           else {
             ob = clone_object(THING_OBJ);
           }
+          debug("We have an object to configure for " + dir[0][j]);
           if(ob) {
             if(configure_object(ob, json)) {
               HOSPITAL_D -> add_object(wards[i], ob);
@@ -123,4 +130,12 @@ atomic void initialize_data() {
       }
     }
   }
+
+  /* now see if we have a "universe" room 
+   * this room is the container into which the entire game fits
+   */
+  ward = HOSPITAL_D -> get_objects("rooms");
+  if(!ward) error("No 'rooms' ward from which to get the universe");
+  if(!ward["universe"]) error("No 'universe' room with which to build the universe. Available rooms: " + implode(map_indices(ward), ", "));
+  HOSPITAL_D -> set_world_object(ward["universe"][0]);
 }

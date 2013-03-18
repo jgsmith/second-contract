@@ -1,5 +1,6 @@
 # include <worldlib.h>
 # include <devlib.h>
+# include <kernel/kernel.h>
 
 /*
  * This represents anything in the world that can be manipulated or entered.
@@ -26,13 +27,14 @@ inherit traits   "/usr/WorldLib/lib/prop/traits";
 inherit ur       "/usr/WorldLib/lib/comp/ur";
 
 static void create(varargs int clone) {
-  counters::create();
-  details::create();
-  reputations::create();
-  skills::create();
-  stats::create();
-  traits::create();
-  id::create();
+  counters::create(clone);
+  details::create(clone);
+  relations::create(clone);
+  reputations::create(clone);
+  skills::create(clone);
+  stats::create(clone);
+  traits::create(clone);
+  id::create(clone);
 }
 
 atomic void set_ur_object(object ob) {
@@ -107,4 +109,13 @@ int set_property(string *path, mixed value) {
     EVENTS_D -> queue_event(e);
   }
   return result;
+}
+
+int add_event_handlers(mapping code) {
+  string po;
+
+  po = object_name(previous_object());
+  if(SYSTEM() || po == "/usr/WorldLib/initd" || po == "/usr/WorldLib/data/resource/thing") {
+    return EVENT_SCRIPT_D -> set_event_handlers(code);
+  }
 }

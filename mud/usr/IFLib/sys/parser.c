@@ -15,7 +15,7 @@ object *parse_command(string cmd, object actor) {
   /* if cmds is nil, we should try some alternative parsing methods */
   if(!cmds) return nil;
 
-  actor -> message(JSON_P -> to_json(cmds));
+  actor -> message(JSON_P -> to_json(cmds)+"\n");
 
   commands = ({ });
   for(i = 0, n = sizeof(cmds); i < n; i++) {

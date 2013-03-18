@@ -7,7 +7,7 @@ static int create(varargs int clone) {
   int i, n;
 
   files = ({
-    EVENT_DATA,
+    EVENT_DATA, EVENT_SET,
     TEMPLATE_DATA, TMPL_POS_DATA, TMPL_VERB_DATA,
     EVENTS_D, EVENT_SCRIPT_D, COMPILER_CONTEXT_DATA,
   });

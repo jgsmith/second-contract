@@ -20,15 +20,12 @@ static void create(varargs int clone) {
   hospital::create(1);
 
   if(!find_object(THING_OBJ)) compile_object(THING_OBJ);
-
-  if(!top_of_the_world) {
-    top_of_the_world = clone_object(THING_OBJ);
-    top_of_the_world -> set_property(({ "detail", "default", "description", "brief" }), "the top of the world");
-    top_of_the_world -> set_property(({ "detail", "default", "description", "long" }), "This is the top location in the universe. Everything else is somehow contained in this.");
-  }
 }
 
 object get_world_object() { return top_of_the_world; }
+void set_world_object(object THING_OBJ ob) {
+  if(!top_of_the_world) top_of_the_world = ob;
+}
 
 int add_ward(string name) {
   if(!SYSTEM() && object_name(previous_object()) != "/usr/WorldLib/initd") {
