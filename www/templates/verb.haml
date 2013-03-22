@@ -1,0 +1,369 @@
+#verb-template
+  %h1 {{(data.verb||[]).join(', ')}}
+  %form.form-horizontal
+    %fieldset
+      %legend User Interface
+      .control-group
+        %label.control-label Verbs:
+        .controls
+          %input.input-block-level(name="verbs" type="text" value="{{ (data.verb||[]).join(', ') }}")/
+      .control-group
+        %label.control-label Brief Description:
+        .controls
+          %input.input-block-level(name="brief" type="text" value="{{ data.brief }}")/
+      .control-group
+        %label.control-label Long Description (help):
+        .controls
+          %textarea.input-block-level(name="help" rows="5") {{ data.help }}
+      .control-group
+        %label.control-label See Also:
+        .controls
+          %input(name="see-also" type="text" value="{{ (data.see_also||[]).join(', ') }}")
+    %fieldset
+      %legend Action
+      .control-group
+        %label.checkbox
+          %input(type="checkbox" name="disabled")
+          Disabled
+      .control-group
+        %label.control-label Action Sequence (one per line):
+        .controls
+          %textarea(name="action" rows="5") {{ (data.action||[]).join("\n") }}
+    %fieldset
+      %legend Objects Used
+      .control-group
+        %fieldset
+          %legend
+            %label.checkbox
+              %input(type="checkbox" value="direct" name="arguments")
+              Direct Object
+          .fieldset-body
+            %div
+              %strong Requirements
+            .row
+              .span2
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="living" name="arguments.direct")
+                  Living
+                %label.checkbox
+                  %input(type="checkbox" value="player" name="arguments.direct")
+                  Player
+                %label.checkbox
+                  %input(type="checkbox" value="distant" name="arguments.direct")
+                  Distant
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="wielded" name="arguments.direct")
+                  Wielded
+                %label.checkbox
+                  %input(type="checkbox" value="worn" name="arguments.direct")
+                  Worn
+                %label.checkbox
+                  %input(type="checkbox" value="in-inventory" name="arguments.direct")
+                  In Actor's Inventory
+                %label.checkbox
+                  %input(type="checkbox" value="in-indirect" name="arguments.direct")
+                  In Indirect Object's Inventory
+        %fieldset
+          %legend
+            %label.checkbox
+              %input(type="checkbox" value="indirect" name="arguments")
+              Indirect Object
+          .fieldset-body
+            %div
+              %strong Requirements
+            .row
+              .span2
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="living" name="arguments.indirect")
+                  Living
+                %label.checkbox
+                  %input(type="checkbox" value="player" name="arguments.indirect")
+                  Player
+                %label.checkbox
+                  %input(type="checkbox" value="distant" name="arguments.indirect")
+                  Distant
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="wielded" name="arguments.indirect")
+                  Wielded
+                %label.checkbox
+                  %input(type="checkbox" value="worn" name="arguments.indirect")
+                  Worn
+                %label.checkbox
+                  %input(type="checkbox" value="in-inventory" name="arguments.indirect")
+                  In Actor's Inventory
+                %label.checkbox
+                  %input(type="checkbox" value="in-direct" name="arguments.indirect")
+                  In Direct Object's Inventory
+        %fieldset
+          %legend
+            %label.checkbox
+              %input(type="checkbox" value="instrumental" name="arguments")
+              Instrumental Object
+          .fieldset-body
+            %div
+              %strong Requirements
+            .row
+              .span2
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="living" name="arguments.instrumental")
+                  Living
+                %label.checkbox
+                  %input(type="checkbox" value="player" name="arguments.instrumental")
+                  Player
+                %label.checkbox
+                  %input(type="checkbox" value="distant" name="arguments.instrumental")
+                  Distant
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="wielded" name="arguments.instrumental")
+                  Wielded
+                %label.checkbox
+                  %input(type="checkbox" value="worn" name="arguments.instrumental")
+                  Worn
+                %label.checkbox
+                  %input(type="checkbox" value="in-inventory" name="arguments.instrumental")
+                  In Actor's Inventory
+        %fieldset
+          %legend
+            %label.checkbox
+              %input(type="checkbox" value="communication" name="arguments")
+              Communication-style
+
+    %fieldset
+      %legend Actor Requirements
+      .row
+        .span1
+        .span10
+          %fieldset
+            %legend Action
+            .row
+              .span3
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="manipulation" name="actor.action")
+                  Manipulation
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="combat" name="actor.action")
+                  Combat
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="move" name="actor.action")
+                  Mobile
+          %fieldset
+            %legend Senses
+            .row
+              .span1
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="see" name="actor.sense")
+                  See
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="smell" name="actor.sense")
+                  Smell
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="touch" name="actor.sense")
+                  Touch
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="taste" name="actor.sense")
+                  Taste
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="hear" name="actor.sense")
+                  Hear
+          %fieldset
+            %legend Position
+            .row
+              .span2
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="standing" name="actor.position")
+                  Standing
+                %label.checkbox
+                  %input(type="checkbox" value="sitting" name="actor.position")
+                  Sitting
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="lying" name="actor.position")
+                  Lying
+                %label.checkbox
+                  %input(type="checkbox" value="flying" name="actor.position")
+                  Flying
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="leaning" name="actor.position")
+                  Leaning
+                %label.checkbox
+                  %input(type="checkbox" value="kneeling" name="actor.position")
+                  Kneeling
+              .span2
+                %label.checkbox
+                  %input(type="checkbox" value="floating" name="actor.position")
+                  Floating
+                %label.checkbox
+                  %input(type="checkbox" value="swimming" name="actor.position")
+                  Swimming
+
+    %fieldset
+      %legend Environment Requirements
+      .row
+        .span1
+        .span10
+          %fieldset
+            %legend Respiration
+            .row
+              .span2
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="air" name="respiration")
+                  Air
+                %label.checkbox
+                  %input(type="checkbox" value="water" name="respiration")
+                  Water
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="vacuum" name="respiration")
+                  Vacuum
+                %label.checkbox
+                  %input(type="checkbox" value="methane" name="respiration")
+                  Methane
+          %fieldset
+            %legend Terrain
+            .row
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="outdoors" name="terrain")
+                  Outdoors
+                %label.checkbox
+                  %input(type="checkbox" value="indoors" name="terrain")
+                  Indoors
+                %label.checkbox
+                  %input(type="checkbox" value="road" name="terrain")
+                  Road
+                %label.checkbox
+                  %input(type="checkbox" value="underwater" name="terrain")
+                  Underwater
+                %label.checkbox
+                  %input(type="checkbox" value="surface" name="terrain")
+                  Water Surface
+                %label.checkbox
+                  %input(type="checkbox" value="midair" name="terrain")
+                  Midair
+                %label.checkbox
+                  %input(type="checkbox" value="swamp" name="terrain")
+                  Swamp
+                %label.checkbox
+                  %input(type="checkbox" value="woods" name="terrain")
+                  Woods
+                %label.checkbox
+                  %input(type="checkbox" value="jungle" name="terrain")
+                  Jungle
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="rough" name="terrain")
+                  Rough
+                %label.checkbox
+                  %input(type="checkbox" value="underground" name="terrain")
+                  Underground
+                %label.checkbox
+                  %input(type="checkbox" value="space" name="terrain")
+                  Space
+                %label.checkbox
+                  %input(type="checkbox" value="magma" name="terrain")
+                  Magma
+                %label.checkbox
+                  %input(type="checkbox" value="plasma" name="terrain")
+                  Plasma
+                %label.checkbox
+                  %input(type="checkbox" value="planar" name="terrain")
+                  Planar
+                %label.checkbox
+                  %input(type="checkbox" value="snow" name="terrain")
+                  Snow
+                %label.checkbox
+                  %input(type="checkbox" value="sand" name="terrain")
+                  Sand
+                %label.checkbox
+                  %input(type="checkbox" value="ice" name="terrain")
+                  Ice
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="biological" name="terrain")
+                  Biological
+                %label.checkbox
+                  %input(type="checkbox" value="seafloor" name="terrain")
+                  Seafloor
+                %label.checkbox
+                  %input(type="checkbox" value="water-shallow" name="terrain")
+                  Shallow Water
+                %label.checkbox
+                  %input(type="checkbox" value="indoors-window" name="terrain")
+                  Indoors with Windows
+                %label.checkbox
+                  %input(type="checkbox" value="rooftop" name="terrain")
+                  Rooftop
+                %label.checkbox
+                  %input(type="checkbox" value="any-outdoors" name="terrain")
+                  Any Outdoors
+                %label.checkbox
+                  %input(type="checkbox" value="any-indoors" name="terrain")
+                  Any Indoors
+                %label.checkbox
+                  %input(type="checkbox" value="any-water" name="terrain")
+                  Any Water
+                %label.checkbox
+                  %input(type="checkbox" value="sees-weather" name="terrain")
+                  Weather Visible
+          %fieldset
+            %legend Calendar
+            .row
+              .span2
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="spring" name="calendar")
+                  Spring
+                %label.checkbox
+                  %input(type="checkbox" value="summer" name="calendar")
+                  Summer
+                %label.checkbox
+                  %input(type="checkbox" value="diurnal" name="calendar")
+                  Diurnal
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="winter" name="calendar")
+                  Winter
+                %label.checkbox
+                  %input(type="checkbox" value="fall" name="calendar")
+                  Fall
+                %label.checkbox
+                  %input(type="checkbox" value="nocturnal" name="calendar")
+                  Nocturnal
+          %fieldset
+            %legend Weather
+            .row
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="raining" name="weather")
+                  Raining
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="snowing" name="weather")
+                  Snowing
+              .span4
+                %label.checkbox
+                  %input(type="checkbox" value="cloudy" name="weather")
+                  Cloudy
+          %fieldset
+            %legend Climate
+          
+    .control-group
+      .controls
+        %button.btn.save(type="submit") Save Verb

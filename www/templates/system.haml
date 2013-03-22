@@ -1,0 +1,67 @@
+#system-template
+  %h1 System
+  .row-fluid
+    .span6
+      %h2 Time
+      %table
+        %tr
+          %td(align="right") Started at:
+          %td {{(new Date(data.starttime*1000)).toLocaleString()}}
+        %tr
+          %td(align="right") Running since:
+          %td {{(new Date(data.boottime*1000)).toLocaleString()}}
+        %tr
+          %td(align="right")Uptime:
+          %td 
+            {{parseInt(data.uptime/(60*60*24*7),10)}}w 
+            {{parseInt(data.uptime/(60*60*24), 10)%7}}d 
+            {{parseInt(data.uptime/(60*60),10)%24}}h 
+            {{parseInt(data.uptime/60,10)%60}}m 
+            {{data.uptime%60}}s
+      %h2 Resources
+      %dl
+        %dt Memory
+        %dd
+          .progress
+            .bar(style="background: transparent; text-shadow: none; width: {{parseInt((data.static_memory_size-data.static_memory_used)*100/(data.static_memory_size+data.dynamic_memory_size), 10)}}%;")
+            .bar(style="width: {{parseInt(data.static_memory_used * 100 / (data.static_memory_size+data.dynamic_memory_size), 10)}}%;" title="{{parseInt(data.static_memory_used/1024,10)}}k/{{parseInt(data.static_memory_size/1024,10)}}k")
+            .bar.bar-success(style="width: {{parseInt(data.dynamic_memory_used * 100 / (data.dynamic_memory_size+data.static_memory_size), 10)}}%;" title="{{parseInt(data.dynamic_memory_used/1024,10)}}k/{{parseInt(data.dynamic_memory_size/1024,10)}}k")
+        %dt Swap
+        %dd
+          .progress
+            .bar(style="width: {{parseInt(data.swap_used*100/data.swap_size, 10)}}%;" title="{{data.swap_used}}/{{data.swap_size}}")/
+        %dt Users
+        %dd
+          .progress
+            .bar(style="width: {{parseInt(data.user_used*100/data.user_size, 10)}}%;" title="{{data.user_used}}/{{data.user_size}}")
+        %dt Callouts
+        %dd
+          .progress
+            .bar(style="width: {{parseInt(data.call_out_long*100/data.call_out_size, 10)}}%;")
+            .bar.bar-success(style="width: {{parseInt(data.call_out_short*100/data.call_out_size, 10)}}%;")
+        %dt Objects
+        %dd
+          .progress
+            .bar(style="width: {{parseInt(data.objects*100/data.object_table_size, 10)}}%;" title="{{data.objects}}/{{data.object_table_size}}")
+    .span6
+      %h2 Settings
+      %dl
+        %dt Game Name
+        %dd
+          %form.form-inline
+            %input#system-name(type="text" placeholder="Name of the game" value="{{ data.name }}")/
+            %button.btn#save-system-name(type="button") Save
+        %dt Telnet Ports
+        %dd {{data.telnet_ports.join(", ")}}
+        %dt Binary Ports
+        %dd {{data.binary_ports.join(", ")}}
+        %dt Swap Sector Size
+        %dd {{data.sectorsize}} bytes
+        %dt Maximum String Length
+        %dd {{data.string_size}} bytes
+        %dt Maximum Array and Mapping Size
+        %dd {{data.array_size}} entries
+        %dt Server Version
+        %dd {{data.version}}
+        %dt Mudlib Version
+        %dd {{data.mudlib_version}}

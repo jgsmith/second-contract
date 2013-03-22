@@ -1,0 +1,50 @@
+!!! 5
+%html(lang="en")
+  %head
+    %title Second Contract Dashboard
+    %meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    %link(href="css/bootstrap.min.css" rel="stylesheet" media="screen")
+    :css
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+
+      @media (max-width: 980px) {
+        /* Enable use of floated navbar text */
+        .navbar-text.pull-right {
+          float: none;
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+      }
+    %link(href="css/bootstrap-responsive.min.css" rel="stylesheet" media="screen")
+  %body
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          %button.btn.btn-navbar(type="button" data-toggle="collapse" data-target=".nav-collapse")
+            %span.icon-bar/
+            %span.icon-bar/
+            %span.icon-bar/
+          %a.brand(href="#") Project name
+          .nav-collapse.collapse
+            %p.navbar-text.pull-right
+              Logged in as 
+              %a.navbar-link#logged-in-as(href="#login") Nobody
+            %ul.nav#top-nav
+              %li.active
+                %a(href="#") System
+              %li
+                %a(href="#iflib") IFLib
+              %li
+                %a(href="#worldlib") WorldLib
+    .container-fluid#sc-admin
+      .row-fluid
+        .span2#sidebar
+        .span10#main
+      %footer
+    %div(style="visibility: hidden; display: none;")
