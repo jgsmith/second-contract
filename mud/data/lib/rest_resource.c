@@ -19,6 +19,7 @@ string base;
 int auth_flags;
 string owner;
 string auth_account;
+string resource_id;
 
 static void create(varargs int clone) {
   auth_flags = HTTP_REQUIRES_ADMIN;
@@ -35,13 +36,19 @@ void set_base(string b) { base = b; }
 string get_resource_id() {
   string path;
 
-  if(request) {
-    path = request -> get_path_info();
-    if(strlen(path) > strlen(base)+1 && path[0..strlen(base)] == base+"/") {
-      return path[strlen(base)+1..];
+  if(!resource_id) {
+    if(request) {
+      path = request -> get_path_info();
+      if(strlen(path) > strlen(base)+1 && path[0..strlen(base)] == base+"/") {
+        resource_id = path[strlen(base)+1..];
+      }
     }
   }
-  return nil;
+  return resource_id;
+}
+
+void set_resource_id(string id) {
+  resource_id = id;
 }
 
 /*

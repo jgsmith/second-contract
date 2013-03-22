@@ -5,21 +5,23 @@
 # include <worldlib.h>
 # include <toollib.h>
 # include <worldlib/proximity.h>
+# include <data.h>
 
 static int create(varargs int clone) {
+  string *files;
+  int i, n;
 
-  if(!find_object(DETAIL_DATA)) compile_object(DETAIL_DATA);
-  if(!find_object(EXIT_DATA))   compile_object(EXIT_DATA);
-  if(!find_object(LOCATION_DATA))   compile_object(LOCATION_DATA);
+  files = ({
+    DETAIL_DATA, EXIT_DATA, LOCATION_DATA, SENSATION_DATA,
+    SENSATION_SET, SENSATION_END_DATA, EVENT_TIMER_DATA,
+    GENETICS_DATA,
+    THING_OBJ, WARD_OBJ, PRIORITY_QUEUE, PRIORITY_QUEUE_ITEM,
+    EXITS_D, HOSPITAL_D, CHARACTER_D, PROXIMITY_D,
+    WORLD_EVENTS_D,
+  });
 
-  if(!find_object(THING_OBJ))   compile_object(THING_OBJ);
-  if(!find_object(WARD_OBJ))    compile_object(WARD_OBJ);
-
-  if(!find_object(PLACEMENT_D)) compile_object(PLACEMENT_D);
-  if(!find_object(EXITS_D))     compile_object(EXITS_D);
-  if(!find_object(HOSPITAL_D))  compile_object(HOSPITAL_D);
-  if(!find_object(CHARACTER_D))  compile_object(CHARACTER_D);
-  if(!find_object(PROXIMITY_D))  compile_object(PROXIMITY_D);
+  for(i = 0, n = sizeof(files); i < n; i++)
+    if(!find_object(files[i])) compile_object(files[i]);
 }
 
 private int configure_object(object ob, mixed json) {

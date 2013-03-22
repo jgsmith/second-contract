@@ -18,7 +18,7 @@ mixed get_property(string *path) {
       else if(sizeof(path) == 2)
         return path[1] = WORDS_D -> thing_type_name(thing_type);
       else return nil;
-    case "environment": return this_object() -> environment();
+    case "environment": return this_object() -> get_environment();
     case "position":
       if(sizeof(path) == 1) {
         return WORDS_D -> position_name(position);
@@ -55,7 +55,7 @@ int set_property(string *path, mixed value) {
         if(!value) tmp = -1;
       }
       if(tmp < 1) return FALSE;
-      env = PLACEMENT_D -> environment(this_object());
+      env = this_object() -> get_environment();
       if(env) {
         /* we need to check on a few things to ensure that this position
          * is allowed.

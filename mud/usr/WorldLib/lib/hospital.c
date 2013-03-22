@@ -1,9 +1,9 @@
 # include <kernel/kernel.h>
 # include <devlib.h>
 # include <worldlib.h>
-# include <worldlib/proximity.h>
 # include <worldlib/hospital.h>
 # include <system.h>
+# include <data.h>
 
 /*
  * Handles creating new objects from ur-objects, and knows about the available
@@ -68,7 +68,6 @@ object create_placed_object(string ward, string ur_name, object dest, int relati
   if(!thing) return nil;
   /* now we can add things like clothing or other inventory */
 
-  (users())[0]->message("We have a thing");
   /* finally, we place the item in the environment */
   loc = new_object(LOCATION_DATA);
   loc -> set_object(dest);

@@ -20,8 +20,9 @@ string render(mapping data, object pov) {
   string pov_var;
   string nom;
 
-  if(pov == data["this"]) pov_var == "this";
-  else if(pov == data["actor"]) pov_var == "actor";
+  pov_var = "observer";
+  if(pov == data["actor"]) pov_var = "actor";
+  else if(pov == data["this"]) pov_var = "this";
   else if(data["indirect"] && sizeof(({ pov }) & data["indirect"]))
     pov_var = "indirect";
   else if(data["direct"] && sizeof(({ pov }) & data["direct"]))
@@ -29,14 +30,15 @@ string render(mapping data, object pov) {
   else if(data["instrument"] && sizeof(({ pov }) & data["instrument"]))
     pov_var = "instrument";
 
+  if(pov_var != "observer") data["_last_var"] = var;
   if(pov_var == var) {
     switch(pos) {
       case POS_NOMINATIVE: case POS_NAME: case POS_OBJECTIVE:
-        nom = "you";
+        nom = "you"; break;
       case POS_POSSESSIVE_NOUN: case POS_POSSESSIVE:
-        nom = "your";
+        nom = "your"; break;
       case POS_REFLEXIVE:
-        nom = "yourself";
+        nom = "yourself"; break;
     }
     if(typeof(data[var]) == T_ARRAY) {
       return ENGLISH_D -> item_list(data[var] - ({ pov }) + ({ nom }));
@@ -51,7 +53,10 @@ string render(mapping data, object pov) {
       data["_last_var"] = var;
       switch(pos) {
         case POS_NOMINATIVE:
-          return ENGLISH_D -> nominative(data[var]);
+          if(var == "actor")
+            return ENGLISH_D -> item_list(data[var]);
+          else
+            return ENGLISH_D -> nominative(data[var]);
         case POS_NAME: 
           return ENGLISH_D -> item_list(data[var]);
         case POS_OBJECTIVE:

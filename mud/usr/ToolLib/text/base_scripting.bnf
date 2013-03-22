@@ -45,27 +45,20 @@ type_specifier : 'object'
 type_specifier : 'mapping'
 type_specifier : 'mixed'
 
-message : string ? _constant
-message : exp
-messages : message ? _list
-messages : messages ',' messages ? _list
-
-message_output : ':' messages ? _message_output
-
 event_invocation : '[' exp '#' colon_name ']' ? _event
 event_invocation : '[' exp '#' colon_name ':' opt_event_arg_list_comma ']' ? _event_with_args
+event_invocation : '[' '#' colon_name ']' ? _event
+event_invocation : '[' '#' colon_name ':' opt_event_arg_list_comma ']' ? _event_with_args
 
 if_stmt : 'if' '(' f_list_exp ')' stmt ? _if
 
 stmt : list_exp ';' ? _pass_first
 stmt : compound_stmt
-stmt : message_output ';' ? _pass_first
 stmt : if_stmt
 stmt : if_stmt 'else' stmt ? _if_else
 stmt : 'do' stmt 'while' '(' f_list_exp ')' ';' ? _do_while
 stmt : 'while' '(' f_list_exp ')' stmt ? _while_do
 stmt : 'for' '(' opt_list_exp ';' f_opt_list_exp ';' opt_list_exp ')' stmt ? _for
-stmt : 'catch' compound_stmt opt_caught_stmt ? _catch
 stmt : 'switch' '(' f_list_exp ')' compound_stmt ? _switch
 stmt : 'case' exp ':' stmt ? _case
 stmt : 'case' exp '..' exp ':' stmt ? _case_range
@@ -94,14 +87,14 @@ primary_p1_exp : string ? _constant
 primary_p1_exp : '(' '{' opt_arg_list_comma '}' ')' ? _array
 primary_p1_exp : '(' '[' opt_assoc_arg_list_comma ']' ')' ? _map
 primary_p1_exp : ident  ? _var_ref
+primary_p1_exp : '$' ident ? _dollar_var_ref
 primary_p1_exp : '(' list_exp ')' ? _pass_second
 primary_p1_exp : ident '(' opt_arg_list_comma ')' ? _function_call
-primary_p1_exp : 'catch' '(' list_exp ')' ? _catch_expr
-primary_p1_exp : primary_p2_exp '.' colon_name 
+primary_p1_exp : primary_p2_exp '.' colon_name ? _get_property
 
 primary_p2_exp : primary_p1_exp
-primary_p2_exp : primary_p2_exp '[' f_list_exp ']'
-primary_p2_exp : primary_p2_exp '[' f_opt_list_exp '..' f_opt_list_exp ']'
+primary_p2_exp : primary_p2_exp '[' f_list_exp ']' ? _array_ref
+primary_p2_exp : primary_p2_exp '[' f_opt_list_exp '..' f_opt_list_exp ']' ? _array_range_ref
 
 postfix_exp : primary_p2_exp
 
@@ -157,6 +150,7 @@ cond_exp : or_oper_exp '//' cond_exp ? _binop
 
 exp : cond_exp
 exp : cond_exp '=' exp ? _assignment
+exp : primary_p2_exp '.' colon_name '=' exp ? _set_property
 
 list_exp : exp ? _list_exp
 list_exp : list_exp ',' exp ? _list_exp

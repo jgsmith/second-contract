@@ -1,4 +1,5 @@
 # include <devlib.h>
+# include <data.h>
 
 /*
  * Handles ordering/tracking events.
@@ -89,7 +90,7 @@ atomic int run_event_set(object EVENT_SET set) {
       es = set -> get_consequents(1);
       for(i = 0, n = sizeof(es); i < n; i++) call_event(es[i]);
       es = set -> get_reactions(1);
-      for(i = 0, n = sizeof(es); i < n; i++) queue_event(es[i]);
+      for(i = 0, n = sizeof(es); i < n; i++) call_event(es[i]);
       next = set -> get_next();
     }
   }

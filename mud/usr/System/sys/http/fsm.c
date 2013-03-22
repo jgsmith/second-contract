@@ -166,24 +166,6 @@ atomic void run(object resource) {
   }
 }
 
-static void add_caching_headers(object resource, object response) {
-  string t;
-  if(t = resource->generate_etag())
-    response->add_header("Etag", ensure_quoted_header(t));
-  if(t = resource->expires())
-    response->add_header("Expires", t);
-  if(t = resource->last_modified())
-    response->add_header("Last-Modified", t);
-}
-
-static int handle_304(object resource, object response) {
-  response->remove_header("Content-Type");
-  response->remove_header("Content-Encoding");
-  response->remove_header("Content-Language");
-  add_caching_headers(resource, response);
-  return 304;
-}
-
 mixed b13(object resource, object request, object response, mapping metadata) { /* service_available */
   return resource->service_available() ? "b12" : 500;
 }

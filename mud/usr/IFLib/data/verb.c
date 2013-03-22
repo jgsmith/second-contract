@@ -14,6 +14,7 @@
 # include <devlib.h>
 # include <kernel/kernel.h>
 # include <type.h>
+# include <data.h>
 
 string *verbs;
 string brief;
@@ -47,7 +48,7 @@ static void create(varargs int clone) {
 
 static int can_modify() {
   if(SYSTEM()) return TRUE;
-  if(object_name(previous_object()) != HTTP_VERB_RESOURCE) return TRUE;
+  if(explode(object_name(previous_object()),"#")[0] == HTTP_VERB_RESOURCE) return TRUE;
   error("Verbs may only be modified by System or through the web administrative interface.");
   return FALSE;
 }
@@ -140,7 +141,7 @@ mapping get_properties() {
       "used": args_used & ARG_INDIRECT_OBJ != 0,
       "requirements": ({ }),
     ]),
-    "implement": ([
+    "instrumental": ([
       "used": args_used & ARG_IMPLEMENT_OBJ != 0,
       "requirements": ({ }),
     ]),
@@ -162,20 +163,22 @@ mapping get_properties() {
   if(indirect_obj_flags & ARG_IN_INVENTORY) args["indirect"]["requirements"] |= ({ "in-inventory" });
   if(indirect_obj_flags & ARG_IN_DIRECT_OBS) args["indirect"]["requirements"] |= ({ "in-direct-obs" });
 
-  if(implement_obj_flags & ARG_LIVING) args["implement"]["requirements"] |= ({ "living" });
-  if(implement_obj_flags & ARG_PLAYER) args["implement"]["requirements"] |= ({ "player" });
-  if(implement_obj_flags & ARG_DISTANT) args["implement"]["requirements"] |= ({ "distant" });
-  if(implement_obj_flags & ARG_WIELDED) args["implement"]["requirements"] |= ({ "wielded" });
-  if(implement_obj_flags & ARG_WORN) args["implement"]["requirements"] |= ({ "worn" });
-  if(implement_obj_flags & ARG_IN_INVENTORY) args["implement"]["requirements"] |= ({ "in-inventory" });
+  if(implement_obj_flags & ARG_LIVING) args["instrumental"]["requirements"] |= ({ "living" });
+  if(implement_obj_flags & ARG_PLAYER) args["instrumental"]["requirements"] |= ({ "player" });
+  if(implement_obj_flags & ARG_DISTANT) args["instrumental"]["requirements"] |= ({ "distant" });
+  if(implement_obj_flags & ARG_WIELDED) args["instrumental"]["requirements"] |= ({ "wielded" });
+  if(implement_obj_flags & ARG_WORN) args["instrumental"]["requirements"] |= ({ "worn" });
+  if(implement_obj_flags & ARG_IN_INVENTORY) args["instrumental"]["requirements"] |= ({ "in-inventory" });
   return ([
-    "see-also": see_alsos,
+    "see_also": see_alsos,
     "help": help,
     "verb": verbs,
     "arguments": args,
     "environment": env,
     "actor": actor,
     "disabled": disabled,
+    "brief": brief,
+    "action": action,
   ]);
 }
 
@@ -348,6 +351,12 @@ int uses_args(int args) {
   if(!args_used && !args) return TRUE;
   return (args_used & args) == args;
 }
+
+void set_args_used(int a) { 
+  if(can_modify()) args_used = a; 
+}
+
+int get_args_used() { return args_used; }
 
 int actor_allowed(object ob) {
   object EVENT_DATA e;

@@ -1,4 +1,4 @@
-# define HTTP_RESOURCE_LIB "/usr/System/open/data/lib/http/resource"
+# define HTTP_RESOURCE_LIB "/data/lib/rest_resource"
 # define HTTP_REQUEST "/usr/System/data/http/request"
 # define HTTP_RESPONSE "/usr/System/data/http/response"
 

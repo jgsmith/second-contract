@@ -2,6 +2,7 @@
 # include <worldlib/proximity.h>
 # include <devlib.h>
 # include <type.h>
+# include <data.h>
 
 /*
  * This keeps track of forward and reverse relations between objects and
@@ -112,7 +113,7 @@ atomic static int add_relation(int prox, object LOCATION_DATA target) {
   for(i = 0, n = sizeof(targets); i < n; i++) {
     if(targets[i]->get_object() == target -> get_object()) {
       targets[i] = new_object(target);
-      targets[i] -> set_proximity(prox);
+      targets[i] -> set_relation(prox);
       return TRUE;
     }
   }

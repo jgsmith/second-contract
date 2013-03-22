@@ -32,15 +32,13 @@ string add_verb(object VERB_DATA v, varargs string id) {
   string *names;
   int i, n;
 
-  names = v -> get_verbs();
-  for(i = 0, n = sizeof(names); i < n; i++) {
-    if(verb_handlers[names[i]]) verb_handlers[names[i]] |= ({ v });
-    else verb_handlers[names[i]] = ({ v });
+  if(id) {
+    if(!verb_data[id]) return nil;
+    names = verb_data[id] -> get_verbs() - v -> get_verbs();
+    for(i = 0, n = sizeof(names); i < n; i++)
+      if(verb_handlers[names[i]]) verb_handlers[names[i]] -= ({ id });
   }
-
-  call_out("update_grammar", 0);
-
-  if(!id) {
+  else {
     do {
       id = "";
       for(i = 0; i < 5; i++) {
@@ -51,6 +49,14 @@ string add_verb(object VERB_DATA v, varargs string id) {
       }
     } while(verb_data[id]);
   }
+  names = v -> get_verbs();
+  for(i = 0, n = sizeof(names); i < n; i++) {
+    if(verb_handlers[names[i]]) verb_handlers[names[i]] |= ({ id });
+    else verb_handlers[names[i]] = ({ id });
+  }
+
+  call_out("update_grammar", 0);
+
   verb_data[id] = v;
   return id;
 }
@@ -69,7 +75,7 @@ void remove_verb(string id) {
   names = v -> get_verbs();
   for(i = 0, n = sizeof(names); i < n; i++) {
     if(verb_handlers[names[i]]) {
-      verb_handlers[names[i]] -= ({ v });
+      verb_handlers[names[i]] -= ({ id });
       if(sizeof(verb_handlers[names[i]]) == 0) verb_handlers[names[i]] = nil;
     }
   }
@@ -79,12 +85,15 @@ void remove_verb(string id) {
 
 object *get_verb_handlers(string verb, int args) {
   object *list;
+  string *ids;
   int i, n;
 
-  if(verb_handlers[verb]) list = verb_handlers[verb] + ({ });
+  if(verb_handlers[verb]) ids = verb_handlers[verb] + ({ });
   else list = ({ });
 
-  for(i = 0, n = sizeof(list); i < n; i++) {
+  list = allocate(sizeof(ids));
+  for(i = 0, n = sizeof(ids); i < n; i++) {
+    list[i] = verb_data[ids[i]];
     if(list[i]->is_disabled()) list[i] = nil;
     if(!list[i]->uses_args(args)) list[i] = nil;
   }
@@ -92,8 +101,9 @@ object *get_verb_handlers(string verb, int args) {
 }
 
 string get_verb_help(string verb) {
-  object *list;
+  string *list;
   string *ret;
+  object ob;
   int i, n;
 
   if(verb_handlers[verb]) list = verb_handlers[verb];
@@ -101,18 +111,15 @@ string get_verb_help(string verb) {
 
   ret = ({ });
   for(i = 0, n = sizeof(list); i < n; i++) {
-    ret += ({ list[i]->get_brief(), "", list[i] -> get_help() }) - ({ nil });
-    if(list[i]->get_see_also() && sizeof(list[i]->get_see_also())) {
-      ret += ({ "See also: " + implode(list[i]->get_see_also(), ", ") });
+    ob = verb_data[list[i]];
+    if(ob) {
+      ret += ({ ob->get_brief(), "", ob -> get_help() }) - ({ nil });
+      if(ob->get_see_also() && sizeof(ob->get_see_also())) {
+        ret += ({ "See also: " + implode(ob->get_see_also(), ", ") });
+      }
     }
     ret += ({ "" });
   }
 
   return implode(ret - ({ nil }), "\n");
 }
-
-void replace_verb(string id, object VERB_DATA v) {
-  remove_verb(id);
-  add_verb(v, id);
-}
-

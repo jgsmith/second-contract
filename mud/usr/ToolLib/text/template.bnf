@@ -7,74 +7,72 @@
 
 message : bits
 
-_word = /[^:{}<>$|]+/
+bits : bit
+bits : bits ws bit
 
-_ = /[ \b\n\t]+/
+bit : words
+bit : command
+bit : pos
 
-#start_command : '{{'
-#start_command_end : '{{/'
-start_comment : '{{!'
-end_command : '}}'
+words : _
+words : word
+words : words word ? _combine_words
 
-#point = /[.]/
+command : start_command command_ end_command ? _pass_second
 
-#bar = /[ \b\n\t]*[|][ \b\n\t]*/
-colon : ':'
+command_ : if
+command_ : if_else
+command_ : choose_one
 
-#true_ : 'true'
-#false_ : 'false'
+if : '#if' _ expression ws end_command bits start_command '/if' ? _if
 
-bos : '<'
-eos : '>'
+if_else : '#if' _ expression ws end_command bits start_command '#else' end_command bits start_command '/if' ? _if_else
 
-#dollar_ : '$'
+#unless : '#unless' _ expression ws end_command bits start_command '/unless' ? _unless
 
+choose_one : '#chooseOne' word_list ? _choose_one_word
+choose_one : '#chooseOne' property ? _choose_one_value
+
+expression : property
+expression : true_
+expression : false_
+
+word_list : words ? _create_word_list
+word_list : word_list bar words ? _append_word_list
+
+property : colon_name ? _default_property
+property : expression point colon_name ? _exp_property
+
+pos : bos pos_ eos ? _pass_second
+
+pos_ : word  ? _simple_substitution
+pos_ : word colon word ? _targeted_substitution
 
 word : _word
-#word : true_
-#word : false_
+word : false_
+word : true_
 
-#colon_name : word colon word
-#colon_name : colon_name colon word
+false_ : 'false'
+true_ : 'true'
 
-#varname : dollar_ word ? _varname
+ws :
+ws : _ ? _noop
 
-#bit : start_command command end_command ? _pass_second
-bit : start_comment words end_command ? _comment
-#bit : start_command expression end_command ? _pass_second
-bit : bos substitution eos ? _pass_second
-bit : words
+_word = /[^ #{}<>\b\n\t]+/
 
-bits : bits bit
-bits : bit
+_ = /[ \b\n\t]*/
 
-#command : choose_one
-#command : if
-#command : unless
-#command : if_then_else
+start_command = /{{/
+end_command = /}}/
 
-substitution: word  ? _simple_substitution
-substitution: word colon word ? _targeted_substitution
+point = /[.]/
 
-#choose_one : '#chooseOne' word_list ? _choose_one_word
-#choose_one : '#chooseOne' property ? _choose_one_value
+bos = /</
+eos = />/
 
-words: word
-words: words word
+bar = /[ \b\n\t]*[|][ \b\n\t]*/
 
-#word_list : words ? _create_word_list
-#word_list : word_list bar words ? _append_word_list
+colon = /:/
 
-#property : colon_name ? _default_property
-#property : expression point colon_name ? _exp_property
+colon_name = /[a-z]+(-[a-z]+)*(:[a-z]+(-[a-z]+)*)*/
 
-#if : '#if' _ expression _ end_command bits start_command '/if' ? _if
-
-#if_then_else : '#if' _ expression _ end_command bits start_command '#else' end_command bits start_command '/if' ? _if_else
-
-#unless : '#unless' _ expression _ end_command bits start_command '/unless' ? _unless
-
-#expression : property
-#expression : varname
-#expression : true_
-#expression : false_

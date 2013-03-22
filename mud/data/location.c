@@ -2,6 +2,7 @@ object target;
 string *detail_path;
 int *coords;
 int milestone;
+int proximity;
 
 void create(varargs int clone) {
   if(clone) {
@@ -21,7 +22,6 @@ void set_detail_path(string dp) {
     detail_path = ({ "details" }) + explode(implode(explode(dp, ":"), ":details:"), ":");
     
 }
-
 /* BUG: this will return the wrong information if a detail in the path is
  *      using the id "details". For now, don't do that!
  */
@@ -41,3 +41,5 @@ mixed get_property(string *path) {
   else return target -> get_property(({ "details", "default" }) + path);
 }
 
+int get_relation() { return proximity; }
+void set_relation(int p) { proximity = p; }

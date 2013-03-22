@@ -17,6 +17,10 @@ mixed parse_template(string str) {
   return nil;
 }
 
+mixed _combine_words(mixed *args) {
+  return ({ implode(args, "") });
+}
+
 mixed _pass_second(mixed *args) {
   return ({ args[1] });
 }
@@ -120,7 +124,7 @@ mixed _exp_property(mixed *args) {
 }
 
 mixed _if(mixed *args) {
-  return ({ ({ "if", args[1], args[3] }) });
+  return ({ ({ "if", args[2], args[4] }) });
 }
 
 mixed _unless(mixed *args) {
@@ -128,9 +132,13 @@ mixed _unless(mixed *args) {
 }
 
 mixed _if_else(mixed *args) {
-  return ({ ({ "if", args[1], args[3], args[7] }) });
+  return ({ ({ "if", args[2], args[4], args[8] }) });
 }
 
 mixed _exp(mixed *args) {
   return ({ ({ "exp", args }) });
+}
+
+mixed _noop(mixed *args) {
+  return ({ });
 }

@@ -35,7 +35,7 @@ void initialize_data() {
   for(i = 0, n = sizeof(dir[0]); i < n; i++) {
     if(dir[1][i] > 0 && dir[0][i][0] != '.') {
       json = JSON_P -> from_json(read_file("/usr/IFLib/json/verbs/" + dir[0][i]));
-      if(json) {
+      if(FALSE && json) {
         ob = new_object(VERB_DATA);
         ob -> set_verbs(json["verbs"]);
         ob -> set_brief(json["brief"]);
@@ -50,4 +50,3 @@ void initialize_data() {
     }
   }
 }
-      

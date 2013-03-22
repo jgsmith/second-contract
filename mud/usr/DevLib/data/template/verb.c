@@ -18,8 +18,8 @@ string render(mapping data, object pov) {
   string pov_var;
   string nom;
 
-  if(pov == data["this"]) pov_var == "this";
-  else if(pov == data["actor"]) pov_var == "actor";
+  if(pov == data["actor"]) pov_var = "actor";
+  else if(pov == data["this"]) pov_var = "this";
   else if(data["indirect"] && sizeof(({ pov }) & data["indirect"]))
     pov_var = "indirect";
   else if(data["direct"] && sizeof(({ pov }) & data["direct"]))
@@ -28,7 +28,7 @@ string render(mapping data, object pov) {
     pov_var = "instrument";
 
   /* render the verb based on the pov and var */
-  if(pov_var == var || var == "last_var" && pov_var == data["_last_var"]) {
+  if(pov_var == var || var == "last_substitution" && pov_var == data["_last_var"]) {
     /* return the verb as-is, appropriate for "you ..." */
     return verb;
   }

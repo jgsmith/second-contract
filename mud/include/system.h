@@ -18,4 +18,4 @@
  * JJJ: day of the year
  * N: release for that day
  */
-# define MUDLIB_VERSION "SC 0.130650"
+# define MUDLIB_VERSION "SC 0.yyjjjN"

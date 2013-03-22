@@ -54,6 +54,7 @@ string compile_events(string events) {
   handler_count++;
   err = catch( ob = compile_object(fname, content) );
   if(err) error("Unable to compile handlers: " + err);
+  ob -> set_source(content);
   return fname;
 }
 

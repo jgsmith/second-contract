@@ -24,6 +24,7 @@ MUDLib is not subject to the same license. Any files you modify or create
 in the following directories are subject to this GNU Affero GPL (with '/'
 being taken as the root of this repository):
 
+* /mud/data/
 * /mud/include/devlib/
 * /mud/include/gamelib/
 * /mud/include/iflib/
@@ -39,6 +40,7 @@ being taken as the root of this repository):
 
 The following files are also subject to the GNU Affero GPL:
 
+* /mud/include/data.h
 * /mud/include/devlib.h
 * /mud/include/gamelib.h
 * /mud/include/iflib.h

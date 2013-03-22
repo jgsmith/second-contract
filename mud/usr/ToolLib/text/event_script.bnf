@@ -7,4 +7,63 @@ event_body : data_declarations stmt_list
 
 @include base_scripting.bnf
 
+#
+# messages need to handle type and intensity
+#
+# type: env (narration)
+#       whisper
+#       speak
+#       shout
+
+msg_type : 'env'
+msg_type : 'whisper'
+msg_type : 'spoken'
+msg_type : 'shout'
+msg_type : 'yell'
+msg_type : 'scream'
+
+msg_intensity : '+' _int_const ? _msg_intensity
+msg_intensity : '-' _int_const ? _msg_intensity
+
+message : string ? _constant
+message : exp
+messages : message ? _list
+messages : messages ',' messages ? _list
+
+message_output : messages ? _message_output
+message_output : messages '@' msg_type ? _message_output
+message_output : messages '@' msg_type msg_intensity ? _message_output
+
+sensation : sense ':' message_output  ? _acute_sensation
+sensation : ':' message_output  ? _acute_sensation
+sensation : sense '{' sensation_steps '}' 'for' primary_p2_exp ? _chronic_sensation
+sensation : ':' '{' sensation_steps '}' 'for' primary_p2_exp ? _chronic_sensation
+
+sensations : sensation ? _list
+sensations : sensations ',' sensation ? _list
+
+sensation_set : '(' '*' sensations '*' ')' ? _acute_sensation_set
+sensation_set : '(' '*' sensations '*' ')' 'for' primary_p2_exp ? _chronic_sensation_set
+
+sensation_set_chain : sensation_set ? _list
+sensation_set_chain : sensation_set_chain '->' sensation_set ? _list
+
+sensation_steps :
+sensation_steps : sensation_step ? _list
+sensation_steps : sensation_steps ',' sensation_step ? _list
+
+sensation_step : sense_step ':' message_output ? _sensation_step
+
+sense_step : 'start'
+sense_step : 'narrative'
+sense_step : 'end'
+
+sense : 'light'
+sense : 'sound'
+sense : 'heat'
+sense : 'cold'
+sense : 'vibration'
+
 stmt : 'return' exp ';' ? _return
+stmt : sensation ';' ? _pass_first
+stmt : sensation_set_chain ';' ? _sensation_chain

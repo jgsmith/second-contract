@@ -20,7 +20,7 @@ static string read_grammar(string file_name) {
   for(i = 0, sz = sizeof(lines); i < sz; i++) {
     if(lines[i] && strlen(lines[i])) {
       if(lines[i][0] == '#') lines[i] = nil;
-      else if(lines[i][0..8] == "@include ") {
+      else if(strlen(lines[i]) > 9 && lines[i][0..8] == "@include ") {
         lines[i] = read_grammar(lines[i][9..]);
       }
       else {

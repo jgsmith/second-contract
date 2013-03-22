@@ -16,8 +16,7 @@
 # define EXITS_D    "/usr/WorldLib/sys/exits"
 # define CHARACTER_D "/usr/WorldLib/sys/characters"
 # define PROXIMITY_D "/usr/WorldLib/sys/proximity"
-
-# define MESSAGING_D "/usr/WorldLib/sys/messaging"
+# define WORLD_EVENTS_D "/usr/WorldLib/sys/events"
 
 # define ID_DATA_LIB     "/usr/WorldLib/data/lib/id"
 # define DETAIL_DATA_LIB "/usr/WorldLib/data/lib/detail"
@@ -25,6 +24,7 @@
 # define DETAIL_DATA "/usr/WorldLib/data/detail"
 # define EXIT_DATA   "/usr/WorldLib/data/exit"
 # define GENETICS_DATA "/usr/WorldLib/data/genetics"
+# define EVENT_TIMER_DATA "/usr/WorldLib/data/event_timer"
 
 # define SCENE_THING 1
 # define PATH_THING  2

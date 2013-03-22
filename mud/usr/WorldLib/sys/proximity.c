@@ -1,5 +1,7 @@
 # include <worldlib/proximity.h>
 # include <iflib.h>
+# include <data.h>
+
 /*
  * Handles proximity-based calculations
  */
@@ -99,4 +101,14 @@ int get_composite_proximity(int p, object thing, string *detail_path) {
     prop = prop[0..sizeof(prop)-2];
   }
   return p;
+}
+
+/* returns the 2*log(dist)/log(2) of the distance. Sets 0 to being
+ * "close" (-4 == in, -2 == on)
+ * "near" = 1 - each "near" == +1
+ *
+ * This represents how much distance attenuates sound and such in a scene.
+ */
+int get_son_distance(object src, object LOCATION_DATA dest) {
+  return 0;
 }

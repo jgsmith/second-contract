@@ -4,6 +4,7 @@
 # include <system.h>
 # include <worldlib.h>
 # include <iflib.h>
+# include <toollib.h>
 
 inherit LIB_USER;
 inherit user API_USER;
@@ -63,9 +64,9 @@ static void create(int clone)
     }
 }
 
-atomic void enter_game() {
+void enter_game() {
   Character -> set_iflib_driver(this_object());
-  Character -> call_event_handler("scan:brief", ([ "actor": Character ]));
+  CHARACTER_D -> enter_game(Character);
 }
 
 atomic object create_character(string email, string name, string cap_name, string template, int gender) {
@@ -129,6 +130,7 @@ void logout(int quit)
         if (wiztool) {
             destruct_object(wiztool);
         }
+        if(Character) CHARACTER_D -> leave_game(Character);
         destruct_object(this_object());
     }
 }
@@ -159,6 +161,7 @@ int receive_message(string str)
                 if (strlen(cmd) != 0) {
                   if(cmd == "quit") {
                     message("Please come again!\n");
+                    CHARACTER_D -> leave_game(Character);
                     return MODE_DISCONNECT;
                   }
                   if(!IFPARSER_D -> run_command(Character, cmd)) {
@@ -178,6 +181,9 @@ int receive_message(string str)
                   else {
                     message("\nNo help available for " + bits[1] + ".\n");
                   }
+                  break;
+                case "who":
+                  message("\nThe following players are in this reality: " + ENGLISH_D -> item_list(CHARACTER_D -> active_characters()) + ".\n");
                   break;
                 default:
                   if( wiztool) wiztool->input(cmd[1..]);
@@ -401,4 +407,13 @@ int receive_message(string str)
         state[previous_object()] = STATE_NORMAL;
         return MODE_ECHO;
     }
+}
+
+void queue_message(int transaction_id, string type, string msg) {
+  if(!transaction_id) {
+    message(msg + "\n");
+  }
+  else {
+    message(msg + "\n");
+  }
 }

@@ -1,5 +1,3 @@
-# define LOCATION_DATA "/usr/WorldLib/data/location"
-
 # define PROX_INSIDE  0
 # define PROX_CLOSE   1
 # define PROX_AGAINST 2

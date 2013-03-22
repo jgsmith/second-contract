@@ -9,8 +9,11 @@
 
 mapping characters;
 
+object *active_characters;
+
 void create() {
   characters = ([ ]);
+  active_characters = ({ });
 }
 
 int character_exists(string name) {
@@ -27,6 +30,31 @@ int character_exists(string name) {
 object find_character(string name) {
   name = STRING_D -> lower_case(name);
   return MAPPING_D -> specific_mapping(characters, name)[name];
+}
+
+object *active_characters() {
+  /* we want to return all active characters - characters currently logged in */
+  return active_characters + ({});
+}
+
+int enter_game(object char) {
+  if(SYSTEM()) {
+    active_characters |= ({ char });
+    char -> call_event_handler("post-scan:brief", ([ "this": char, "actor": char ]));
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/*
+ * Here is where we can move them to the meat locker if we have one.
+ */
+int leave_game(object char) {
+  if(SYSTEM()) {
+    active_characters -= ({ char });
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /* returns a list of pieces that can be assembled into a template name.
@@ -66,6 +94,7 @@ atomic object create_character(string name, string cap_name, string template) {
 
   ob -> set_name(name);
   ob -> set_cap_name(cap_name);
+  ob -> set_property(({ "basic", "position" }), "floating");
 
   MAPPING_D -> specific_mapping(characters, name)[name] = ob;
   

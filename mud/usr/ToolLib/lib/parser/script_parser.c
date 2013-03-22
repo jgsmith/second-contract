@@ -71,7 +71,7 @@ mixed _list_exp(mixed *args) {
 mixed _stmt_list(mixed *args) {
   if(!sizeof(args)) return ({ });
   if(sizeof(args) >= 2)
-    return ({ args[0] + args[1..] });
+    return ({ args[0..0] + args[1..] });
   return ({ args[0..0] });
 }
 
@@ -115,17 +115,9 @@ mixed _string_const(mixed *args) {
     str = args[0];
   }
   else {
-    front = args[0];
-    str = args[1];
+    front = args[0][0..strlen(args[0])-2];
+    str = args[1][1..];
   }
-
-  str = str[1..strlen(str)-2];
-
-  str = implode(explode(str, "\\n"), "\n");
-  str = implode(explode(str, "\\t"), "\t");
-  str = implode(explode(str, "\\b"), "\b");
-  str = implode(explode(str, "\\\""), "\"");
-  str = implode(explode(str, "\\\\"), "\\");
 
   return ({ front + str });
 }
@@ -138,16 +130,16 @@ mixed _assignment(mixed *args) {
   return ({ ({ "assignment", args[0], args[2] }) });
 }
 
-mixed _message_output(mixed *args) {
-  return ({ ({ "message" }) + args[1..] });
-}
-
 mixed _function_call(mixed *args) {
   return ({ ({ "function", args[0], args[2] }) });
 }
 
 mixed _var_ref(mixed *args) {
   return ({ ({ "variable", args[0] }) });
+}
+
+mixed _dollar_var_ref(mixed *args) {
+  return ({ ({ "variable", "_" + args[1] }) });
 }
 
 mixed _array(mixed *args) {
@@ -257,4 +249,20 @@ mixed _binop(mixed *args) {
 
 mixed _trinary(mixed *args) {
   return ({ ({ "trinary", args[0], args[2], args[4] }) });
+}
+
+mixed _get_property(mixed *args) {
+  return ({ ({ "function", "Get", ({ args[0], ({ "constant", "\"" + args[2] + "\"" }) }) }) });
+}
+
+mixed _set_property(mixed *args) {
+  return ({ ({ "function", "Set", ({ args[0], ({ "constant", "\"" + args[2] + "\"" }), args[4] }) }) });
+}
+
+mixed _array_ref(mixed *args) {
+  return ({ ({ "array_ref", args[0], args[2] }) });
+}
+
+mixed _array_range_ref(mixed *args) {
+  return ({ ({ "array_ref", args[0], args[2], args[4] }) });
 }

@@ -71,6 +71,7 @@ mixed from_json(string json) {
 string to_json(mixed data) {
   string *keys;
   string *vals;
+  string tmp;
   int i, n;
 
   switch(typeof(data)) {
@@ -78,7 +79,11 @@ string to_json(mixed data) {
     case T_INT: return ""+data;
     case T_FLOAT: return ""+data;
     case T_STRING:
-      return "\"" + data + "\"";
+      tmp = implode(explode(data, "\\"), "\\\\");
+      tmp = implode(explode(tmp, "\n"), "\\n");
+      tmp = implode(explode(tmp, "\t"), "\\t");
+      tmp = implode(explode(tmp, "\""), "\\\"");
+      return "\"" + tmp + "\"";
     case T_OBJECT: return data->to_json();
     case T_ARRAY:
       vals = ({ });

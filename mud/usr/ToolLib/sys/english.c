@@ -176,11 +176,15 @@ string consolidate(int count, string str) {
   return cardinal(count) + " " + pluralize(implode(words, " "));
 }
 
-string item_list(mixed *items) {
+string item_list(mixed items) {
   mapping list;
   string str;
   int maxi, i, n;
   mixed value;
+
+  if(typeof(items) == T_NIL) return "nothing";
+
+  if(typeof(items) != T_ARRAY) items = ({ items });
 
   if(!sizeof(items)) return "nothing";
 

@@ -66,18 +66,6 @@ string compile_binary(object ctx, mixed *args) {
   return implode(operands - ({ "", nil }), " " + args[0] + " ");
 }
 
-/*
- * Messages are compiled as calls to an inherited function
- */
-string compile_message(object ctx, mixed *args) {
-  if(ctx -> void_context()) {
-    return "_C_message_async(" + compile_parse(ctx, args[0]) + ")";
-  }
-  else {
-    return "_C_message(" + compile_parse(ctx, args[0]) + ")";
-  }
-}
-
 string compile_function(object ctx, mixed *args) {
   string *fargs;
   int i, n;
@@ -157,10 +145,12 @@ string compile_if(object ctx, mixed *args) {
 
   ctx -> reset_void_context();
   ret = "if(" + compile_parse(ctx, args[0]) + ")";
+  ctx -> set_void_context();
   if(tmp = compile_parse(ctx, args[1])) ret += tmp;
   else ret += "{}";
   if(sizeof(args) > 2) {
     ret += " else ";
+    ctx -> set_void_context();
     if(tmp = compile_parse(ctx, args[2])) ret += tmp;
     else tmp += "{}";
   }
@@ -235,4 +225,12 @@ string compile_trinary(object ctx, mixed *args) {
   return "(" + compile_parse(ctx, args[0]) + " ? "
              + compile_parse(ctx, args[1]) + " : "
              + compile_parse(ctx, args[2]) + ")";
+}
+
+string compile_array_ref(object ctx, mixed *args) {
+  ctx -> reset_void_context();
+  if(sizeof(args) == 2) {
+    return compile_parse(ctx, args[0]) + "[" + compile_parse(ctx, args[1]) + "]";
+  }
+  return compile_parse(ctx, args[0]) + "[" + compile_parse(ctx, args[1]) + ".." + compile_parse(ctx, args[2]) + "]";
 }

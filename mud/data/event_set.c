@@ -1,5 +1,6 @@
 # include <devlib.h>
 # include <type.h>
+# include <data.h>
 
 /*
  * An event chain is a linked list of event sets

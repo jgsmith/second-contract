@@ -21,6 +21,7 @@ inherit id       "/usr/WorldLib/lib/prop/id";
 inherit parser   "/usr/WorldLib/lib/prop/parser";
 inherit relations "/usr/WorldLib/lib/comp/relations";
 inherit reputations "/usr/WorldLib/lib/prop/reputations";
+inherit sensations "/usr/WorldLib/lib/event/sensations";
 inherit skills   "/usr/WorldLib/lib/prop/skills";
 inherit stats    "/usr/WorldLib/lib/prop/stats";
 inherit traits   "/usr/WorldLib/lib/prop/traits";
@@ -29,8 +30,10 @@ inherit ur       "/usr/WorldLib/lib/comp/ur";
 static void create(varargs int clone) {
   counters::create(clone);
   details::create(clone);
+  genetics::create(clone);
   relations::create(clone);
   reputations::create(clone);
+  sensations::create(clone);
   skills::create(clone);
   stats::create(clone);
   traits::create(clone);
@@ -90,6 +93,7 @@ int set_property(string *path, mixed value) {
     case "basic":  result = basic::set_property(path[1..], value); break;
     case "counter": result = counters::set_property(path[1..], value); break;
     case "detail": result = details::set_property(path[1..], value); break;
+    case "physical": result = genetics::set_property(path[1..], value); break;
     case "reputation": result = reputations::set_property(path[1..], value); break;
     case "skill":  result = skills::set_property(path[1..], value); break;
     case "stat":   result = stats::set_property(path[1..], value); break;

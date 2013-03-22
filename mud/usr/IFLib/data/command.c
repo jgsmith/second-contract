@@ -4,6 +4,7 @@
 # include <type.h>
 # include <toollib.h>
 # include <devlib.h>
+# include <data.h>
 
 /*
  * All the data associated with the command as well as some logic to run it
@@ -110,8 +111,9 @@ int execute(object actor) {
     actions = verb_obj[0]->get_action();
 
     for(i = 0, n = sizeof(actions); i < n; i++) {
-      estmp = EVENTS_D -> create_event_set();
-      e = EVENTS_D -> create_event("pre-" + actions[i]);
+      estmp = new_object(EVENT_SET);
+      e = new_object(EVENT_DATA);
+      e -> set_event_type("pre-" + actions[i]);
       e -> set_object(actor);
       e -> set_args(([
         "actor": actor,
@@ -120,23 +122,12 @@ int execute(object actor) {
         "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
       ]));
       estmp -> add_guard(e);
-      e = EVENTS_D -> create_event(actions[i]);
-      e -> set_object(actor);
-      e -> set_args(([
-        "actor": actor,
-        "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
-        "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
-        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
-      ]));
+      e = new_object(e);
+      e -> set_event_type(actions[i]);
       estmp -> add_consequent(e);
-      e = EVENTS_D -> create_event("post-"+actions[i]);
-      e -> set_object(actor);
-      e -> set_args(([
-        "actor": actor,
-        "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
-        "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
-        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
-      ]));
+      e = new_object(e);
+      e -> set_event_type("post-"+actions[i]);
+      estmp -> add_reaction(e);
       if(e_set) e_set -> add_next(estmp);
       else e_set = estmp;
     }
