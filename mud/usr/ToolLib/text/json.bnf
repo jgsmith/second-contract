@@ -1,31 +1,148 @@
+#
+# This JSON parser is based on RFC 4627: http://www.ietf.org/rfc/rfc4627.txt
+#
 
-whitespace = /[ \b\t\n\r]+/
+# 
+# Section 2. JSON Grammar
+#
 
-number = /-?(0|[1-9][0-9]*)(\.[0-9]+)?([Ee][+-]?[0-9]+)?/
+#
+# A JSON text is a sequence of tokens. The set of tokens includes six
+# structural characters, strings, numbers, and three literal names.
+#
 
-string = /"([^"\\]|\\(["\\\/bfnrt]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*"/
+#
+# A JSON text is a serialized object or array.
+#
 
 json: object
 json: array
 
-object: '{' '}' ? _empty_object
-object: '{' members '}' ? _object
+#
+# These are the six structural characters:
+#
 
-members: pair
-members: members ',' pair ? _add_pair
+begin_array : '['
+begin_object : '{'
+end_array : ']'
+end_object : '}'
+name_separator : ':'
+value_separator : ','
 
-pair: string ':' value ? _make_pair
+#
+# Insignificant whitespace is allowed before or after any of the six
+# structural characters.
+#
 
-array: '[' ']' ? _empty_array
-array: '[' elements ']' ? _array
+whitespace = /[ \t\n\r]/
 
-elements: value ? _add_value
-elements: elements ',' value ? _add_value
+#
+# 2.1. Values
+#
 
-value: array
+#
+# A JSON value MUST be an object, array, number, or string, or one of the
+# following three literal names: false null true.
+#
+
 value: object
-value: string ? _parse_string
+value: array
 value: number ? _parse_number
-value: 'true' ? _true
+value: string ? _parse_string
 value: 'false' ? _false
 value: 'null' ? _null
+value: 'true' ? _true
+
+#
+# 2.2. Objects
+#
+
+#
+# An object structure is represented as a pair of curly brackets surrounding
+# zero or more name/value pairs (or members). A name is a string. A single
+# colon comes after each name, separating the name from the value. A single
+# comma separates a value from a following name. The names within an object
+# SHOULD be unique.
+#
+
+object: begin_object end_object ? _empty_object
+object: begin_object members end_object ? _object
+
+members: member
+members: members value_separator member ? _add_pair
+
+member: string name_separator value ? _make_pair
+
+#
+# 2.3. Arrays
+#
+
+#
+# An array structure is represented as square brackets surrounding zero or more
+# values (or elements). Elements are separated by commas.
+#
+
+array: begin_array end_array ? _empty_array
+array: begin_array values end_array ? _array
+
+values: value ? _add_value
+values: values value_separator value ? _add_value
+
+#
+# 2.4. Numbers
+#
+
+#
+# The representation of numbers is similar to that used in most programming
+# languages. A number contains an integer component that may be prefixed
+# with an optional minus sign, which may be followed by a fraction part
+# and/or an exponent part.
+#
+# Octal and hex forms are not allowed. Leading zeros are not allowed.
+#
+# A fraction part is a decimal point followed by one or more digits.
+#
+# An exponent part begins with the letter E in upper or lowercase, which
+# may be followed by a plus or minus sign. The E and optional sign are
+# followed by one or more digits.
+#
+# Numeric values that cannot be represented as sequences of digits
+# (such as Infinity and NaN) are not permitted.
+#
+
+number = /-?(0|[1-9][0-9]*)(\.[0-9]+)?([Ee][+-]?[0-9]+)?/
+
+#
+# 2.5. Strings
+#
+
+#
+# The representation of strings is similar to conventions used in the C
+# family of programming languages.  A string begins and ends with
+# quotation marks.  All Unicode characters may be placed within the
+# quotation marks except for the characters that must be escaped:
+# quotation mark, reverse solidus, and the control characters (U+0000
+# through U+001F).
+# 
+# Any character may be escaped.  If the character is in the Basic
+# Multilingual Plane (U+0000 through U+FFFF), then it may be
+# represented as a six-character sequence: a reverse solidus, followed
+# by the lowercase letter u, followed by four hexadecimal digits that
+# encode the character's code point.  The hexadecimal letters A though
+# F can be upper or lowercase.  So, for example, a string containing
+# only a single reverse solidus character may be represented as
+# "\u005C".
+# 
+# Alternatively, there are two-character sequence escape
+# representations of some popular characters.  So, for example, a
+# string containing only a single reverse solidus character may be
+# represented more compactly as "\\".
+# 
+# To escape an extended character that is not in the Basic Multilingual
+# Plane, the character is represented as a twelve-character sequence,
+# encoding the UTF-16 surrogate pair.  So, for example, a string
+# containing only the G clef character (U+1D11E) may be represented as
+# "\uD834\uDD1E".
+# 
+
+string = /"([^"\\]|\\(["\\\/bfnrt]|u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]))*"/
