@@ -12,6 +12,9 @@ mapping words;
 
 static void create(varargs int clone) {
   words = ([
+    "gaits": ({ /* does not cover what vehicles can do */
+      "crawling", "walking", "running", "sprinting",
+    }),
     "prepositions": ({
       "in", "close", "against", "under", "on", "near", "over",
       "behind", "before", "beside", "contains", "guards", "blocks",
@@ -63,6 +66,16 @@ string preposition_name(int prep) {
 
 int preposition_number(string prep) {
   return int_from_list("prepositions", prep);
+}
+
+string gait_name(int p) {
+  return word_from_list("gaits", p, 1);
+}
+
+string gait_word(int p) { return gait_name(p); }
+
+int gait_number(string p) {
+  return int_from_list("gait", p, 1);
 }
 
 string position_name(int p) {

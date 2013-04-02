@@ -6,6 +6,7 @@
 # define TEMPLATE_P     "/usr/ToolLib/sys/parser/template"
 # define MUDMODE_P      "/usr/ToolLib/sys/parser/mudmode"
 # define STATE_MACHINE_SCRIPT_P "/usr/ToolLib/sys/parser/state_machine_script"
+# define URI_PATH_P     "/usr/ToolLib/sys/parser/uri_path"
 
 # define ENGLISH_D "/usr/ToolLib/sys/english"
 

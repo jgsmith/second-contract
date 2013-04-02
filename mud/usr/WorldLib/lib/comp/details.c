@@ -8,6 +8,30 @@ static void create(varargs int clone) {
   details = ([ ]);
 }
 
+mapping get_properties() {
+  mapping info;
+  string *idx;
+  object ur;
+  int i, n;
+
+  ur = this_object() -> get_ur_object();
+
+  info = ([ ]);
+  idx = map_indices(details) | (ur ? ur->get_property(({ "detail" })) : ({ }));
+  for(i = 0, n = sizeof(idx); i < n; i++) {
+    if(!details[idx[i]]) {
+      info[idx[i]] = "*inherited*";
+    }
+    else if(details[idx[i]] == "*deleted*") {
+      info[idx[i]] = "*deleted*";
+    }
+    else {
+      info[idx[i]] = details[idx[i]] -> get_properties();
+    }
+  }
+  return info;
+}
+
 mixed get_property(string *path) {
   string *idx;
   object ur;
@@ -44,19 +68,21 @@ int set_property(string *path, mixed value) {
 
   if(sizeof(path) == 1) {
     if(!value) {
-      if(details[path[0]] || ur->get_property(({ "detail", path[0] }))) {
-        details[path[0]] = "*deleted*";
+      if(details[path[0]]) {
+        if(ur->get_property(({ "detail", path[0] })))
+          details[path[0]] = "*deleted*";
+        else
+          details[path[0]] = nil;
       }
       return TRUE;
     }
     return FALSE;
   }
 
-  if(!details[path[0]] || details[path[0]] == "*deleted*") {
-    details[path[0]] = nil;
+  if(!details[path[0]]) {
     if(ur) details[path[0]] = ur->copy_details(path[0]);
   }
-  if(!details[path[0]])
+  if(details[path[0]] == "*deleted*" || !details[path[0]])
     details[path[0]] = new_object(EXIT_DATA);
   return details[path[0]] -> set_property(path[1..], value);
 }

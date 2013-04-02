@@ -4,7 +4,7 @@
 
 /*
  * Given a set of phrases, find all matching objects in another object's
- * inventory or environment
+ * inventory or environment.
  */
 
 mapping ordinals;

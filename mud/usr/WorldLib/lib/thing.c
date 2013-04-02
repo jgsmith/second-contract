@@ -40,9 +40,9 @@ static void create(varargs int clone) {
   id::create(clone);
 }
 
-atomic void set_ur_object(object ob) {
-  ur::set_ur_object(ob);
-  bulk::set_ur_object(ob);
+atomic void set_ur_object_path(string path) {
+  ur::set_ur_object_path(path);
+  bulk::set_ur_object(ur::get_ur_object());
 }
 
 string *parse_command_id_list() {
@@ -65,6 +65,23 @@ string *parse_command_plural_adjective_id_list() {
        | details::parse_command_plural_adjective_id_list()) - ({ nil, "" });
 }
 
+mixed get_properties() {
+  mapping info;
+
+  info = ([
+    "basic": basic::get_properties(),
+    /* "counter": counters::get_properties(), */
+    "detail": details::get_properties(),
+    "physical": genetics::get_properties(),
+    /* "reputation": reputations::get_properties(),
+    "skill": skills::get_properties(),
+    "stat": stats::get_properties(),
+    "trait": traits::get_properties(),
+    "id": id::get_properties(), */
+    "events": actions::get_event_handler_source(),
+  ]);
+  return info;
+}
 
 mixed get_property(string *path) {
   if(!sizeof(path)) return nil;

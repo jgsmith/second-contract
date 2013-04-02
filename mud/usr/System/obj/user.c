@@ -182,6 +182,9 @@ int receive_message(string str)
                     message("\nNo help available for " + bits[1] + ".\n");
                   }
                   break;
+                case "verbs":
+                  message("\nKnown verbs: " + ENGLISH_D -> item_list(VERB_D -> get_verbs()) + ".\n");
+                  break;
                 case "who":
                   message("\nThe following players are in this reality: " + ENGLISH_D -> item_list(CHARACTER_D -> active_characters()) + ".\n");
                   break;

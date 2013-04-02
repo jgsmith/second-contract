@@ -7,6 +7,15 @@ static void create(varargs int clone) {
   set_bnf_file(JSON_BNF);
 }
 
+/*
+ * These functions are called by the parser based on matching patterns in the
+ * grammar. The `args` array holds all of the data associated with the
+ * right hand side of the matching pattern. The function returns the value
+ * that should be used in place of the left hand side symbol.
+ *
+ * Returning '0' indicates that this parse alternative should fail.
+ */
+
 static mixed * _empty_object(mixed *args) { return ({ ([ ]) }); }
 
 static mixed * _object(mixed *args) { return ({ args[1] }); }
@@ -33,12 +42,20 @@ static mixed *_add_value(mixed *args) {
   return ({ args[0] });
 }
 
+/*
+ * LPC doesn't have a boolean type, so we translate true and false into
+ * 1 and 0.
+ */
+
 static mixed * _true(mixed *args) { return ({ 1 }); }
 
 static mixed * _false(mixed *args) { return ({ 0 }); }
 
 static mixed * _null(mixed *args) { return ({ nil }); }
 
+/*
+ * LPC has two different numeric types: integer and float.
+ */
 static mixed * _parse_number(mixed *args) {
   int d;
   float f;
@@ -63,7 +80,7 @@ mixed from_json(string json) {
 
   json = implode(explode(json, "\n"), " ");
 
-  result = parse_string(syntax_bnf, json);
+  result = parser::parse(json);
   if(result) return result[0];
   return nil;
 }
@@ -76,6 +93,10 @@ string to_json(mixed data) {
 
   switch(typeof(data)) {
     case T_NIL: return "null";
+      /* LPC automatically converts numeric data to a string when concatenating
+       * to a string. We don't have a boolean type, so converting a boolean
+       * from JSON to LPC and back to JSON will result in integers in the JSON.
+       */
     case T_INT: return ""+data;
     case T_FLOAT: return ""+data;
     case T_STRING:
@@ -84,7 +105,10 @@ string to_json(mixed data) {
       tmp = implode(explode(tmp, "\t"), "\\t");
       tmp = implode(explode(tmp, "\""), "\\\"");
       return "\"" + tmp + "\"";
-    case T_OBJECT: return data->to_json();
+    case T_OBJECT: 
+      tmp = data->to_json();
+      if(tmp) return tmp;
+      return "null";
     case T_ARRAY:
       vals = ({ });
       for(i = 0, n = sizeof(data); i < n; i++)

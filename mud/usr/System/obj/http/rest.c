@@ -26,6 +26,24 @@ void create(varargs int clone) {
   }
 }
 
+void log_request(varargs object resource) {
+  string *line;
+  string rl;
+
+  rl = request -> get_request_line();
+  /* rl = implode(explode(rl, "\x0d"), "");
+  rl = implode(explode(rl, "\x0a"), ""); */
+
+  line = ({ "<client ip>" });
+  line += ({ (resource && resource -> get_auth() ? resource -> get_auth() : "-") });
+  line += ({ "-" });
+  line += ({ "[" + ctime(time()) + "]" });
+  line += ({ "\"" + rl + "\"" });
+  line += ({ ""+response -> get_status() });
+  line += ({ ""+(response -> get_content_length() || "-") });
+  LOG_D -> log("http:access", implode(line, " "));
+} 
+
 int handle_request() {
   object resource;
 
@@ -42,19 +60,26 @@ int handle_request() {
         catch {
           HTTP_FSM_D -> run(resource);
         } : {
+          response -> set_status(500);
+          log_request(resource);
           message("500 Internal Error - Too Much Time\n");
           response_sent = TRUE;
           return TRUE;
-        }
+        } 
       }
       if(!resource -> get_response()) {
+        response -> set_status(500);
+        log_request(resource);
         message("503 Internal Error - No Response\n");
       }
       else {
         resource -> get_response() -> output(this_object());
+        log_request(resource);
       }
     }
     else {
+      response -> set_status(401);
+      log_request();
       message("401 Not Found\n");
     }
     response_sent = TRUE;

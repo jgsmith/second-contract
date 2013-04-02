@@ -14,10 +14,12 @@ static int create(varargs int clone) {
   files = ({
     DETAIL_DATA, EXIT_DATA, LOCATION_DATA, SENSATION_DATA,
     SENSATION_SET, SENSATION_END_DATA, EVENT_TIMER_DATA,
-    GENETICS_DATA,
-    THING_OBJ, WARD_OBJ, PRIORITY_QUEUE, PRIORITY_QUEUE_ITEM,
+    GENETICS_DATA, DOMAIN_DATA,
+    HTTP_DOMAIN_RESOURCE,
+    THING_OBJ, WARD_OBJ, HOSPITAL_OBJ,
+    PRIORITY_QUEUE, PRIORITY_QUEUE_ITEM,
     EXITS_D, HOSPITAL_D, CHARACTER_D, PROXIMITY_D,
-    WORLD_EVENTS_D,
+    WORLD_EVENTS_D, DOMAINS_D,
   });
 
   for(i = 0, n = sizeof(files); i < n; i++)
@@ -55,6 +57,16 @@ void initialize_data() {
   mapping delayed; /* keyed off of "ward" */
   mixed *tmp_delayed;
   int i, n, j, m;
+
+  HTTP_D -> add_resource_handler("/api/worldlib/domain", HTTP_DOMAIN_RESOURCE);
+  HTTP_D -> add_resource_handler("/api/worldlib/domain/:id", HTTP_DOMAIN_RESOURCE);
+/*
+  HTTP_D -> add_resource_handler("/api/worldlib/area/:domain_id/:id", HTTP_AREA_RESOURCE);
+  HTTP_D -> add_resource_handler("/api/worldlib/ward/:domain_id/:area_id", HTTP_WARD_RESOURCE);
+  HTTP_D -> add_resource_handler("/api/worldlib/ward/:domain_id/:area_id/:id", HTTP_WARD_RESOURCE);
+  HTTP_D -> add_resource_handler("/api/worldlib/thing/:domain_id/:area_id/:ward_id/:id", HTTP_THING_RESOURCE);
+*/
+
   /*
    * We want to initialize various things with data from the json/
    * directory.

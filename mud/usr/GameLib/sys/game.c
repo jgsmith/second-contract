@@ -3,8 +3,8 @@
 
 string name;
 
-void create(varargs int clone) {
-  name = "Second Contract";
+static void create(varargs int clone) {
+  name = "Second Contract Dev";
 }
 
 string get_name() { return name; }

@@ -1,9 +1,16 @@
+# include <worldlib.h>
+# include <worldlib/tasks.h>
+# include <iflib.h>
 # include <limits.h>
 # include <type.h>
 
 /*
  * handles all of the skill information for this object.
  */
+
+object TASK_RESULT_DATA perform_task(string skill, int difficulty, int tm_type, varargs object ADVERB_DATA adverb);
+static void attempt_task(int con, int pro, int upper, mixed extra, object TASK_RESULT_DATA result);
+static void attempt_task_e(int con, int pro, int upper, int half, object TASK_RESULT_DATA result);
 
 mapping skills;
 mapping skill_bonuses;
@@ -192,7 +199,7 @@ int set_property(string *path, mixed value) {
   return FALSE;
 }
 
-void evt_train_skill(string skill, int pro, int con, varargs int a...) {
+void train_skill(string skill, int pro, int con, varargs int a...) {
   int lvl, val, success, bonus;
 
   lvl = get_property(({ skill, "level" }));
@@ -220,4 +227,248 @@ void evt_train_skill(string skill, int pro, int con, varargs int a...) {
     get_property(({ skill, "points" })) + 
     (bonus * val * lvl * lvl) + 1
   );
+}
+
+static void attempt_task(int con, int pro, int upper, mixed extra, object TASK_RESULT_DATA result) {
+  int margin, success_margin, deg, res;
+  float tmp;
+
+  if(pro < con) {
+    result -> set_result(TASK_FAIL);
+    result -> set_degree(
+      TASKS_D -> is_critical(-100) ? TASK_CRITICAL : TASK_EXCEPTIONAL
+    );
+    result -> set_raw(-100);
+    return;
+  }
+
+  switch(typeof(extra)) {
+    case T_NIL: margin = (int)(3.0*sqrt((float)con)); break;
+    case T_INT: margin = extra; break;
+    case T_ARRAY: margin = (int)(extra[0] + extra[1]*sqrt((float)con)); break;
+    default: margin = 0; break;
+  }
+
+  if(pro > con + margin) {
+    result -> set_result(TASK_SUCCESS);
+    result -> set_degree(
+      TASKS_D -> is_critical(100) ? TASK_CRITICAL : TASK_EXCEPTIONAL
+    );
+    result -> set_raw(100);
+    return;
+  }
+
+  if(!margin) margin = 1;
+  success_margin = (( 100 * (pro-con) )/margin) - random(100);
+  result -> set_raw(success_margin);
+  if(success_margin <= 0) {
+    result -> set_result(TASK_FAIL);
+    if(TASKS_D -> is_critical(success_margin)) {
+      deg = TASK_CRITICAL;
+    }
+    else {
+      if(-success_margin < TASK_MARGINAL_UPPER) {
+        deg = TASK_MARGINAL;
+      }
+      else if(-success_margin < TASK_NORMAL_UPPER) {
+        deg = TASK_NORMAL;
+      }
+      else {
+        deg = TASK_EXCEPTIONAL;
+      }
+    }
+
+    result -> set_degree(deg);
+    return;
+  }
+
+  result -> set_result(TASK_SUCCESS);
+  if(TASKS_D -> is_critical(success_margin)) {
+    deg = TASK_CRITICAL;
+  }
+  else {
+    if(success_margin < TASK_MARGINAL_UPPER) {
+      deg = TASK_MARGINAL;
+    }
+    else if(success_margin < TASK_NORMAL_UPPER) {
+      deg = TASK_NORMAL;
+    }
+    else {
+      deg = TASK_EXCEPTIONAL;
+    }
+  }
+  result -> set_degree(deg);
+}
+
+static void attempt_task_e(int con, int pro, int upper, int half, object TASK_RESULT_DATA result) {
+  float fail_chance;
+  float tmp;
+  int success_margin, deg, res;
+
+  if(pro < con) {
+    result->set_result(TASK_FAIL);
+    result -> set_degree(TASKS_D -> is_critical(-100) ? TASK_CRITICAL : TASK_EXCEPTIONAL);
+    result -> set_raw(-100);
+    return;
+  }
+
+  if(!half) half = (int)(6.0*sqrt((float)con));
+  if(!half) half = 1;
+  fail_chance = exp((-0.693*(float)(pro-con))/(float)half);
+  success_margin = (random(1000) - (int)(1000.0*fail_chance))/10;
+  result -> set_raw(success_margin);
+  if(success_margin < 0) {
+    result->set_result(TASK_FAIL);
+    if(-success_margin < TASK_MARGINAL_UPPER) {
+      deg = TASK_MARGINAL;
+    }
+    else if(-success_margin < TASK_NORMAL_UPPER) {
+      deg = TASK_NORMAL;
+    }
+    else {
+      deg = TASK_EXCEPTIONAL;
+    }
+    result -> set_degree(deg);
+    return;
+  }
+
+  result->set_result(TASK_SUCCESS);
+  if(TASKS_D -> is_critical(success_margin)) {
+    deg = TASK_CRITICAL;
+  }
+  else {
+    if(success_margin < TASK_MARGINAL_UPPER) {
+      deg = TASK_MARGINAL;
+    }
+    else if(success_margin < TASK_NORMAL_UPPER) {
+      deg = TASK_NORMAL;
+    }
+    else {
+      deg = TASK_EXCEPTIONAL;
+    }
+  }
+  result -> set_degree(deg);
+}
+
+object TASK_RESULT_DATA perform_task(string skill, int difficulty, int tm_type, varargs object ADVERB_DATA adverb) {
+  /*
+   * adverb can apply constraints: time and skill
+   *
+   *      time
+   *        |
+   *     A  |  B     s
+   *        |        k
+   *  ------+------  i
+   *        |        l
+   *     C  |  D     l
+   *        |
+   *
+   * A: dec time/inc skill  -- mid chance of success -requires focus
+   * B: inc time/inc skill  -- highest chance of success
+   * C: dec time/dec skill  -- lowest chance of success
+   * D: inc time/dec skill  -- mid chance of success - no focus required
+   */
+  object TASK_RESULT_DATA result;
+  int c_time, c_skill;
+  int pro, con, bonus, success;
+  int trainable;
+
+  result = new_object(TASK_RESULT_DATA);
+
+  if(!skill) return result;
+
+  if(adverb) {
+    c_time = adverb->get_constraint("time");
+    c_skill = adverb->get_constraint("skill");
+  }
+
+  con = difficulty;
+  pro = get_property(({ skill }));
+  bonus = 1;
+
+  if(c_time < 0) {
+    if(c_skill < 0) { /* C */
+    }
+    else { /* A */
+      result -> set_focus_required(1); /* raise requirements for outside events getting noticed */
+    }
+  }
+  else {
+    if(c_skill < 0) { /* D */
+    }
+    else { /* B */
+      bonus = 2;
+      if(c_time > bonus) bonus = c_time;
+      if(c_skill > bonus) bonus = c_skill;
+    }
+  }
+
+  if(!tm_type) tm_type = SKILLS_D -> get_task_type(skill);
+ 
+  switch(tm_type) {
+    case TASK_FIXED: 
+      attempt_task(con, pro, 100, 0, result); trainable = 1; break;
+    case TASK_FREE: 
+      attempt_task(con, pro, 25, 0, result); trainable = 1; break;
+    case TASK_CONTINUOUS: 
+      attempt_task(con, pro, 50, 0, result); break;
+    case TASK_COMMAND: 
+      attempt_task(con, pro, 100, 0, result); trainable = 1; break;
+    case TASK_RITUAL: 
+      attempt_task_e(con, pro, 50, 25, result); trainable = 1; break;
+    case TASK_SPELL: 
+      attempt_task_e(con, pro, 60, 40, result); trainable = 1; break;
+    default: 
+      attempt_task_e(con, pro, 1, 0, result); trainable = 0; break;
+  }
+
+  if(c_time < 0 && c_skill < 0) trainable = 0;
+
+  /* we double the training available if we are exceptional or better in our
+   * task results
+   */
+  if(trainable) {
+    if(result->get_result() && result -> get_degree() >= TASK_EXCEPTIONAL) 
+      bonus *= 2;
+    train_skill(skill, pro, con, result->get_result(), bonus);
+  }
+
+  return result;
+}
+
+object TASK_RESULT_DATA compare_skills(string myskill, object other, string otherskill, int modifier, int my_tm_type, int other_tm_type, varargs object ADVERB_DATA my_adv, object ADVERB_DATA other_adv) {
+  int offskill, defskill;
+  int perc, chance;
+  int success_margin, res, deg;
+  object TASK_RESULT_DATA result;
+
+  result = new_object(TASK_RESULT_DATA);
+  result -> set_result(TASK_FAIL);
+
+  if(!other || !myskill || !otherskill) return result;
+
+  offskill = get_property(({ myskill }));
+  defskill = other->get_property(({ "skill", otherskill }));
+  if(!defskill) defskill = 1;
+  if(!offskill) offskill = 1;
+
+  if(offskill > defskill)
+    perc = (50 * offskill * offskill) / (offskill * defskill);
+  else
+    perc = 100 - (50 * defskill*defskill)/(offskill*defskill);
+
+  if(perc > 99) perc = 99;
+  if(perc < 1) perc = 1;
+
+  chance = random(100);
+  success_margin = perc-chance;
+  if(success_margin > 0) {
+    result = perform_task( myskill, defskill-modifier, my_tm_type, my_adv );
+    result -> set_winner(1);
+  }
+  else {
+    result = other->perform_task(otherskill, offskill-modifier, other_tm_type, other_adv);
+    result -> set_winner(0);
+  }
+  return result;
 }

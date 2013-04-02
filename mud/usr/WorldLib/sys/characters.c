@@ -95,6 +95,7 @@ atomic object create_character(string name, string cap_name, string template) {
   ob -> set_name(name);
   ob -> set_cap_name(cap_name);
   ob -> set_property(({ "basic", "position" }), "floating");
+  ob -> set_property(({ "basic", "gait" }), "walking");
 
   MAPPING_D -> specific_mapping(characters, name)[name] = ob;
   

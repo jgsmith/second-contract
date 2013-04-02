@@ -29,6 +29,23 @@ int is_living() {
   return FALSE;
 }
 
+mapping get_properties() {
+  mapping info;
+  object GENETICS_DATA g;
+
+  g = get_genetics();
+
+  info = ([ ]);
+
+  if(g) {
+    info["living"] = g->is_living();
+    info["medium"] = WORDS_D -> medium_word(g->get_medium());
+    info["terrain"] = WORDS_D -> terrain_word(g->get_terrain());
+    info["respiration"] = WORDS_D -> respiration_word(g->get_respiration());
+  }
+  return info;
+}
+
 mixed get_property(string *path) {
   string *tmp;
   object *inv;

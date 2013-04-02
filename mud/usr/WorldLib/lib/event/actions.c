@@ -4,22 +4,29 @@
  * We want to manage action event handling here
  */
 
-string event_handler_source;
+mapping event_handler_source;
+
+static void create(varargs int clone) {
+  if(clone) {
+    event_handler_source = ([ ]);
+  }
+}
 
 /* returns the list of event handlers defined with this object */
 string *get_event_handlers() {
   return EVENT_SCRIPT_D -> get_event_handlers();
 }
 
-string get_event_handler_source() {
+mapping get_event_handler_source() {
   return event_handler_source;
 }
 
-mixed set_event_handler_source(string s) {
+atomic mixed set_event_handler_source(mapping s) {
   mixed ret;
+  s = event_handler_source + s;
   if((ret = EVENT_SCRIPT_D -> set_event_handlers(s)) == 1) {
     event_handler_source = s;
-    return 1;
+    return TRUE;
   }
   return ret;
 }

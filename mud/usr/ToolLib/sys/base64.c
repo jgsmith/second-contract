@@ -1,3 +1,5 @@
+# include <kernel/kernel.h>
+
 string from_base64;
 
 void create(varargs int clone) {
@@ -17,6 +19,11 @@ string decode(string str) {
   string result, bits;
   int i, len, b1, b2, b3, b4;
 
+  len = strlen(str);
+  while(len % 4) {
+    str += "=";
+    len++;
+  }
   result = "";
   bits = "...";
   for (i = 0, len = strlen(str); i < len; i += 4) {

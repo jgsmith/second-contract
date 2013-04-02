@@ -19,6 +19,20 @@ void create(varargs int clone) {
   plural_adjectives = ({ });
 }
 
+mapping get_properties() {
+  mapping info;
+
+  info = ([ 
+    "adjective": adjectives,
+    "noun": nouns,
+    "plural_adjective": plural_adjectives,
+    "plural_noun": plural_nouns,
+    "descriptions": descriptions,
+  ]);
+
+  return info;
+}
+
 mixed get_property(string *path) {
   switch(path[0]) {
     case "adjective":

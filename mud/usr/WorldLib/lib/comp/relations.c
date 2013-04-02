@@ -219,8 +219,28 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
   object *items;
   int i, n;
 
+  if(prox == 0 && location == nil) {
+    /* we want to remove all relations */
+    items = inventory;
+    inventory = ({ });
+    for(i = 0, n = sizeof(items); i < n; i++)
+      items[i] -> remove_relation(this_object());
+
+    items = ({ });
+    for(i = 0, n = sizeof(targets); i < n; i++)
+      items |= targets[i]->get_object();
+    for(i = 0, n = sizeof(items); i < n; i++)
+      remove_relation(items[i]);
+    return TRUE;
+  }
+
   if(prox < 0 || prox > PROX_MAX) return FALSE;
   if(!location) return FALSE;
+
+  /* check that the destination is not in development if we're not a tester */
+  if(!this_object() -> is_play_tester()) {
+    
+  }
 
   env = get_environment();
   if(env) { 

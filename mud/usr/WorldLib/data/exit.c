@@ -15,7 +15,7 @@ int source_distance;
 int *source_relations;
 
 void create(varargs int clone) {
-  detail::create();
+  detail::create(clone);
   source_relations = nil; /* no exit set up */
 }
 
@@ -25,12 +25,7 @@ mixed get_property(string *path) {
 
   if(!sizeof(path)) return nil;
   switch(path[0]) {
-    case "adjective":
-    case "noun":
-    case "plural-adjective":
-    case "plural-noun":
-    case "description":
-    case "detail":
+    default:
       return detail::get_property(path);
     case "exit":
       if(sizeof(path) == 1) return source_relations && sizeof(source_relations) > 0;

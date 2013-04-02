@@ -15,6 +15,10 @@ string *adverbs;
 mixed *direct;
 mixed *indirect;
 mixed *instrument;
+mixed *evocation;
+mixed *topic;
+
+void default_error(object actor);
 
 void create(varargs int clone) {
   if(clone) {
@@ -22,6 +26,8 @@ void create(varargs int clone) {
     direct = ({ });
     indirect = ({ });
     instrument = ({ });
+    evocation = ({ });
+    topic = ({ });
   }
 }
 
@@ -31,6 +37,10 @@ void add_adverb(string s) { adverbs |= ({ s }); }
 void add_direct(mixed *bits) { direct += bits; }
 void add_indirect(string prep, mixed *bits) { indirect += ({ ({ prep, bits }) }); }
 void add_instrument(string prep, mixed *bits) { instrument += ({ ({ prep, bits }) }); }
+
+void add_evocation(string e) { evocation += ({ e }); }
+
+void add_topic(string t) { topic += ({ t }); }
 
 /* ({ words... }), prep, ({ words... }) ... */
 string unparse_noun_phrase(mixed *phrase, varargs string holding) {
@@ -65,50 +75,63 @@ string unparse_noun_phrase(mixed *phrase, varargs string holding) {
 int execute(object actor) {
   /* We see if we can find a proper verb of the right type */
   int num_args;
-  object *verb_obj;
+  object *verb_objs;
+  object verb_obj;
   string *bits;
   string *actions;
   string tmp;
-  int i, n;
+  int i, n, j, m;
   object BINDER_MATCH direct_obs;
   object BINDER_MATCH indirect_obs;
   object BINDER_MATCH instrument_obs;
   object EVENT_DATA e;
   object EVENT_SET e_set, estmp;
+  object ADVERB_DATA effective_adverb;
+  object ADVERB_DATA adverb;
+
+  if(sizeof(adverbs)) {
+    effective_adverb = ADVERB_D -> get_effective_adverb(adverbs);
+    if(!effective_adverb) {
+      default_error(actor);
+      return FALSE;
+    }
+  }
 
   num_args = 0;
   if(sizeof(direct) > 0) num_args |= 1;
   if(sizeof(indirect) > 0) num_args |= 2;
   if(sizeof(instrument) > 0) num_args |= 4;
 
-  verb_obj = VERB_D -> get_verb_handlers(verb, num_args);
-  if(verb_obj) {
-    verb_obj -= ({ nil });
-    /*
-     * we want to go through the adverbs and combine their modifications
-     *
-     * two adverbs can't modify the same aspect of the verb
-     */
+  verb_objs = VERB_D -> get_verb_handlers(verb, num_args);
+  if(verb_objs) {
+    verb_objs -= ({ nil });
   }
-  while(verb_obj && sizeof(verb_obj)) {
-    if(direct && sizeof(direct))
+  /* now go through and see which verb handlers work with the current
+   * set of objects - use the first one that matches
+   */
+  for(j = 0, m = sizeof(verb_objs); j < m; j++) {
+    verb_obj = verb_objs[j];
+    if(direct && sizeof(direct)) {
+      /* if direct_obs are expected to be in indirect_obs, then we need to
+       * look for indirect_obs first
+       */
       direct_obs = BINDER_D -> bind_direct(actor, BINDER_MATCH_SINGULAR, direct);
-    /* we need to construct an event chain that will be executed with this
-     * set of objects.
-     */
+    }
+
     if(instrument && sizeof(instrument))
       instrument_obs = BINDER_D -> bind_instrument(actor, instrument);
 
-    if(indirect && sizeof(indirect)) {
+    if(!indirect_obs && indirect && sizeof(indirect)) {
       indirect_obs = BINDER_D -> bind_indirect(actor, indirect, direct_obs);
     }
 
-    /* now go through and see which verb handlers work with the current
-     * set of objects - use the first one that matches
+    /* we need to construct an event chain that will be executed with this
+     * set of objects.
      */
 
     /* build out the event set for the first verb handler */
-    actions = verb_obj[0]->get_action();
+    actions = verb_obj->get_action();
+    adverb = verb_obj->get_modified_adverb(effective_adverb);
 
     for(i = 0, n = sizeof(actions); i < n; i++) {
       estmp = new_object(EVENT_SET);
@@ -119,7 +142,12 @@ int execute(object actor) {
         "actor": actor,
         "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
         "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
-        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ }))
+        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ })),
+        "topic": topic,
+        "evocation": evocation,
+        "verb": verb,
+        "adverb": adverbs,
+        "mods": adverb,
       ]));
       estmp -> add_guard(e);
       e = new_object(e);
@@ -135,10 +163,18 @@ int execute(object actor) {
      * try again
      */
     if(EVENTS_D -> run_event_set(e_set)) return TRUE;
-    verb_obj = verb_obj[1..];
   }
   
   /* if we get here, we weren't able to act on the command */
+  default_error(actor);
+  return FALSE;
+}
+
+void default_error(object actor) {
+  string *bits;
+  int i, n;
+  string tmp;
+
   bits = ({ "You", "can't" });
   if(adverbs && sizeof(adverbs))
     bits += ({ ENGLISH_D -> item_list(adverbs) });
@@ -195,5 +231,4 @@ int execute(object actor) {
    * options.
    */
   actor -> message(implode(bits - ({ nil, "" }), " ") + ".\n");
-  return FALSE;
 }

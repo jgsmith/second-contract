@@ -283,6 +283,7 @@ string compile_function(object ctx, mixed *args) {
   string *fargs;
   int i, n;
   int vc;
+  int needs_args;
 
   switch(args[0]) {
     case "Stop": real_name = "_C_remove_timer"; break;
@@ -291,6 +292,9 @@ string compile_function(object ctx, mixed *args) {
     case "Emit": real_name = "_C_queue_message"; break;
     case "Get": real_name = "_C_get_property"; break;
     case "Set": real_name = "_C_set_property"; break;
+    case "MoveTo": real_name = "_C_move_to"; break;
+    case "PerformSkill": real_name = "_C_perform_task"; needs_args = 1; break;
+    case "CompareSkills": real_name = "_C_compare_skills"; needs_args = 1; break;
   }
 
   if(real_name) {
@@ -299,7 +303,9 @@ string compile_function(object ctx, mixed *args) {
     ctx -> reset_void_context();
     for(i = 0; i < n; i++) fargs[i] = compile_parse(ctx, args[1][i]);
     if(vc) ctx -> set_void_context();
-    return "this_object()->" + real_name + "(_this" + (n > 0 ? ",":"") + implode(fargs, ",") + ")"
+    fargs = ({ "_this" }) + fargs;
+    if(needs_args) fargs += ({ "_args" });
+    return "this_object()->" + real_name + "(" + implode(fargs, ",") + ")"
          + (vc ? ";" : "");
   }
   else error("Unknown function: " + args[0]);

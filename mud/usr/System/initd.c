@@ -26,7 +26,7 @@ static int create(varargs int clone) {
     }
 
     if(find_object(LOG_D)) {
-     /* driver -> set_error_manager(find_object(LOG_D)); */
+      /* driver -> set_error_manager(find_object(LOG_D)); */
     }
 
     if(!find_object(TELNET_D)) {
@@ -39,14 +39,15 @@ static int create(varargs int clone) {
     if(!find_object(HTTP_D)) {
       compile_object(HTTP_D);
     }
+
     http_manager = find_object(HTTP_D);
+
     "/kernel/sys/userd" -> set_binary_manager(1, http_manager);
 
     if(!find_object(HTTP_SYSTEM_RESOURCE)) {
       compile_object(HTTP_SYSTEM_RESOURCE);
     }
 
-    http_manager -> add_resource_handler("/api/system", HTTP_SYSTEM_RESOURCE);
 
     if(!find_object("/usr/System/obj/wiztool")) {
         compile_object("/usr/System/obj/wiztool");
@@ -76,4 +77,6 @@ static int create(varargs int clone) {
     WORLDLIB_INIT -> initialize_data();
     IFLIB_INIT -> initialize_data();
     GAMELIB_INIT -> initialize_data();
+
+    http_manager -> add_resource_handler("/api/system", HTTP_SYSTEM_RESOURCE);
 }

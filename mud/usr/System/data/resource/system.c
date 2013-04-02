@@ -16,14 +16,8 @@ void create(varargs int clone) {
   }
 }
 
-int is_authorized(string auth) { return 1; }
-
-int forbidden() { return 0; }
-
 /* this isn't a collection of resources */
-int resource_exists() {
-  return typeof(get_resource_id()) == T_NIL;
-}
+int resource_exists() { return TRUE; }
 
 mixed *content_types_provided() {
   return ({ ({ "application/json", "to_json" }) });
@@ -31,14 +25,6 @@ mixed *content_types_provided() {
 
 mixed *content_types_accepted() {
   return ({ ({ "application/json", "from_json" }) });
-}
-
-int valid_entity_length(int length) {
-  return length <= status(ST_STRSIZE);
-}
-
-mixed *allowed_methods() {
-  return resource::allowed_methods() - ({ "DELETE" }) + ({ "POST", "PUT" });
 }
 
 mixed from_json(mapping metadata) {

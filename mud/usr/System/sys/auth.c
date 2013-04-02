@@ -10,16 +10,19 @@ mapping accounts;
 mapping groups;
 
 void create() {
-  accounts = ([ ]);
-  groups = ([ ]);
+  groups = ([
+    "ADMIN": ({ }),
+  ]);
+/*
   this_object() -> set_user_password("admin", "password");
   this_object() -> create_group("ADMIN");
   this_object() -> add_user_to_group("ADMIN", "admin");
+*/
 }
 
 int create_group(string grp) {
   if(!SYSTEM()) {
-    ERROR_D -> message("Only System may create new groups.");
+    error("Only System may create new groups.");
     return FALSE;
   }
   if(groups[grp]) return FALSE;
@@ -33,7 +36,7 @@ int is_in_group(string group, string user) {
 
 int add_user_to_group(string group, string user) {
   if(!SYSTEM()) {
-    ERROR_D -> message("Only System may add a user to a group.");
+    error("Only System may add a user to a group.");
     return FALSE;
   }
   if(!groups[group]) return FALSE;
@@ -41,6 +44,7 @@ int add_user_to_group(string group, string user) {
 }
 
 int user_exists(string name) {
+  if(!accounts) return FALSE;
   name = STRING_D -> lower_case(name);
   if(MAPPING_D -> specific_mapping(accounts, name)[name]) return 1;
   return 0;
@@ -53,6 +57,7 @@ int character_exists(string name) {
 int user_authenticated(string name, string password) {
   mapping m;
 
+  if(!accounts) return FALSE;
   name = STRING_D -> lower_case(name);
   m = MAPPING_D -> specific_mapping(accounts, name);
   if(!m[name] && m[name]["password"]) return 0;
@@ -62,14 +67,24 @@ int user_authenticated(string name, string password) {
 
 int set_user_password(string name, string password, varargs string old_password) {
   mapping m;
+  int first_account;
 
   name = STRING_D -> lower_case(name);
+  if(!accounts) {
+    first_account = 1;
+    accounts = ([ ]);
+  }
   m = MAPPING_D -> specific_mapping(accounts, name);
   if(m[name] && m[name]["password"]) {
     if(crypt(password,m[name]["password"]) != m[name]["password"]) return 0;
   }
   else {
     m[name] = ([ "password": crypt(password) ]);
+    if(first_account) {
+      find_object(DRIVER)->message("Adding " + name + " to ADMIN group\n");
+      add_user_to_group("ADMIN", name);
+      previous_object() -> message("\n\nThis is the first account and has been added to the ADMIN group.\n");
+    }
     return 1;
   }
 }

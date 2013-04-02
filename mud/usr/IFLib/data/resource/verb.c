@@ -9,7 +9,7 @@
 
 inherit resource HTTP_RESOURCE_LIB;
 
-void create(varargs int clone) {
+static void create(varargs int clone) {
   resource::create(clone);
 
   set_authentication_flags(HTTP_ALLOWS_PUBLIC_READ);
@@ -17,10 +17,6 @@ void create(varargs int clone) {
   if(clone) {
   }
 }
-
-int is_authorized(string auth) { return 1; }
-
-int forbidden() { return 0; }
 
 /* this isn't a collection of resources */
 int resource_exists() {
@@ -34,14 +30,6 @@ mixed *content_types_provided() {
 
 mixed *content_types_accepted() {
   return ({ ({ "application/json", "from_json" }) });
-}
-
-int valid_entity_length(int length) {
-  return length <= status(ST_STRSIZE);
-}
-
-mixed *allowed_methods() {
-  return resource::allowed_methods() - ({ "DELETE" }) + ({ "POST", "PUT" });
 }
 
 mapping data_for_verb(string verb) {

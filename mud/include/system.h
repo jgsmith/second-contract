@@ -11,6 +11,8 @@
 
 # define HTTP_SYSTEM_RESOURCE "/usr/System/data/resource/system"
 
+# define LIB_CONNECTION "/usr/System/lib/connection"
+
 /* The version is "SC MAJOR.YYJJJN"
  *  date -u '+SC 0.%g%j0'
  * MAJOR: 0 (alpha/beta)

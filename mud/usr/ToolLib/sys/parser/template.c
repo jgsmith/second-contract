@@ -60,6 +60,8 @@ mixed _simple_substitution(mixed *args) {
       pos = POS_POSSESSIVE_NOUN; break;
     case "reflexive":
       pos = POS_REFLEXIVE; break;
+    case "verb":
+      return ({ ({ "verb", name, nil }) });
     default:
       return ({ ({ "verb", name, args[0] }) });
   }
@@ -93,6 +95,8 @@ mixed _targeted_substitution(mixed *args) {
       pos = POS_POSSESSIVE_NOUN; break;
     case "reflexive":
       pos = POS_REFLEXIVE; break;
+    case "verb":
+      return ({ ({ "verb", name, nil }) });
     default: 
       return ({ ({ "verb", name, args[2] }) });
   }

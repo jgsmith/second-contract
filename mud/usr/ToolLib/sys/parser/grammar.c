@@ -123,3 +123,21 @@ mixed _noun_phrase(mixed *args) {
 mixed _rel_prep(mixed *args) {
   return ({ implode(args, " ") });
 }
+
+mixed _evocation(mixed *args) {
+  string e;
+
+  e = args[sizeof(args)-1];
+  e = e[1..strlen(e)-2];
+  args[0][1] += ({ ({ "evocation", e }) });
+  return ({ args[0] });
+}
+
+mixed _topic(mixed *args) {
+  return ({ ({ "topic", implode(args[1..], " ") }) });
+}
+
+mixed _add_topic(mixed *args) {
+  args[0][1] += ({ args[sizeof(args)-1] });
+  return ({ args[0] });
+}

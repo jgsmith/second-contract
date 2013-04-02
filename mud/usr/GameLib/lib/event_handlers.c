@@ -121,3 +121,40 @@ mixed _C_set_property(object owner, object src, string prop, mixed value) {
   if(src -> set_property(bits = explode(prop, ":"), value)) return value;
   return src -> get_property(bits);
 }
+
+mixed _C_move_to(object owner, int prox, object LOCATION_DATA dest) {
+  if(prox == 0 && dest == nil) return FALSE;
+
+  return owner -> move_to(prox, dest);
+}
+
+/* PerformSkill("my-skill", difficulty, [tm_type]) */
+object TASK_RESULT_DATA _C_perform_task(object owner, string skill, int difficulty, int tm_type, mapping args) {
+  object ACTION_CONSTRAINT_DATA my_adv;
+  my_adv = owner -> get_default_constraints(skill);
+  if(my_adv) {
+    if(args["mod"]) my_adv = my_adv->merge_constraints(args["mod"]);
+  }
+  else {
+    my_adv = args["mod"];
+  }
+  return owner -> perform_task(skill, difficulty, tm_type, my_adv);
+}
+
+/* CompareSkills("my-skill", $direct_object[0], "their-skill", modifier) */
+object TASK_RESULT_DATA _C_compare_skills(object owner, string myskill, object other, string otherskill, int modifier, mapping args) {
+  object ACTION_CONSTRAINT_DATA other_adv, my_adv;
+  int my_tm_type, other_tm_type;
+
+  my_tm_type = SKILLS_D -> get_task_type(myskill);
+  other_tm_type = SKILLS_D -> get_task_type(otherskill);
+  if(other) other_adv = other -> get_default_constraints(otherskill);
+  my_adv = owner -> get_default_constraints(myskill);
+  if(my_adv) {
+    if(args["mod"]) my_adv = my_adv->merge_constraints(args["mod"]);
+  }
+  else {
+    my_adv = args["mod"];
+  }
+  return owner -> compare_skills(myskill, other, otherskill, modifier, my_tm_type, other_tm_type, my_adv, other_adv);
+}

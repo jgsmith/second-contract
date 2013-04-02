@@ -1,9 +1,10 @@
 #
-# This JSON parser is based on RFC 4627: http://www.ietf.org/rfc/rfc4627.txt
+# This JSON parser is based on [RFC 4627](http://www.ietf.org/rfc/rfc4627.txt).
+# The rest of the comments are taken from the RFC.
 #
 
 # 
-# Section 2. JSON Grammar
+# ## Section 2. JSON Grammar
 #
 
 #
@@ -37,7 +38,7 @@ value_separator : ','
 whitespace = /[ \t\n\r]/
 
 #
-# 2.1. Values
+# ### 2.1. Values
 #
 
 #
@@ -54,7 +55,7 @@ value: 'null' ? _null
 value: 'true' ? _true
 
 #
-# 2.2. Objects
+# ### 2.2. Objects
 #
 
 #
@@ -74,7 +75,7 @@ members: members value_separator member ? _add_pair
 member: string name_separator value ? _make_pair
 
 #
-# 2.3. Arrays
+# ### 2.3. Arrays
 #
 
 #
@@ -89,7 +90,7 @@ values: value ? _add_value
 values: values value_separator value ? _add_value
 
 #
-# 2.4. Numbers
+# ### 2.4. Numbers
 #
 
 #
@@ -113,7 +114,7 @@ values: values value_separator value ? _add_value
 number = /-?(0|[1-9][0-9]*)(\.[0-9]+)?([Ee][+-]?[0-9]+)?/
 
 #
-# 2.5. Strings
+# ### 2.5. Strings
 #
 
 #

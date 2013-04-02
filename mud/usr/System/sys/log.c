@@ -5,29 +5,58 @@
  * Log handler
  */
 
+/* we store log data in the mapping and write it out on heart beats */
+mapping logs;
+mapping ensured_dirs;
+
 int log_level;
 
 void create(varargs int clone) {
   log_level = 0;
+  logs = ([ ]);
+  ensured_dirs = ([ "/": 1, "/log/": 1 ]);
+  call_out("do_log", 1);
 }
 
 void set_level(int x) {
   if(x >= 0) log_level = x;
 }
 
-static do_log(string file, string content) {
-  if(content[strlen(content)-1] != '\n')
-    content += "\n";
-  write_file(file, "--- " + ctime(time()) + "\n" + content);
+static ensure_dir(string dir) {
+  string *bits;
+  int i, n;
+  if(ensured_dirs[dir]) return;
+  dir = find_object(DRIVER) -> normalize_path(dir, "/log/");
+  bits = explode(dir, "/") - ({ "" });
+  if(bits[0] != "log") error("Illegal log location");
+  for(i = 1, n = sizeof(bits); i < n; i++) {
+    dir = "/" + implode(bits[0..i], "/") + "/";
+    if(!ensured_dirs[dir]) {
+      if(!sizeof(get_dir(dir)[0])) {
+        if(!make_dir(dir)) error("Unable to create log directory \"" + dir + "\".");
+        ensured_dirs[dir] = 1;
+      }
+    }
+  }
 }
 
-static string ensure_dir(string dir) {
-  dir = find_object(DRIVER) -> normalize_path(dir, "/log/");
-  if(dir[0..4] != "/log/") error("Illegal log location");
-  if(sizeof(get_dir(dir)[0])) return dir;
-  if(!make_dir(dir)) error("Unable to create log directory \"" + dir + "\".");
-  return dir;
+void do_log() {
+  int i, n;
+  string *files;
+  string *bits;
+
+  call_out("do_log", 1);
+  files = map_indices(logs);
+  for(i = 0, n = sizeof(files); i < n; i++) {
+    if(sizeof(logs[files[i]])) {
+      bits = explode(files[i], "/");
+      ensure_dir("/" + implode(bits[0..sizeof(bits)-2], "/"));
+      write_file(files[i], implode(logs[files[i]], "\n")+"\n");
+      logs[files[i]] = nil;
+    }
+  }
 }
+
 
 void log(string type, string content, varargs int level) {
   string basedir, user;
@@ -49,16 +78,19 @@ void log(string type, string content, varargs int level) {
       break;
   }
 
-  basedir = ensure_dir(basedir);
   bits = explode(type, ":");
   if(sizeof(bits) > 2) error("Illegal error type \"" + type + "\".");
   if(sizeof(bits) == 2) {
-    basedir = ensure_dir(basedir + bits[0] + "/");
+    basedir = basedir + bits[0] + "/";
     bits = bits[1..1];
   }
   basedir = find_object(DRIVER) -> normalize_path(basedir + bits[0], "/log/");
   if(basedir[0..4] != "/log/") error("Illegal log location");
-  call_out("do_log", 0, basedir, content);
+  if(!logs[basedir]) logs[basedir] = ({ });
+  if(type == "http:access")
+    logs[basedir] += ({ content });
+  else
+    logs[basedir] += ({ "--- " + ctime(time()), content });
 }
 
 static build_error(string type, string str, mixed **trace) {

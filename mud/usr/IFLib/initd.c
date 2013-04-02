@@ -6,15 +6,17 @@
 # include <iflib.h>
 
 static int create(varargs int clone) {
-  if(!find_object(WORDS_D)) compile_object(WORDS_D);
-  if(!find_object(VERB_DATA)) compile_object(VERB_DATA);
-  if(!find_object(VERB_D)) compile_object(VERB_D);
-  if(!find_object(ADVERB_D)) compile_object(ADVERB_D);
-  if(!find_object(BINDER_D)) compile_object(BINDER_D);
-  if(!find_object(IFPARSER_D)) compile_object(IFPARSER_D);
+  string *files;
+  int i, n;
 
-  if(!find_object("/usr/IFLib/data/resource/verb"))
-    compile_object("/usr/IFLib/data/resource/verb");
+  files = ({
+    WORDS_D, VERB_D, ADVERB_D, BINDER_D, IFPARSER_D,
+    VERB_DATA, ADVERB_DATA, COMMAND_DATA,
+    HTTP_VERB_RESOURCE, HTTP_ADVERB_RESOURCE,
+  });
+
+  for(i = 0, n = sizeof(files); i < n; i++)
+    if(!find_object(files[i])) compile_object(files[i]);
 }
 
 void initialize_data() {
@@ -30,6 +32,7 @@ void initialize_data() {
   /* /usr/WorldLib/json/verbs/$verb.json */
 
   HTTP_D -> add_resource_handler("/api/iflib/verb", HTTP_VERB_RESOURCE);
+  HTTP_D -> add_resource_handler("/api/iflib/verb/:id", HTTP_VERB_RESOURCE);
 
   dir = get_dir("/usr/IFLib/json/verbs/*");
   for(i = 0, n = sizeof(dir[0]); i < n; i++) {
