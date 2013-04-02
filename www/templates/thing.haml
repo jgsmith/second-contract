@@ -1,0 +1,29 @@
+#thing-template
+  %h1 Thing
+  %form.form-horizontal
+    %ul.nav.nav-tabs
+      %li
+        %a(href="#thing-id" data-toggle="tab") ID
+      %li
+        %a(href="#thing-detail" data-toggle="tab") Details
+      %li
+        %a(href="#thing-events" data-toggle="tab") Events
+
+    .tab-content
+      .tab-pane.active(id="thing-id")
+        .control-group
+          %label.control-label Nouns:
+          .controls
+            %input.input-block-level(name="nouns" type="text" value='{{ (data.nouns||[]).join(", ") }}')/
+        .control-group
+          %label.control-label Adjectives:
+          .controls
+            %input.input-block-level(name="adjectives" type="text" value='{{ (data.adjectives||[]).join(", ") }}')/
+        .control-group
+          %label.control-label Plural Nouns:
+          .controls
+            %input.input-block-level(name="plural-nouns" type="text" value='{{ (data.plural_nouns||[]).join(", ") }}')/
+        .control-group
+          %label.control-label Plural Adjectives:
+          .controls
+            %input.input-block-level(name="plural-adjectives" type="text" value='{{ (data.plural_adjectives||[]).join(", ") }}')/

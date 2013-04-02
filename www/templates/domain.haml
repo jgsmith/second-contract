@@ -1,0 +1,29 @@
+#domain-template
+  %form.form-horizontal
+    .control-group(style="float: right;")
+      .controls
+        %button.btn.save(type="submit") Save
+        %button.btn-danger(type="submit") Delete
+    %h1 {{ data.id }}
+    %ul.nav.nav-tabs
+      %li.active
+        %a(href="#domain-id" data-toggle="tab") Id
+      %li
+        %a(href="#domain-areas" data-toggle="tab") Areas
+
+    .tab-content
+      .tab-pane.active(id="domain-id")
+        .control-group
+          %label.control-label Name:
+          .controls
+            %input.input-block-level(name="id" type="text" value="{{ data.id }}")/
+        .control-group
+          %label.control-label Brief Description:
+          .controls
+            %input.input-block-level(name="description" type="text" value="{{ data.description }}")/
+        .control-group
+          %label.control-label Plan:
+          .controls
+            %textarea.input-block-level(name="plan" rows="5") {{ data.plan }}
+      .tab-pane(id="domain-areas")
+        

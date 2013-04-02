@@ -1,0 +1,29 @@
+$ ->
+
+  SC = 
+    Collections: {}
+    Models: {}
+    Views: {}
+
+  _.templateSettings =
+    interpolate: /\{\{(.+?)\}\}/g
+    variable: "data"
+
+  later = (cb) ->
+    setTimeout cb, 0
+
+  auth_header = null
+
+  priorAjax = Backbone.ajax
+  Backbone.ajax = (request) ->
+    if auth_header?
+      request.beforeSend = (xhr) ->
+        xhr.setRequestHeader("Authorization", "Basic " + auth_header)
+    priorAjax request
+
+  $.ajaxSetup
+    statusCode:
+      401: -> 
+        window.location.replace("#login")
+        $("#logged-in-as").text("...");
+      403: -> window.location.replace("#denied")

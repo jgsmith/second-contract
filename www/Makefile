@@ -1,17 +1,22 @@
 TMPL_DIR = ./templates
 JS_DIR = ./js
 
-TEMPLATES = ${TMPL_DIR}/iflib.haml \
-	${TMPL_DIR}/system.haml \
-	${TMPL_DIR}/verb.haml \
-	${TMPL_DIR}/verb-list.haml \
-	${TMPL_DIR}/verb-list-item.haml \
-	${TMPL_DIR}/worldlib.haml
+TEMPLATES = ${TMPL_DIR}/*.haml
+VIEWS = ${JS_DIR}/views/*.coffee
+MODELS = ${JS_DIR}/models/*.coffee
 
 all: index.html ${JS_DIR}/sc-admin.js
 
-${JS_DIR}/sc-admin.js: ${JS_DIR}/sc-admin.coffee
+${JS_DIR}/sc-admin.js: ${JS_DIR}/sc-admin.coffee.pre ${JS_DIR}/sc-admin.coffee.post ${VIEWS} ${MODELS}
 	@@echo "Building sc-admin.js"
+	@@rm -f ${JS_DIR}/sc-admin.coffee
+	@@cp ${JS_DIR}/sc-admin.coffee.pre ${JS_DIR}/sc-admin.coffee
+	@@echo >> ${JS_DIR}/sc-admin.coffee
+	@@for i in ${MODELS} ${VIEWS}; do \
+		cat $$i | sed 's/^/  /' >> ${JS_DIR}/sc-admin.coffee; \
+		echo >> ${JS_DIR}/sc-admin.coffee; \
+		done
+	@@cat ${JS_DIR}/sc-admin.coffee.post >> ${JS_DIR}/sc-admin.coffee
 	@@/usr/local/bin/coffee -c ${JS_DIR}/sc-admin.coffee
 
 index.html: index.haml
