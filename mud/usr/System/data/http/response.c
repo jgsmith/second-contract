@@ -18,6 +18,14 @@ void create(varargs int clone) {
 }
 
 void set_status(int s) { status = s; }
+int get_status() { return status; }
+
+int get_content_length() {
+  if(headers["Content-Length"]) {
+    return headers["Content-Length"][0];
+  }
+  return 0;
+}
 
 int has_body() { return body ? TRUE : FALSE; }
 
@@ -63,28 +71,27 @@ void output(object target) {
   int i, n, j, m;
   int length;
 
-  if(status) {
-    target -> message("HTTP/1.0 " + status + " " +  HTTP_D -> status_message(status) + "\n");
+  if(!status) status = 500;
+  target -> message("HTTP/1.0 " + status + " " +  HTTP_D -> status_message(status) + "\n");
 
-    headers["Access-Control-Allow-Origin"] = ({ "*" });
-    if(body != nil) {
-      if(!headers["Content-Length"]) {
-        length = 0;
-        for(i = 0, n = sizeof(body); i < n; i++) length += strlen(body[i]);
-        headers["Content-Length"] = ({ length });
-      }
-      if(!headers["Content-Type"]) headers["Content-Type"] = ({ "application/json" });
+  headers["Access-Control-Allow-Origin"] = ({ "*" });
+  if(body != nil) {
+    if(!headers["Content-Length"]) {
+      length = 0;
+      for(i = 0, n = sizeof(body); i < n; i++) length += strlen(body[i]);
+      headers["Content-Length"] = ({ length });
     }
+    if(!headers["Content-Type"]) headers["Content-Type"] = ({ "application/json" });
+  }
 
-    keys = map_indices(headers);
-    for(i = 0, n = sizeof(keys); i < n; i++) {
-      for(j = 0, m = sizeof(headers[keys[i]]); j < m; j++)
-        target -> message(keys[i] + ": " + headers[keys[i]][j] + "\n");
-    }
-    target -> message("\n");
-    if(body) {
-      for(i = 0, n = sizeof(body); i < n; i++)
-        target -> message(body[i]);
-    }
+  keys = map_indices(headers);
+  for(i = 0, n = sizeof(keys); i < n; i++) {
+    for(j = 0, m = sizeof(headers[keys[i]]); j < m; j++)
+      target -> message(keys[i] + ": " + headers[keys[i]][j] + "\n");
+  }
+  target -> message("\n");
+  if(body) {
+    for(i = 0, n = sizeof(body); i < n; i++)
+      target -> message(body[i]);
   }
 }

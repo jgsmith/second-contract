@@ -1,8 +1,10 @@
 # include <system.h>
+# include <kernel/kernel.h>
 
 string *content;
 int expected_content_length, content_length;
 string buffer;
+string request_line;
 mapping headers;
 string request_method;
 string request_uri;
@@ -25,9 +27,11 @@ void create(varargs int clone) {
   }
 }
 
+string get_request_line() { return request_line; }
+
 static string trim_front(string s) {
-  while(strlen(s) && (s[0] == '\x0a' || strlen(s) > 1 && s[0..1] == "\x0d\0x0a")) {
-    if(s[0] == '\x0d') s == s[2..];
+  while(strlen(s) && (s[0] == 10 || (strlen(s) > 1 && s[0] == 13 && s[1] == 10))) {
+    if(s[0] == 13) s = s[2..];
     else s = s[1..];
   }
   return s;
@@ -67,14 +71,20 @@ int _parse_header(string chunk, int eoh) {
   if(tmp[2][0..6] != "HTTP/1.") return -4;
   if(!sscanf(tmp[2][7..], "%d", minor)) return -5;
 
+  request_line = request;
+  if(request_line[strlen(request_line)-1] == '\x0d')
+    request_line = request_line[0..strlen(request_line)-2];
+
   server_protocol = "HTTP/1." + minor;
   request_method = tmp[0];
   request_uri = tmp[1];
 
-  i = 0, n = strlen(request_uri);
+  i = 0;
+  n = strlen(request_uri);
   while(i < n && request_uri[i] != '?' && request_uri[i] != '#') i++;
 
   path_info = request_uri[0..i-1];
+
   if(i > strlen(request_uri)) query_string = request_uri[i+1..];
   else query_string = "";
   tmp = explode(path_info, "%");

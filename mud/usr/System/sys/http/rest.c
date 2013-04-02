@@ -7,6 +7,7 @@
 # include <config.h>
 # include <system.h>
 # include <system/http.h>
+# include <toollib.h>
 
 mapping resources;
 string *paths;
@@ -22,9 +23,9 @@ static void create(varargs int clone) {
   if(!find_object(HTTP_RESPONSE)) {
     compile_object(HTTP_RESPONSE);
   }
-  /* if(!find_object(HTTP_RESOURCE_LIB)) {
+  if(!find_object(HTTP_RESOURCE_LIB)) {
     compile_object(HTTP_RESOURCE_LIB);
-  } */
+  }
   if(!find_object(HTTP_FSM_D)) {
     compile_object(HTTP_FSM_D);
   }
@@ -103,9 +104,14 @@ string query_banner(object connection) {
   return nil; 
 }
 
+/*
+ * the uri_prefix should be of the form "/foo/bar/:id"
+ * or "/foo/bar/:bar_id/baz/:id"
+ */
 int add_resource_handler(string uri_prefix, string data_file) {
   int i, n;
   string initd;
+  string *parsed_path;
   object po;
 
   po = previous_object();
@@ -119,7 +125,7 @@ int add_resource_handler(string uri_prefix, string data_file) {
    * under /usr/ * /data/resource/ *
    */
   if(!sscanf(object_name(po), "/usr/%s/initd", initd)) {
-    error("Only user inits may install new URI resource handlers.\n");
+    error("Only initd may install new URI resource handlers.\n");
     return FALSE;
   }
   data_file = find_object(DRIVER)->normalize_path(data_file, "/usr/" + initd + "/", initd);
@@ -132,10 +138,11 @@ int add_resource_handler(string uri_prefix, string data_file) {
     error("The datafile (" + data_file + ") is not a valid resource for " + initd + ".");
     return FALSE;
   }
-  resources[uri_prefix] = data_file;
+  parsed_path = URI_PATH_P -> parse(uri_prefix);
+  resources[uri_prefix] = ({ parsed_path, data_file });
   paths -= ({ uri_prefix });
   for(i = 0, n = sizeof(paths); i < n; i++) {
-    if(paths[i] < uri_prefix) {
+    if(resources[paths[i]][0][0] < resources[uri_prefix][0][0]) {
       if(i > 0) {
         paths = paths[0..i-1] + ({ uri_prefix }) + paths[i..];
         return TRUE;
@@ -153,15 +160,32 @@ int add_resource_handler(string uri_prefix, string data_file) {
 object create_resource_handler(object request) {
   object ob;
   string uri;
-  int i, n;
+  int i, n, j, m;
+  string *bits;
+  mapping args;
+  int match;
 
   uri = request -> get_uri();
+  bits = explode(uri, "/") - ({ "", nil });
   for(i = 0, n = sizeof(paths); i < n; i++) {
-    if(strlen(uri) >= strlen(paths[i])) {
-      if(uri[0..strlen(paths[i])-1] == paths[i]) {
-        ob = new_object(resources[paths[i]]);
+    /* the right number of components? */
+    if(sizeof(bits) == sizeof(resources[paths[i]][0])-1 ) {
+      args = ([ ]);
+      match = TRUE;
+      for(j = 0, m = sizeof(bits); j < m; j++) {
+        if(resources[paths[i]][0][j+1][0] == ':') {
+          args[resources[paths[i]][0][j+1][1..]] = bits[j];
+        }
+        else if(resources[paths[i]][0][j+1] != bits[j]) {
+          match = FALSE;
+          break;
+        }
+      }
+      if(match) {
+        ob = new_object(resources[paths[i]][1]);
         ob -> set_request(request);
         ob -> set_base(paths[i]);
+        ob -> set_parameters(args);
         return ob;
       }
     }

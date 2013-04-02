@@ -1,6 +1,7 @@
 # include <type.h>
 # include <system.h>
 # include <toollib.h>
+# include <kernel/kernel.h>
 
 /*
  * This is the Finite State Machine that manages the actual REST resource
@@ -132,6 +133,7 @@ atomic void run(object resource) {
   mapping metadata;
   object response;
   mixed result;
+  int counter;
 
   metadata = ([ ]);
   state = "b13";
@@ -139,8 +141,14 @@ atomic void run(object resource) {
    * while(1) in favor of yielding?
    */
   response = resource->get_response();
-  while(1) {
-    result = call_other(this_object(), state, resource, resource->get_request(), response, metadata);
+  counter = 0;
+  while(counter < 1000) {
+    counter ++;
+    catch {
+      result = call_other(this_object(), state, resource, resource->get_request(), response, metadata);
+    } : {
+      result = 500;
+    }
     if( is_bad_result( result ) ) {
       response->set_status(500);
       response->add_header("Content-Type", "text/plain");
@@ -163,6 +171,11 @@ atomic void run(object resource) {
       response->set_body( ({ "Got bad state: " + (result ? result : "undef") }) );
       break;
     }
+  }
+  if(counter >= 1000) {
+    response -> set_status( 500 );
+    response->add_header("Content-Type", "text/plain");
+    response->set_body( ({ "Script ran too long." }) );
   }
 }
 
@@ -195,8 +208,13 @@ mixed b9(object resource, object request, object response, mapping metadata) { /
 
 mixed b8(object resource, object request, object response, mapping metadata) { /* is_authorized */
   mixed result;
+  string str;
 
-  result = resource->is_authorized( request->get_header("Authorization") );
+  str = request->get_header("Authorization");
+  if(!str) str = request->get_header("authorization");
+  if(str && str[strlen(str)-1] == 13) str = str[0..strlen(str)-2];
+  
+  result = resource->is_authorized( str );
   if(typeof(result) == T_INT) {
     if( result >= 100 ) return result;
     if( result ) return "b7";
@@ -610,7 +628,7 @@ mixed o14(object resource, object request, object response, mapping metadata) { 
   handler = _get_acceptable_content_type_handler( resource, request );
   if(is_status_code(handler)) return handler;
 
-  result = call_other(resource, "handler", metadata);
+  result = call_other(resource, handler, metadata);
   if(is_status_code(result)) return result;
 
   return "p11";
