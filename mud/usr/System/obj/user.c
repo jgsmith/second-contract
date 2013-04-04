@@ -151,6 +151,8 @@ int receive_message(string str)
 
         switch (state[previous_object()]) {
         case STATE_NORMAL:
+            for(i = 0, sz = strlen(str); i < sz && str[i] == ' '; i++);
+            if(i) str = str[i..];
             cmd = str;
             if (strlen(str) != 0 && str[0] == '!') {
                 cmd = cmd[1 ..];
