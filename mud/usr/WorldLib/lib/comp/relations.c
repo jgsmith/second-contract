@@ -307,7 +307,9 @@ atomic int move_to(int prox, object LOCATION_DATA location) {
       add_relation(prox, location);
       current_location = location;
 
-      switch(env->get_type()) {
+      switch(location->get_type()) {
+        /* this is really about the coordinate system we want to use */
+        
         case SCENE_THING:
           _call_move_event(TRUE, "motion:in-scene", this_object(), ([
             "from": current_location -> get_detail_path(),

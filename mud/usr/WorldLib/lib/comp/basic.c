@@ -5,16 +5,10 @@
 int level;
 int position;
 int gait; /* default movement speed */
-int thing_type;
 mapping senses; /* senses available */
-
-int get_type() { 
-  return thing_type; 
-}
 
 mapping get_properties() {
   return ([
-    "type": (thing_type ? WORDS_D -> thing_type_name(thing_type) : "inherited"),
     "gait": WORDS_D -> gait_word(gait),
     "position": WORDS_D -> position_word(position),
     "level": level,
@@ -28,18 +22,6 @@ mixed get_property(string *path) {
   if(!sizeof(path)) return nil;
 
   switch(path[0]) {
-    case "type":
-      if(sizeof(path) == 1) {
-        if(thing_type) return WORDS_D -> thing_type_name(thing_type);
-        else if(ur) return ur -> get_property(({ "base", "type" }));
-        return nil;
-      }
-      else if(sizeof(path) == 2) {
-        if(thing_type) return path[1] == WORDS_D -> thing_type_name(thing_type);
-        else if(ur) return ur -> get_property(({ "base" }) + path);
-        return FALSE;
-      }
-      else return nil;
     case "environment": return this_object() -> get_environment();
     case "gait":
       if(sizeof(path) == 1) {
