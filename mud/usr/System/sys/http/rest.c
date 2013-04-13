@@ -104,28 +104,23 @@ string query_banner(object connection) {
   return nil; 
 }
 
+mapping get_resource_handlers() {
+  return resources;
+}
+
+
 /*
  * the uri_prefix should be of the form "/foo/bar/:id"
  * or "/foo/bar/:bar_id/baz/:id"
  */
-int add_resource_handler(string uri_prefix, string data_file) {
+private int add_resource_handler(string uri_prefix, string data_file, varargs mapping extra_params) {
   int i, n;
   string initd;
   string *parsed_path;
   object po;
 
-  po = previous_object();
-  if(!po) {
-    error("Unable to determine the previous object.");
-    return FALSE;
-  }
-  
-  /* We want to make sure the previous object is one of the /usr/ * /initd.c
-   * objects and that they are only installing resource handlers for things
-   * under /usr/ * /data/resource/ *
-   */
-  if(!sscanf(object_name(po), "/usr/%s/initd", initd)) {
-    error("Only initd may install new URI resource handlers.\n");
+  if(!sscanf(data_file, "/usr/%s/data/resource", initd)) {
+    error("Only data/resource LWOs may be URI resource handlers.\n");
     return FALSE;
   }
   data_file = find_object(DRIVER)->normalize_path(data_file, "/usr/" + initd + "/", initd);
@@ -139,7 +134,7 @@ int add_resource_handler(string uri_prefix, string data_file) {
     return FALSE;
   }
   parsed_path = URI_PATH_P -> parse(uri_prefix);
-  resources[uri_prefix] = ({ parsed_path, data_file });
+  resources[uri_prefix] = ({ parsed_path, data_file, extra_params });
   paths -= ({ uri_prefix });
   for(i = 0, n = sizeof(paths); i < n; i++) {
     if(resources[paths[i]][0][0] < resources[uri_prefix][0][0]) {
@@ -186,9 +181,36 @@ object create_resource_handler(object request) {
         ob -> set_request(request);
         ob -> set_base(paths[i]);
         ob -> set_parameters(args);
+        if(resources[paths[i]][2])
+          ob -> set_parameters(resources[paths[i]][2]);
         return ob;
       }
     }
   }
   return nil;
+}
+
+# define HTTP_RESOURCE_CONFIG "/config/httpd.json"
+
+void update_resource_handlers_from_config() {
+  string json;
+  string *users;
+  string *urls;
+  string url_prefix;
+  int i, j, m, n;
+  mapping config;
+
+  resources = ([ ]);
+  paths = ({ });
+  json = read_file(HTTP_RESOURCE_CONFIG);
+  config = JSON_P -> from_json(json);
+  if(!config) return;
+  users = map_indices(config);
+  for(i = 0, n = sizeof(users); i < n; i++) {
+    urls = map_indices(config[users[i]]);
+    url_prefix = "/api/" + STRING_D -> lower_case(users[i]) + "/";
+    for(j = 0, m = sizeof(urls); j < m; j++) {
+      add_resource_handler(url_prefix + urls[j], "/usr/"+users[i]+"/data/resource/"+config[users[i]][urls[j]]["handler"], config[users[i]][urls[j]]["params"]);
+    }
+  }
 }

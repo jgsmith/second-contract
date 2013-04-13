@@ -219,6 +219,8 @@ mixed b8(object resource, object request, object response, mapping metadata) { /
     if( result >= 100 ) return result;
     if( result ) return "b7";
   }
+  if(request->get_method() == "OPTIONS") return "b7";
+
   if( typeof(result) == T_STRING && result ) {
     response -> add_header( "WWW-Authenticate", result );
   }
@@ -690,7 +692,7 @@ mixed p3(object resource, object request, object response, mapping metadata) { /
   handler = _get_acceptable_content_type_handler(resource, request);
   if(is_status_code(handler)) return handler;
 
-  result = call_other(resource, handler);
+  result = call_other(resource, handler, metadata);
   if(is_status_code(result)) return result;
   return "p11";
 }

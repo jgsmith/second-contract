@@ -9,8 +9,6 @@ inherit resource HTTP_RESOURCE_LIB;
 static void create(varargs int clone) {
   resource::create(clone);
 
-  set_authentication_flags(HTTP_ALLOWS_PUBLIC_READ);
-
   if(clone) {
   }
 }
@@ -18,14 +16,6 @@ static void create(varargs int clone) {
 int resource_exists() {
   return typeof(get_resource_id()) == T_NIL || 
          typeof(DOMAINS_D -> get_domain(get_resource_id())) != T_NIL;
-}
-
-mixed *content_types_provided() {
-  return ({ ({ "application/json", "to_json" }) });
-}
-
-mixed *content_types_accepted() {
-  return ({ ({ "application/json", "from_json" }) });
 }
 
 mapping data_for_domain(string d) {
@@ -43,6 +33,7 @@ mixed to_json(mapping metadata) {
 
   if(get_resource_id()) {
     return JSON_P -> to_json(data_for_domain(get_resource_id()) + ([
+      "name": get_resource_id(),
       "id": get_resource_id(),
     ]));
   }
@@ -54,6 +45,7 @@ mixed to_json(mapping metadata) {
       list += ({
         (i ? "," : "") +
         JSON_P -> to_json(data_for_domain(domains[i]) + ([
+          "name": domains[i],
           "id": domains[i],
         ]))
       });

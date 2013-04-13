@@ -133,36 +133,20 @@ int execute(object actor) {
     actions = verb_obj->get_action();
     adverb = verb_obj->get_modified_adverb(effective_adverb);
 
-    for(i = 0, n = sizeof(actions); i < n; i++) {
-      estmp = new_object(EVENT_SET);
-      e = new_object(EVENT_DATA);
-      e -> set_event_type("pre-" + actions[i]);
-      e -> set_object(actor);
-      e -> set_args(([
-        "actor": actor,
-        "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
-        "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
-        "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ })),
-        "topic": topic,
-        "evocation": evocation,
-        "verb": verb,
-        "adverb": adverbs,
-        "mods": adverb,
-      ]));
-      estmp -> add_guard(e);
-      e = new_object(e);
-      e -> set_event_type(actions[i]);
-      estmp -> add_consequent(e);
-      e = new_object(e);
-      e -> set_event_type("post-"+actions[i]);
-      estmp -> add_reaction(e);
-      if(e_set) e_set -> add_next(estmp);
-      else e_set = estmp;
-    }
+    estmp = actor -> build_event_sequence(actions, ([
+      "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
+      "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
+      "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ })),
+      "topic": topic,
+      "evocation": evocation,
+      "verb": verb,
+      "adverb": adverbs,
+      "mods": adverb,
+    ]));
     /* if successful, then return - otherwise, remove the handler and
      * try again
      */
-    if(EVENTS_D -> run_event_set(e_set)) return TRUE;
+    if(e_set && EVENTS_D -> run_event_set(e_set)) return TRUE;
   }
   
   /* if we get here, we weren't able to act on the command */

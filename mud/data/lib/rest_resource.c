@@ -49,6 +49,7 @@ void set_resource_id(string id) {
   parameters["id"] = id;
 }
 
+string get_parameter(string p) { return parameters[p]; }
 string get_parameters(string p) { return parameters[p]; }
 
 void set_parameters(mapping p) { parameters += p; }
@@ -76,6 +77,8 @@ int service_available() { return 1; }
  */
 mixed is_authorized(string auth) { 
   string *bits;
+
+  if(request -> get_method() == "OPTIONS") return TRUE;
 
   if((auth_flags & HTTP_ALLOWS_PUBLIC_READ) && (request->get_method() == "GET" || request->get_method() == "HEAD" || request->get_method() == "OPTIONS")) {
     return TRUE;
@@ -171,9 +174,19 @@ string base_uri() { return nil; }
 
 int process_post() { return 0; }
 
+mixed *content_types_provided() {
+  return ({ ({ "application/json", "to_json" }) });
+}
+
+mixed *content_types_accepted() {
+  return ({ ({ "application/json", "from_json" }) });
+}
+
+/* 
 mixed *content_types_provided() { return ({ }); }
 
 mixed *content_types_accepted() { return ({ }); }
+*/
 
 mixed *charsets_provided() { return ({ }); }
 

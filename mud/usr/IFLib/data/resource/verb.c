@@ -24,14 +24,6 @@ int resource_exists() {
          typeof(VERB_D -> get_verb(get_resource_id())) != T_NIL;
 }
 
-mixed *content_types_provided() {
-  return ({ ({ "application/json", "to_json" }) });
-}
-
-mixed *content_types_accepted() {
-  return ({ ({ "application/json", "from_json" }) });
-}
-
 mapping data_for_verb(string verb) {
   object verb_data;
 

@@ -12,7 +12,7 @@
 inherit rsrc API_RSRC;
 inherit access API_ACCESS;
 
-static int create(varargs int clone) {
+static void create(varargs int clone) {
     object driver;
     object telnet_manager;
     object http_manager;
@@ -72,11 +72,8 @@ static int create(varargs int clone) {
     if(!find_object(IFLIB_INIT)) compile_object(IFLIB_INIT);
     if(!find_object(GAMELIB_INIT)) compile_object(GAMELIB_INIT);
 
-    TOOLLIB_INIT -> initialize_data();
-    DEVLIB_INIT -> initialize_data();
-    WORLDLIB_INIT -> initialize_data();
-    IFLIB_INIT -> initialize_data();
-    GAMELIB_INIT -> initialize_data();
+    http_manager -> update_resource_handlers_from_config();
+}
 
-    http_manager -> add_resource_handler("/api/system", HTTP_SYSTEM_RESOURCE);
+void upgraded(varargs int clone) {
 }

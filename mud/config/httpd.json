@@ -1,0 +1,47 @@
+{
+  "System": {
+    "": { "handler": "system" }
+  },
+  "IFLib": {
+    "verb": { "handler": "verb" },
+    "verb/:id": { "handler": "verb" }
+  },
+  "WorldLib": {
+
+    "domain":     { "handler": "domain" },
+    "domain/:id": { "handler": "domain" },
+
+    "area/:domain_id":     { "handler": "area" },
+    "area/:domain_id/:id": { "handler": "area" },
+
+    "ward/:domain_id/:area_id":     { "handler": "ward" },
+    "ward/:domain_id/:area_id/:id": { "handler": "ward" },
+
+    "thing/:domain_id/:area_id/:ward_id":     { "handler": "thing" },
+    "thing/:domain_id/:area_id/:ward_id/:id": { "handler": "thing" },
+    "scene/:domain_id/:area_id": {
+      "handler": "thing",
+      "params" : { "ward_id": "scene" }
+    },
+    "scene/:domain_id/:area_id/:id": {
+      "handler": "thing",
+      "params" : { "ward_id": "scene" }
+    },
+    "path/:domain_id/:area_id": {
+      "handler": "thing",
+      "params" : { "ward_id": "path" }
+    },
+    "path/:domain_id/:area_id/:id": {
+      "handler": "thing",
+      "params" : { "ward_id": "path" }
+    },
+    "terrain/:domain_id/:area_id": {
+      "handler": "thing",
+      "params" : { "ward_id": "terrain" }
+    },
+    "terrain/:domain_id/:area_id/:id": {
+      "handler": "thing",
+      "params" : { "ward_id": "terrain" }
+    }
+  }
+}

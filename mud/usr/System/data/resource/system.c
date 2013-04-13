@@ -19,14 +19,6 @@ void create(varargs int clone) {
 /* this isn't a collection of resources */
 int resource_exists() { return TRUE; }
 
-mixed *content_types_provided() {
-  return ({ ({ "application/json", "to_json" }) });
-}
-
-mixed *content_types_accepted() {
-  return ({ ({ "application/json", "from_json" }) });
-}
-
 mixed from_json(mapping metadata) {
   mixed info;
   string json;

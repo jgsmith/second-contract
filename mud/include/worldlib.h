@@ -20,6 +20,7 @@
 # define DOMAINS_D   "/usr/WorldLib/sys/domains"
 # define TASKS_D     "/usr/WorldLib/sys/tasks"
 # define SKILLS_D    "/usr/WorldLib/sys/skills"
+# define CALENDAR_D  "/usr/WorldLib/sys/calendar"
 
 # define ID_DATA_LIB     "/usr/WorldLib/data/lib/id"
 # define DETAIL_DATA_LIB "/usr/WorldLib/data/lib/detail"
@@ -37,3 +38,6 @@
 # define SURFACE_THING 4
 
 # define HTTP_DOMAIN_RESOURCE "/usr/WorldLib/data/resource/domain"
+# define HTTP_AREA_RESOURCE "/usr/WorldLib/data/resource/area"
+# define HTTP_THING_RESOURCE "/usr/WorldLib/data/resource/thing"
+# define HTTP_WARD_RESOURCE "/usr/WorldLib/data/resource/ward"

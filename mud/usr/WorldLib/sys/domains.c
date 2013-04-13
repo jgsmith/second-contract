@@ -25,6 +25,10 @@ object DOMAIN_DATA get_domain(string id) {
 
 string *get_domains() { return map_indices(domains); }
 
+void remove_domain(string id) {
+  domains[id] = nil;
+}
+
 object DOMAIN_DATA create_domain(string id) {
   /* TODO: make sure previous object is the REST resource object */
   if(domains[id]) return nil;

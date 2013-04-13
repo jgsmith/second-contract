@@ -40,6 +40,13 @@ static void create(varargs int clone) {
   id::create(clone);
 }
 
+void destructed(int clone) {
+  if(SYSTEM()) {
+    actions::destructed(clone);
+    ur::destructed(clone);
+  }
+}
+
 atomic void set_ur_object_path(string path) {
   ur::set_ur_object_path(path);
   bulk::set_ur_object(ur::get_ur_object());
