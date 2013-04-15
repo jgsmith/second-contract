@@ -94,6 +94,13 @@ int add_ward(string name) {
   return TRUE;
 }
 
+int rename_ward(string from, string to) {
+  if(!wards[from] || wards[to]) return FALSE;
+  wards[to] = wards[from];
+  wards[from] = nil;
+  return TRUE;
+}
+
 string *get_wards() {
   return map_indices(wards);
 }
@@ -160,7 +167,7 @@ atomic object create_placed_object(string ward, string ur_name, object dest, int
 }
 
 int add_object(string ward, object ur) {
-  if(!wards[ward]) return 0;
+  if(!wards[ward]) return FALSE;
   return wards[ward] -> add_object(ur);
 }
 

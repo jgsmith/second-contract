@@ -83,8 +83,8 @@ mixed get_properties() {
     /* "reputation": reputations::get_properties(),
     "skill": skills::get_properties(),
     "stat": stats::get_properties(),
-    "trait": traits::get_properties(),
-    "id": id::get_properties(), */
+    "trait": traits::get_properties(), */
+    "ident": id::get_properties(),
     "events": actions::get_event_handler_source(),
   ]);
   return info;

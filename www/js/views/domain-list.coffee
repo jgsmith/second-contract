@@ -1,15 +1,22 @@
-SC.Views.DomainList = Backbone.View.extend
+class SC.Views.DomainList extends Backbone.View
   initialize: ->
-    this.model.bind 'reset', this.render, this
-    this.model.bind 'add', this.appendNewDomain, this
-    this.template = _.template $('#domain-list-template').html()
+    @model.bind 'reset', @render, this
+    @model.bind 'add', @appendNewDomain, this
+    @template = _.template $('#domain-list-template').html()
 
   render: ->
-    this.$el.html this.template {}
-    this.$ul = this.$el.find("ul").first()
-    for domain in this.model.models
-      this.appendNewDomain domain
-    this.el
+    @$el.html @template {}
+    @$ul = @$el.find("ul").first()
+    for domain in @model.models
+      @appendNewDomain domain
+    @el
 
   appendNewDomain: (domain) ->
-    this.$ul.append(new SC.Views.DomainListItem({model:domain}).render())
+    @$ul.append(new SC.Views.DomainListItem({model:domain}).render())
+
+$("#new-domain-modal").find(".btn-primary").click (e) ->
+  e.preventDefault()
+  domain_name = $("#new-domain-modal").find("input[name='name']").val()
+  SC.Collections.domains.create
+    name: domain_name
+  $("#new-domain-modal").modal('hide')

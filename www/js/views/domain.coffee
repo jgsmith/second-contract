@@ -1,30 +1,28 @@
-SC.Views.Domain = Backbone.View.extend
+class SC.Views.Domain extends Backbone.View
   initialize: ->
-    this.template = _.template $('#domain-template').html()
-    this.listenTo this.model, 'change', this.render
+    @template = _.template $('#domain-template').html()
+    @listenTo @model, 'change', @render
 
   events:
     'click .save': 'save'
 
   render: ->
-    json = this.model.toJSON()
-    this.$el.html this.template json
-    if this.model.isNew()
-      this.$el.find("h1").text("New Domain")
-    this.el
+    json = @model.toJSON()
+    @$el.html @template json
+    areaList = new SC.Views.AreaList
+      model: @model.areas
+      domain: @model.get('name')
+    @$el.find("#domain-areas").html areaList.render()
+    @el
 
   save: (e) ->
     e.preventDefault()
     data =
-      name: this.$('input[name="name"]').val()
-      description: this.$('input[name="description"]').val()
-      plan: this.$('textarea[name="plan"]').val()
-    this.model.set data
+      name: @$('input[name="name"]').val()
+      description: @$('input[name="description"]').val()
+      plan: @$('textarea[name="plan"]').val()
+    @model.set data
 
-    if this.model.isNew()
-      SC.Collections.domains.create this.model,
-        success: => console.log "Saved!"
-    else
-      this.model.save()
+    @model.save()
 
     false

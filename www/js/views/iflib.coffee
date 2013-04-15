@@ -1,7 +1,7 @@
-SC.Views.IFLib = Backbone.View.extend
+class SC.Views.IFLib extends Backbone.View
   initialize: ->
-    this.template = _.template $("#iflib-template").html()
+    @template = _.template $("#iflib-template").html()
 
   render: ->
-    this.$el.html this.template({})
-    this.el
+    @$el.html @template({})
+    @el

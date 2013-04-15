@@ -119,19 +119,19 @@ private int add_resource_handler(string uri_prefix, string data_file, varargs ma
   string *parsed_path;
   object po;
 
-  if(!sscanf(data_file, "/usr/%s/data/resource", initd)) {
-    error("Only data/resource LWOs may be URI resource handlers.\n");
-    return FALSE;
-  }
+  if(!sscanf(data_file, "/usr/%s/data/resource", initd))
+    error("Only data/resource LWOs may be URI resource handlers");
+  if(sizeof(explode(initd, "/")) > 1)
+    error("Illegal resource owner: " + initd);
   data_file = find_object(DRIVER)->normalize_path(data_file, "/usr/" + initd + "/", initd);
 
-  if(strlen(data_file) < strlen(initd)+19) {
-    error("The datafile (" + data_file + ") is not a valid resource for " + initd + ".");
-    return FALSE;
-  }
-  if(data_file[0..strlen(initd)+19] != "/usr/"+initd+"/data/resource/") {
-    error("The datafile (" + data_file + ") is not a valid resource for " + initd + ".");
-    return FALSE;
+  if(strlen(data_file) < strlen(initd)+19)
+    error("The datafile (" + data_file + ") is not a valid resource for " + initd);
+  if(data_file[0..strlen(initd)+19] != "/usr/"+initd+"/data/resource/")
+    error("The datafile (" + data_file + ") is not a valid resource for " + initd);
+  if(!find_object(data_file)) {
+    compile_object(data_file);
+    if(!find_object(data_file)) return FALSE;
   }
   parsed_path = URI_PATH_P -> parse(uri_prefix);
   resources[uri_prefix] = ({ parsed_path, data_file, extra_params });

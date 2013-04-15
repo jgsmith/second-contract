@@ -11,6 +11,8 @@ inherit resource HTTP_RESOURCE_LIB;
 
 object HOSPITAL_OBJ hospital;
 object resource_obj;
+object domain;
+object area;
 
 static void create(varargs int clone) {
   resource::create(clone);
@@ -28,8 +30,6 @@ static void create(varargs int clone) {
  */
 int resource_exists() {
   string area_id, ward_id;
-  object domain;
-  object area;
 
   domain = DOMAINS_D -> get_domain(get_parameter("domain_id"));
   if(!domain) return FALSE;
@@ -43,42 +43,67 @@ int resource_exists() {
    * unless ward_id is scene, path, or terrain
    */
   ward_id = get_parameter("ward_id");
-  (users())[0]->message("ward: " + (ward_id ? ward_id : "<none>") + "\n");
-  if(!ward_id) return FALSE;
+  if(typeof(ward_id) == T_NIL || ward_id == "") return FALSE;
   if(area) {
     switch(ward_id) {
       case "scene": 
+        if(typeof(get_resource_id()) == T_NIL) return TRUE;
         resource_obj = area -> get_scene(get_resource_id());
         return resource_obj ? TRUE : FALSE;
       case "path":
+        if(typeof(get_resource_id()) == T_NIL) return TRUE;
         resource_obj = area -> get_path(get_resource_id());
         return resource_obj ? TRUE : FALSE;
       case "terrain":
+        if(typeof(get_resource_id()) == T_NIL) return TRUE;
         resource_obj = area -> get_terrain(get_resource_id());
         return resource_obj ? TRUE : FALSE;
     }
   }
+  if(typeof(get_resource_id()) == T_NIL && hospital && hospital -> get_ward(ward_id)) return TRUE;
   resource_obj = hospital -> get_object(ward_id, get_resource_id());
   return resource_obj ? TRUE : FALSE;
 }
 
-mapping data_for_thing(string d) {
-  object thing;
-
-  if(thing) return thing -> get_properties();
-  else return ([ ]);
-}
-
-/* we don't handle collections at the moment - that's for a different
- * resource handler
- */
 mixed to_json(mapping metadata) {
-  return JSON_P -> to_json(resource_obj->get_properties()) + ([
-    "id": get_resource_id(),
-  ]);
+  string *list;
+  string ward_id;
+  mapping items;
+  string *keys;
+  int i, n;
+
+  if(resource_obj) {
+    return JSON_P -> to_json(resource_obj->get_properties() + ([
+      "id": get_resource_id(),
+    ]));
+  }
+  else {
+    list = ({ "[" });
+    ward_id = get_parameter("ward_id");
+    if(area) {
+      switch(ward_id) {
+        case "scene": items = area -> get_scene_mapping(); break;
+        case "path":  items = area -> get_path_mapping(); break;
+        case "terrain":  items = area -> get_terrain_mapping(); break;
+        default: items = area -> get_objects(ward_id); break;
+      }
+    }
+    if(items) {
+      keys = map_indices(items);
+      for(i = 0, n = sizeof(keys); i < n; i++) {
+        list += ({ (i ? "," : "") +
+          JSON_P -> to_json(items[keys[i]]->get_properties() + ([
+            "id": keys[i],
+          ]))
+        });
+      }
+    }
+    list += ({ "]" });
+    return list;
+  }
 }
 
-void transfer_info(object obj, string *path, mapping info) {
+atomic void transfer_info(object obj, string *path, mapping info) {
   string *keys;
   int i, n;
 
@@ -91,19 +116,45 @@ void transfer_info(object obj, string *path, mapping info) {
       obj -> set_property(path + ({ keys[i] }), info[keys[i]]);
     }
   }
+
+  if(info["ident"]) {
+    if(info["ident"]["name"]) obj -> set_name(info["ident"]["name"]);
+    if(info["ident"]["cap_name"]) obj -> set_cap_name(info["ident"]["cap_name"]);
+  }
 }
 
-mixed from_json(mapping metadata) {
+atomic mixed from_json(mapping metadata) {
   mixed info;
   string json;
+  string id;
+  int stat;
+  string ward_id;
 
   json = implode(get_request()->get_body(), "");
   info = JSON_P -> from_json(json);
   if(typeof(info) == T_NIL) return 400;
+  id = get_resource_id();
+
+  if(!id) return 400;
 
   if(!resource_obj) {
     /* we're creating a resource */
+    ward_id = get_parameter("ward_id");
+    if(!area || !ward_id) return 400;
+
     resource_obj = clone_object(THING_OBJ);
+    switch(ward_id) {
+      case "scene": stat = area -> add_scene(id, resource_obj); break;
+      case "path": stat = area -> add_path(id, resource_obj); break;
+      case "terrain": stat = area -> add_terrain(id, resource_obj); break;
+      default:
+        stat = area -> add_object(ward_id, resource_obj);
+        break;
+    }
+    if(!stat) {
+      destruct_object(resource_obj);
+      return 400;
+    }
   }
 
   if(!resource_obj) return 404;

@@ -1,0 +1,12 @@
+.modal.hide.fade#new-area-ward-modal(role="dialog" aria-hidden="true")
+  .modal-header
+    %button.close(type="button" data-dismiss="modal" aria-hidden="true") x
+    %h3 New Category
+  .modal-body
+    %label.control-label Name:
+    .controls
+      %input.input-block-level(name="name" type="text" placeholder="name of category")/
+  .modal-footer
+    %button.btn(data-dismiss="modal" aria-hidden="true") Close
+    %button.btn.btn-primary Create Category
+

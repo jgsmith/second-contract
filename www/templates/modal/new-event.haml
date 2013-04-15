@@ -1,0 +1,12 @@
+.modal.hide.fade#new-event-modal(role="dialog" aria-hidden="true")
+  .modal-header
+    %button.close(type="button" data-dismiss="modal" aria-hidden="true") x
+    %h3 New Event
+  .modal-body
+    %label.control-label Verbs:
+    .controls
+      %input.input-block-level(name="name" type="text" placeholder="event name")/
+  .modal-footer
+    %button.btn(data-dismiss="modal" aria-hidden="true") Close
+    %button.btn.btn-primary Add Event
+

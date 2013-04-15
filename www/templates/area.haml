@@ -1,0 +1,53 @@
+#area-template
+  %form.form-horizontal
+    .btn-group(style="float: right;")
+      %button.btn.save(type="submit") Save
+      %button.btn-danger(type="submit") Delete
+    %ul.nav.nav-tabs
+      %li.active
+        %a(href="#area-id" data-toggle="tab") Id
+      %li
+        %a(href="#area-locations" data-toggle="tab") Locations
+      %li
+        %a(href="#area-map" data-toggle="tab") Map
+      %li
+        %a(href="#area-templates" data-toggle="tab") Templates
+      %li
+        %a(href="#area-population" data-toggle="tab") Population
+      %li
+        %a(href="#area-items" data-toggle="tab") Items
+
+    .tab-content
+      .tab-pane.active#area-id
+        .control-group
+          %label.control-label Name:
+          .controls
+            %input.input-block-level(name="name" type="text" value="{{ data.name }}")/
+          %label.control-label Owner:
+          .controls
+            %input.input-block-level(name="owner" type="text" value="{{ data.owner }}")/
+      .tab-pane#area-locations
+        %h2
+          Scenes
+          %a.btn(href="#new-area-scene-modal" data-toggle="modal")
+            Create New Scene
+        #area-scenes
+        %h2
+          Paths
+          %a.btn(href="#new-area-path-modal" data-toggle="modal")
+            Create New Path
+        #area-paths
+        %h2
+          Terrains
+          %a.btn(href="#new-area-terrain-modal" data-toggle="modal")
+            Create New Terrain
+        #area-terrains
+      .tab-pane#area-map
+        .row-fluid
+          .span2.controls
+          .span10#area-map-raphael-canvas.raphael-canvas(style="border: 1px solid #cccccc;")
+      .tab-pane#area-templates
+        %a.btn(href="#new-area-ward-modal" data-toggle="modal")
+          Create New Category
+      .tab-pane#area-population
+      .tab-pane#area-items

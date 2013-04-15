@@ -1,17 +1,17 @@
-SC.Views.System = Backbone.View.extend
+class SC.Views.System extends Backbone.View
   initialize: ->
-    this.template = _.template $('#system-template').html()
+    @template = _.template $('#system-template').html()
 
   events:
     "click #save-system-name": "saveSystemInfo"
 
   saveSystemInfo: (e) ->
     e.preventDefault()
-    this.model.set
+    @model.set
       name: $("#system-name").val()
-    this.model.save()
+    @model.save()
     false
 
   render: ->
-    this.$el.html this.template this.model.toJSON()
-    this.el
+    @$el.html @template @model.toJSON()
+    @el

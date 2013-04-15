@@ -1,18 +1,18 @@
-SC.Views.Login = Backbone.View.extend
+class SC.Views.Login extends Backbone.View
   initialize: ->
-    this.template = _.template $("#login-template").html()
+    @template = _.template $("#login-template").html()
 
   render: ->
-    this.$el.html this.template({})
-    this.el
+    @$el.html @template({})
+    @el
 
   events:
     "click .login": "doLogin"
 
   doLogin: (e) ->
     e.preventDefault();
-    email = this.$("input[name='email']").val();
-    passwd = this.$("input[name='password']").val();
+    email = @$("input[name='email']").val();
+    passwd = @$("input[name='password']").val();
     # TODO: make this cross-browser - only works on Chrome or Mozilla for now
     auth_header = btoa(email + ":" + passwd)
     $("#logged-in-as").text(email);

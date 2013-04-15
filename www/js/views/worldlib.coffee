@@ -1,7 +1,7 @@
-SC.Views.WorldLib = Backbone.View.extend
+class SC.Views.WorldLib extends Backbone.View
   initialize: ->
-    this.template = _.template $("#worldlib-template").html()
+    @template = _.template $("#worldlib-template").html()
 
   render: ->
-    this.$el.html this.template({})
-    this.el
+    @$el.html @template({})
+    @el

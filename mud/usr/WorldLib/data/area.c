@@ -43,6 +43,38 @@ object get_scene(string nom) { return scenes[nom]; }
 object get_path(string nom) { return paths[nom]; }
 object get_terrain(string nom) { return terrains[nom]; }
 
+int add_scene(string id, object THING_OBJ s) {
+  if(scenes[id] || !s) return FALSE;
+  scenes[id] = s;
+  return TRUE;
+}
+int add_path(string id, object THING_OBJ s) {
+  if(paths[id] || !s) return FALSE;
+  paths[id] = s;
+  return TRUE;
+}
+int add_terrain(string id, object THING_OBJ s) {
+  if(terrains[id] || !s) return FALSE;
+  terrains[id] = s;
+  return TRUE;
+}
+
+mapping get_scene_mapping() {
+  if(explode(object_name(previous_object()),"#")[0] == HTTP_THING_RESOURCE)
+    return scenes;
+  return ([ ]);
+}
+mapping get_path_mapping() {
+  if(explode(object_name(previous_object()),"#")[0] == HTTP_THING_RESOURCE)
+    return paths;
+  return ([ ]);
+}
+mapping get_terrain_mapping() {
+  if(explode(object_name(previous_object()),"#")[0] == HTTP_THING_RESOURCE)
+    return terrains;
+  return ([ ]);
+}
+
 mapping get_properties() {
   mapping info;
 
@@ -85,8 +117,6 @@ atomic void empty_area() {
 
   dest = new_object(LOCATION_DATA);
   dest -> set_object(HOSPITAL_D -> get_world_room());
-  destroy_inventory(top_room, dest);
-  destruct_object(top_room);
   /* now go through scenes, etc., and do the same for any that are left */
   items = map_values(scenes) - ({ nil });
   for(i = 0, n = sizeof(items); i < n; i++) {

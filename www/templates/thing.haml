@@ -1,29 +1,40 @@
 #thing-template
-  %h1 Thing
   %form.form-horizontal
+    .btn-group(style="float: right;")
+      %button.btn.save(type="submit") Save
+      %button.btn-danger(type="submit") Delete
     %ul.nav.nav-tabs
+      %li.active
+        %a(href="#thing-ident" data-toggle="tab") Identity
       %li
-        %a(href="#thing-id" data-toggle="tab") ID
-      %li
-        %a(href="#thing-detail" data-toggle="tab") Details
+        %a(href="#thing-details" data-toggle="tab") Details
       %li
         %a(href="#thing-events" data-toggle="tab") Events
 
     .tab-content
-      .tab-pane.active(id="thing-id")
+      .tab-pane.active#thing-ident
         .control-group
-          %label.control-label Nouns:
+          %label.control-label Ur Object:
           .controls
-            %input.input-block-level(name="nouns" type="text" value='{{ (data.nouns||[]).join(", ") }}')/
+            %select(name="ur.domain")
+            %select(name="ur.area")
+            %select(name="ur.ward")
+            %select(name="ur.item")
         .control-group
-          %label.control-label Adjectives:
+          %label.control-label Name:
           .controls
-            %input.input-block-level(name="adjectives" type="text" value='{{ (data.adjectives||[]).join(", ") }}')/
+            %input.input-block-level(name="ident.name" type="text" value="{{ data.ident.name }}")/
         .control-group
-          %label.control-label Plural Nouns:
+          %label.control-label Capitalized Name:
           .controls
-            %input.input-block-level(name="plural-nouns" type="text" value='{{ (data.plural_nouns||[]).join(", ") }}')/
+            %input.input-block-level(name="ident.cap_name" type="text" value="{{ data.ident.cap_name }}")/
+      .tab-pane#thing-details
+        
+      .tab-pane#thing-events
         .control-group
-          %label.control-label Plural Adjectives:
+          %label.control-label Event:
           .controls
-            %input.input-block-level(name="plural-adjectives" type="text" value='{{ (data.plural_adjectives||[]).join(", ") }}')/
+            %select.event-selection
+            %a.btn(href="#new-event-modal" data-toggle="modal")
+              %i.icon.icon-plus
+        #thing-event-editor(style="position: relative !important; height: 40em; border: 1px solid #cccccc")

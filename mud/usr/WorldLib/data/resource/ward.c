@@ -20,12 +20,13 @@ static void create(varargs int clone) {
  */
 int resource_exists() {
   object domain;
+  string domain_id, area_id;
 
-  if(!get_parameter("domain_id")) return FALSE;
-  if(!get_parameter("area_id")) return FALSE;
-  domain = DOMAINS_D -> get_domain(get_parameter("domain_id"));
+  if(!(domain_id = get_parameter("domain_id"))) return FALSE;
+  if(!(area_id = get_parameter("area_id"))) return FALSE;
+  domain = DOMAINS_D -> get_domain(domain_id);
   if(!domain) return FALSE;
-  area = domain -> get_area(get_parameter("area_id"));
+  area = domain -> get_area(area_id);
   if(!area) return FALSE;
   if(typeof(get_resource_id()) == T_NIL ||
      area -> get_ward(get_resource_id())) return TRUE;
@@ -35,15 +36,15 @@ int resource_exists() {
 mixed to_json(mapping metadata) {
   string *list;
   string *wards;
-  object ward;
   int i, n;
 
   if(get_resource_id()) {
-    ward = area -> get_ward(get_resource_id());
-    return JSON_P -> to_json(ward->get_properties() + ([
+    return JSON_P -> to_json(([
       "id": get_resource_id(),
+      "name": get_resource_id(),
       "area": get_parameter("area_id"),
       "domain": get_parameter("domain_id"),
+      "objects": map_indices(area->get_objects(get_resource_id())),
     ]));
   }
   else {
@@ -52,10 +53,12 @@ mixed to_json(mapping metadata) {
     for(i = 0, n = sizeof(wards); i < n; i++) {
       list += ({ 
         (i ? "," : "") +
-        JSON_P -> to_json(area->get_ward(wards[i])->get_properties() + ([
-          "id": get_resource_id(),
-           "area": get_parameter("area_id"),
-           "domain": get_parameter("domain_id"),
+        JSON_P -> to_json(([
+          "id": wards[i],
+          "name": wards[i],
+          "area": get_parameter("area_id"),
+          "domain": get_parameter("domain_id"),
+          "objects": map_indices(area->get_objects(wards[i])),
         ])) 
       });
     }
@@ -67,8 +70,8 @@ mixed to_json(mapping metadata) {
 mixed from_json(mapping metadata) {
   mixed info;
   string json;
-  object ward;
   string id;
+  int has_ward;
 
   json = implode(get_request()->get_body(), "");
   info = JSON_P -> from_json(json);
@@ -77,13 +80,12 @@ mixed from_json(mapping metadata) {
   id = get_resource_id();
   if(!id) id = info["name"];
   if(!id) return 400;
-  ward = area -> get_ward(id);
-  if(!ward) {
-    ward = area -> create_ward(id);
+  if(!area -> query_ward_exists(id)) {
+    if(!area -> add_ward(id)) return 409;
   }
-  if(!ward) return 404;
 
-  if(id != info["name"]) area -> rename_ward(id, info["name"]);
+  if(id != info["name"]) 
+    if(!area -> rename_ward(id, info["name"])) return 409;
 
   return 200;
 }

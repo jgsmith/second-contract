@@ -32,7 +32,7 @@ mapping get_event_handler_source() {
 atomic mixed set_event_handler_source(mapping s) {
   mixed ret;
   if(!s) return TRUE;
-  s = event_handler_source + s;
+  if(event_handler_source) s = event_handler_source + s;
   if((ret = EVENT_SCRIPT_D -> set_event_handlers(s)) == 1) {
     event_handler_source = s;
     return TRUE;

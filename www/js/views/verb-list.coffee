@@ -1,15 +1,30 @@
-SC.Views.VerbList = Backbone.View.extend
+class SC.Views.VerbList extends Backbone.View
   initialize: ->
-    this.model.bind 'reset', this.render, this
-    this.model.bind 'add', this.appendNewVerb, this
-    this.template = _.template $('#verb-list-template').html()
+    @model.bind 'reset', @render, this
+    @model.bind 'add', @appendNewVerb, this
+    @template = _.template $('#verb-list-template').html()
 
   render: ->
-    this.$el.html this.template {}
-    this.$ul = this.$el.find("ul").first()
-    for verb in this.model.models
-      this.appendNewVerb verb
-    this.el
+    @$el.html @template {}
+    @$ul = @$el.find("ul").first()
+    for verb in @model.models
+      @appendNewVerb verb
+    @el
 
   appendNewVerb: (verb) ->
-    this.$ul.append(new SC.Views.VerbListItem({model:verb}).render())
+    @$ul.append(new SC.Views.VerbListItem({model:verb}).render())
+
+$("#new-verb-modal").find(".btn-primary").click (e) ->
+  e.preventDefault()
+  verbs = $("#new-verb-modal").find("input[name='verbs']").val()
+  if verbs?
+    verbs = verbs.split(/\s*,\s*/)
+    console.log "Verbs:", verbs
+    data =
+      verb: verbs
+      disabled: true
+    console.log "Creating verb"
+    SC.Collections.verbs.create data,
+      wait: true
+    
+  $("#new-verb-modal").modal('hide')

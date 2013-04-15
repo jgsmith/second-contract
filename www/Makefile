@@ -2,6 +2,7 @@ TMPL_DIR = ./templates
 JS_DIR = ./js
 
 TEMPLATES = ${TMPL_DIR}/*.haml
+MODALS = ${TMPL_DIR}/modal/*.haml
 VIEWS = ${JS_DIR}/views/*.coffee
 MODELS = ${JS_DIR}/models/*.coffee
 
@@ -23,12 +24,16 @@ index.html: index.haml
 	@@echo "Building index.html"
 	/usr/bin/haml index.haml > index.html
 
-index.haml: index.haml.pre index.haml.post ${TEMPLATES}
+index.haml: index.haml.pre index.haml.post ${TEMPLATES} ${MODALS}
 	@@echo "Building index.haml"
 
 	@@cp index.haml.pre index.haml
 	@@for i in ${TEMPLATES}; do \
 		cat $$i | sed 's/^/      /' >> index.haml; \
+		echo >> index.haml; \
+	done
+	@@for i in ${MODALS}; do \
+		cat $$i | sed 's/^/    /' >> index.haml; \
 		echo >> index.haml; \
 	done
 	@@cat index.haml.post >> index.haml

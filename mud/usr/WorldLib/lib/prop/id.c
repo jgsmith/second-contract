@@ -19,6 +19,13 @@ mixed get_property(string *path) {
   }
 }
 
+mapping get_properties() {
+  return ([
+    "name": name,
+    "cap_name": cap_name,
+  ]);
+}
+
 /* We can't use set_property for this - only set_name */
 mixed set_property(string *path, mixed value) { return FALSE; }
 

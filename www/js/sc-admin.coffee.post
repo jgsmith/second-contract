@@ -2,13 +2,16 @@
     routes : 
       "": "system"
       "iflib/verb": "verbs"
-      "iflib/verb/new": "newVerb"
       "iflib/verb/:id": "verb"
       "iflib": "iflib"
       "worldlib": "worldlib"
       "worldlib/domain": "domains"
-      "worldlib/domain/new": "newDomain"
       "worldlib/domain/:id": "domain"
+      "worldlib/area/:domain_id/:id": "area"
+      "worldlib/thing/:domain_id/:area_id/:ward_id/:id": "areaThing"
+      "worldlib/scene/:domain_id/:area_id/:id": "sceneThing"
+      "worldlib/path/:domain_id/:area_id/:id": "pathThing"
+      "worldlib/terrain/:domain_id/:area_id/:id": "terrainThing"
       "login": "login"
       "denied": "denied"
     currentViews :
@@ -16,7 +19,6 @@
       "#sidebar": null
 
     login: ->
-      console.log "Showing login screen"
       this.showView "#main", new SC.Views.Login()
 
     denied: ->
@@ -25,54 +27,112 @@
     system: ->
       me = this
       SC.Models.system.fetch
-        success: ->
-          me.showView "#main", new SC.Views.System
+        success: =>
+          this.showView "#main", new SC.Views.System
             model: SC.Models.system
-          me.showNav ""
+          this.showNav ""
+          this.showCrumbs()
 
     iflib: ->
       this.showView "#main", new SC.Views.IFLib()
       this.showNav "iflib"
+      this.showCrumbs [
+        [ "#iflib", "IFLib" ]
+      ]
 
     worldlib: ->
       this.showView "#main", new SC.Views.WorldLib()
       this.showNav "worldlib"
+      this.showCrumbs [
+        [ "#worldlib", "WorldLib" ]
+      ]
 
     domains: ->
-      me = this
       SC.Collections.domains.fetch
-        success: ->
-          me.showView "#sidebar", new SC.Views.DomainList
+        success: =>
+          this.showView "#main", new SC.Views.DomainList
             model: SC.Collections.domains
-          me.showNav "worldlib"
-
-    newDomain: ->
-      this.showView "#main", new SC.Views.Domain
-        model: new SC.Collections.domains.model
-      this.showNav "worldlib"
+          this.showNav "worldlib"
+          this.showCrumbs [
+            [ "#worldlib", "WorldLib" ]
+            [ "#worldlib/domain", "Domains" ]
+          ]
 
     domain: (id) ->
+      model = SC.Collections.domains.get id
       this.showView "#main", new SC.Views.Domain
-        model: SC.Collections.domains.get id
+        model: model
       this.showNav "worldlib"
+      doCrumbs = =>
+        this.showCrumbs [
+          [ "#worldlib", "WorldLib" ]
+          [ "#worldlib/domain", "Domains" ]
+          [ "#worldlib/domain/#{id}", model.get('name') ]
+        ]
+      doCrumbs()
+      model.on 'change:name', doCrumbs
+
+    sceneThing: (domain_id, area_id, id) ->
+      domain = SC.Collections.domains.get domain_id
+      area = domain.areas.get area_id
+      thing = area.scenes.get id
+      this.showView "#main", new SC.Views.Thing
+        model: thing
+      this.showNav "worldlib"
+      doCrumbs = =>
+        this.showCrumbs [
+          [ "#worldlib", "WorldLib" ]
+          [ "#worldlib/domain", "Domains" ]
+          [ "#worldlib/domain/#{domain_id}", domain.get('name') ]
+          [ "#worldlib/area/#{domain_id}/#{area_id}", area.get('name') ]
+          "Scene"
+          [ "#worldlib/area/#{domain_id}/#{area_id}/#{id}", id ]
+        ]
+      doCrumbs()
+      domain.on 'change:name', doCrumbs
+      area.on 'change:name', doCrumbs
+
+    area: (domain_id, id) ->
+      domain = SC.Collections.domains.get domain_id
+      area = domain.areas.get id
+      this.showView "#main", new SC.Views.Area
+        model: area
+      this.showNav "worldlib"
+      doCrumbs = =>
+        this.showCrumbs [
+          [ "#worldlib", "WorldLib" ]
+          [ "#worldlib/domain", "Domains" ]
+          [ "#worldlib/domain/#{domain_id}", domain.get('name') ]
+          [ "#worldlib/area/#{domain_id}/#{id}", area.get('name') ]
+        ]
+      doCrumbs()
+      domain.on 'change:name', doCrumbs
+      area.on 'change:name', doCrumbs
 
     verbs: ->
-      me = this
       SC.Collections.verbs.fetch
-        success: ->
-          me.showView "#sidebar", new SC.Views.VerbList
+        success: =>
+          this.showView "#main", new SC.Views.VerbList
             model: SC.Collections.verbs
-          me.showNav "iflib"
-
-    newVerb: ->
-      this.showView "#main", new SC.Views.Verb
-        model: new SC.Collections.verbs.model
-      this.showNav "iflib"
+          this.showNav "iflib"
+          this.showCrumbs [
+            [ "#iflib", "IFLib" ]
+            [ "#iflib/verb", "Verbs" ]
+          ]
 
     verb: (id) ->
+      model = SC.Collections.verbs.get id
       this.showView "#main", new SC.Views.Verb
-        model: SC.Collections.verbs.get id
+        model: model
       this.showNav "iflib"
+      doCrumbs = =>
+        this.showCrumbs [
+          [ "#iflib", "IFLib" ]
+          [ "#iflib/verb", "Verbs" ]
+          [ "#iflib/verb/#{id}", model.get('verb').join(', ') ]
+        ]
+      doCrumbs()
+      model.on 'change:verbs', doCrumbs
 
     showView: (selector, view) ->
       if this.currentViews[selector]?.close?
@@ -80,6 +140,27 @@
       $(selector).html view.render()
       this.currentViews[selector] = view
       view
+
+    showCrumbs: (list) ->
+      el = $("#nav-breadcrumbs")
+      el.empty()
+      if list?.length > 0
+        el.append("<li><a href='#'>Home</a> <span class='divider'>/</span></li>")
+        n = list.length
+        for link in list
+          n -= 1
+          if n > 0
+            if $.isArray(link)
+              el.append("<li><a href='#{link[0]}'>#{link[1]}</a> <span class='divider'>/</span></li>")
+            else
+              el.append("<li>#{link} <span class='divider'>/</span></li>")
+          else
+            if $.isArray(link)
+              el.append("<li class='active'>#{link[1]}</li>")
+            else
+              el.append("<li class='active'>#{link}</li>")
+      else
+        el.append("<li class='active'>Home</li>")
 
     showNav: (sel) ->
       if this.currentNav? and this.currentNav != sel

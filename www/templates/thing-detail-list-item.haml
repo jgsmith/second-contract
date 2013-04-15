@@ -1,0 +1,17 @@
+%h3 {{ data.detail_path.join(" : ") }}
+.control-group
+  %label.control-label Nouns:
+  .controls
+    %input.input-block-level(name="noun" type="text" value="{{ (data.noun||[]).join(', ') }}")/
+.control-group
+  %label.control-label Adjectives:
+  .controls
+    %input.input-block-level(name="noun" type="text" value="{{ (data.noun||[]).join(', ') }}")/
+.control-group
+  %label.control-label Plural Nouns:
+  .controls
+    %input.input-block-level(name="noun" type="text" value="{{ (data.noun||[]).join(', ') }}")/
+.control-group
+  %label.control-label Plural Adjectives:
+  .controls
+    %input.input-block-level(name="noun" type="text" value="{{ (data.noun||[]).join(', ') }}")/

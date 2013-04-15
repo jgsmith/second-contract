@@ -42,9 +42,12 @@
                 %a(href="#iflib") IFLib
               %li
                 %a(href="#worldlib") WorldLib
+    .container-fluid
+      .row-fluid
+        .span12
+          %ul.breadcrumb#nav-breadcrumbs
     .container-fluid#sc-admin
       .row-fluid
-        .span2#sidebar
-        .span10#main
+        .span12#main
       %footer
     %div(style="visibility: hidden; display: none;")
