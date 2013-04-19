@@ -86,10 +86,6 @@ atomic object create_character(string email, string name, string cap_name, strin
 int login(string str)
 {
     if (previous_program() == LIB_CONN) {
-        if (nconn == 0) {
-            ::login(str);
-        }
-        nconn++;
         if (strlen(str) == 0 || sscanf(str, "%*s ") != 0 ||
             sscanf(str, "%*s/") != 0) {
             return MODE_DISCONNECT;
@@ -200,6 +196,10 @@ int receive_message(string str)
         case STATE_NEWACCOUNT:
             email = str;
             connection(previous_object());
+            if(!email || email == "") {
+              message("\nPerhaps another time.\n");
+              return MODE_DISCONNECT;
+            }
             if(AUTH_D -> user_exists(email)) {
               message("\nThat user already has an account.");
               return MODE_DISCONNECT;
@@ -210,6 +210,10 @@ int receive_message(string str)
 
         case STATE_NEWACCOUNT_PASSWORD:
             newpasswd = str;
+            if(!newpasswd || newpasswd == "") {
+              message("\nPerhaps another time.\n");
+              return MODE_DISCONNECT;
+            }
             if(AUTH_D -> user_exists(email)) {
               message("\nThat user already has account.");
               return MODE_DISCONNECT;
@@ -219,6 +223,10 @@ int receive_message(string str)
             return MODE_NOECHO;
 
         case STATE_NEWACCOUNT_PASSWORD2:
+            if(!str || str == "") {
+              message("\nPerhaps another time.\n");
+              return MODE_DISCONNECT;
+            }
             if(newpasswd != str) {
               message("\nThose passwords don't match. Please come back and try again another time.");
               return MODE_DISCONNECT;
@@ -228,6 +236,10 @@ int receive_message(string str)
               return MODE_DISCONNECT;
             }
             AUTH_D -> set_user_password(email, newpasswd);
+            if (nconn == 0) {
+                ::login(email);
+            }
+            nconn++;
             message("\nNow we'll walk you through creating your first character.");
             message("\n\nWhat name do you wish? ");
             state[previous_object()] = STATE_NEW_CHARACTER;
@@ -303,6 +315,10 @@ int receive_message(string str)
                 previous_object()->message("\nBad password.\n");
                 return MODE_DISCONNECT;
             }
+            if (nconn == 0) {
+                ::login(email);
+            }
+            nconn++;
             connection(previous_object());
             message("\n");
             if((chars = AUTH_D -> get_characters(email)) && sizeof(chars)) {
