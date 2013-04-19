@@ -9,6 +9,7 @@
 # include <system/http.h>
 # include <kernel/kernel.h>
 # include <kernel/user.h>
+# include <type.h>
 
 inherit LIB_USER;
 inherit user API_USER;
@@ -28,24 +29,38 @@ void create(varargs int clone) {
 
 void log_request(varargs object resource) {
   string *line;
-  string rl;
+  string rl, auth;
+  object conn;
+  int tmp;
 
   rl = request -> get_request_line();
   /* rl = implode(explode(rl, "\x0d"), "");
   rl = implode(explode(rl, "\x0a"), ""); */
 
-  line = ({ "<client ip>" });
-  line += ({ (resource && resource -> get_auth() ? resource -> get_auth() : "-") });
-  line += ({ "-" });
-  line += ({ "[" + ctime(time()) + "]" });
-  line += ({ "\"" + rl + "\"" });
-  line += ({ ""+response -> get_status() });
-  line += ({ ""+(response -> get_content_length() || "-") });
+  conn = this_object();
+  while(conn <- LIB_USER) {
+    conn = conn -> query_conn();
+  }
+
+  tmp = response -> get_content_length();
+  if(resource) auth = resource -> get_auth_account();
+  if(!auth) auth = "-";
+
+  line = ({ 
+    query_ip_number(conn), 
+    auth, 
+    "-",
+    "[" + ctime(time()) + "]",
+    "\"" + rl + "\"",
+    ""+response -> get_status(),
+    ""+(typeof(tmp) == T_INT ? tmp : "-"),
+  });
   LOG_D -> log("http:access", implode(line, " "));
 } 
 
 int handle_request() {
   object resource;
+  string err;
 
   if(response_sent) return TRUE;
 
@@ -57,12 +72,14 @@ int handle_request() {
     if(resource) {
       resource -> set_response(response);
       rlimits(1000;1000000) {
-        catch {
-          HTTP_FSM_D -> run(resource);
-        } : {
+        err = catch( HTTP_FSM_D -> run(resource) );
+        if(err) {
           response -> set_status(500);
           log_request(resource);
-          message("500 Internal Error - Too Much Time\n");
+          response -> set_body(({
+            "500 Internal Error - Too Much Time\n\n",
+            err
+           }));
           response_sent = TRUE;
           return TRUE;
         } 
