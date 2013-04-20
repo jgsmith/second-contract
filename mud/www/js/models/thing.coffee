@@ -91,7 +91,7 @@ class SC.Collections.Thing extends Backbone.Collection
     @ward = options.ward
 
   url: ->
-    base = "http://localhost:6050/api/worldlib/"
+    base = "/api/worldlib/"
     switch @ward
       when "scene" then   base + "scene/#{@domain}/#{@area}"
       when "path" then    base + "path/#{@domain}/#{@area}"

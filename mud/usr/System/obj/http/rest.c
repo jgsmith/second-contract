@@ -14,16 +14,19 @@
 inherit LIB_USER;
 inherit user API_USER;
 
+# define RESPONSE_STARTED 1
+# define RESPONSE_FINISHED 2
+
 object request;
 object response;
 int request_status;
-int response_sent;
+int response_state;
 
 void create(varargs int clone) {
   if(clone) {
     request = new_object(HTTP_REQUEST);
     response = new_object(HTTP_RESPONSE);
-    response_sent = FALSE;
+    response_state = FALSE;
   }
 }
 
@@ -62,7 +65,7 @@ int handle_request() {
   object resource;
   string err;
 
-  if(response_sent) return TRUE;
+  if(response_state) return TRUE;
 
   if(request_status >= 0) {
     /*
@@ -80,7 +83,7 @@ int handle_request() {
             "500 Internal Error - Too Much Time\n\n",
             err
            }));
-          response_sent = TRUE;
+          response_state = RESPONSE_STARTED;
           return TRUE;
         } 
       }
@@ -88,6 +91,7 @@ int handle_request() {
         response -> set_status(500);
         log_request(resource);
         message("503 Internal Error - No Response\n");
+        response_state = RESPONSE_FINISHED;
       }
       else {
         resource -> get_response() -> output(this_object());
@@ -98,8 +102,9 @@ int handle_request() {
       response -> set_status(401);
       log_request();
       message("401 Not Found\n");
+      response_state = RESPONSE_FINISHED;
     }
-    response_sent = TRUE;
+    if(!response_state) response_state = RESPONSE_STARTED;
     return TRUE;
   }
   return FALSE;
@@ -108,6 +113,7 @@ int handle_request() {
 int logout() {
   if(request_status < 0) {
     message("501 Bad Request\n");
+    response_state = RESPONSE_FINISHED;
   }
   return MODE_DISCONNECT;
 }
@@ -119,7 +125,7 @@ int receive_message(string str) {
    */
   request_status = request -> parse_http_request(str);
   message(""); /* to keep things flowing */
-  if(request_status >= 0 && handle_request()) return MODE_DISCONNECT;
+  if(request_status >= 0) { handle_request(); }
   return MODE_RAW;
 }
 
@@ -130,9 +136,20 @@ int login(string str) {
 }
 
 int message_done() {
-  if(handle_request()) {
-    destruct_object(this_object());
-    return MODE_DISCONNECT;
+  switch(response_state) {
+    case RESPONSE_FINISHED:
+      destruct_object(this_object());
+      return MODE_DISCONNECT;
+    case RESPONSE_STARTED:
+      if(response -> spool_finished()) {
+        response_state = RESPONSE_FINISHED;
+        destruct_object(this_object());
+        return MODE_DISCONNECT;
+      } 
+      else {
+        response -> spool_body(this_object());
+        return MODE_RAW;
+      }
   }
   return MODE_RAW;
 }

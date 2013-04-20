@@ -14,7 +14,7 @@ class SC.Views.Area extends Backbone.View
     wardList = new SC.Views.WardList
       model: @model.wards
     @$el.find("#area-scenes").html sceneList.render()
-    @$el.find("#area-wards").html wardList.render()
+    @$el.find("#area-templates").html wardList.render()
     later =>
       el = $("#area-map-raphael-canvas")
       @mapCanvas = Raphael("area-map-raphael-canvas", el.width(), el.width() * 2 / 3)

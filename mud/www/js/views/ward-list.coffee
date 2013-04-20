@@ -10,8 +10,8 @@ class SC.Views.WardList extends Backbone.View
     @$el.html @template
       domain: @domain
       area: @area
-    for area in @model.models
-      @appendNewArea area
+    for ward in @model.models
+      @appendNewWard ward
     @el
 
   appendNewWard: (ward) ->

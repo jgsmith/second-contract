@@ -133,7 +133,10 @@ private int add_resource_handler(string uri_prefix, string data_file, varargs ma
     compile_object(data_file);
     if(!find_object(data_file)) return FALSE;
   }
-  parsed_path = URI_PATH_P -> parse(uri_prefix);
+  if(uri_prefix == "")
+    parsed_path = ({ 0, "" });
+  else
+    parsed_path = URI_PATH_P -> parse(uri_prefix);
   resources[uri_prefix] = ({ parsed_path, data_file, extra_params });
   paths -= ({ uri_prefix });
   for(i = 0, n = sizeof(paths); i < n; i++) {
@@ -213,4 +216,14 @@ void update_resource_handlers_from_config() {
       add_resource_handler(url_prefix + urls[j], "/usr/"+users[i]+"/data/resource/"+config[users[i]][urls[j]]["handler"], config[users[i]][urls[j]]["params"]);
     }
   }
+  add_resource_handler("/admin/:id", "/usr/System/data/resource/static", ([
+    "directory": "",
+  ]));
+  add_resource_handler("/admin/", "/usr/System/data/resource/static", ([
+    "directory": "", "id": "index.html"
+  ]));
+  add_resource_handler("/admin", "/usr/System/data/resource/static", ([
+    "directory": "", "id": "index.html"
+  ]));
+  add_resource_handler("/admin/static/:directory/:id", "/usr/System/data/resource/static");
 }

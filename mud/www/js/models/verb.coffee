@@ -1,7 +1,7 @@
 class SC.Models.Verb extends Backbone.Model
   defaults: -> {}
 
-  urlRoot: "http://localhost:6050/api/iflib/verb"
+  urlRoot: "/api/iflib/verb"
 
   url: ->
     base = @urlRoot
@@ -20,6 +20,6 @@ class SC.Models.Verb extends Backbone.Model
 
 class SC.Collections.Verb extends Backbone.Collection
   model: SC.Models.Verb
-  url: 'http://localhost:6050/api/iflib/verb'
+  url: '/api/iflib/verb'
 
 SC.Collections.verbs = new SC.Collections.Verb

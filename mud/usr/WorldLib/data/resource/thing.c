@@ -9,7 +9,6 @@
 
 inherit resource HTTP_RESOURCE_LIB;
 
-object HOSPITAL_OBJ hospital;
 object resource_obj;
 object domain;
 object area;
@@ -36,32 +35,32 @@ int resource_exists() {
   if(area_id = get_parameter("area_id")) {
     area = domain -> get_area(area_id);
     if(!area) return FALSE;
-    hospital = area -> get_hospital();
   }
   else return FALSE;
-  /* we're looking for something in the area *or* domain hospital 
+  /* we're looking for something in the area
    * unless ward_id is scene, path, or terrain
    */
   ward_id = get_parameter("ward_id");
   if(typeof(ward_id) == T_NIL || ward_id == "") return FALSE;
-  if(area) {
-    switch(ward_id) {
-      case "scene": 
-        if(typeof(get_resource_id()) == T_NIL) return TRUE;
-        resource_obj = area -> get_scene(get_resource_id());
-        return resource_obj ? TRUE : FALSE;
-      case "path":
-        if(typeof(get_resource_id()) == T_NIL) return TRUE;
-        resource_obj = area -> get_path(get_resource_id());
-        return resource_obj ? TRUE : FALSE;
-      case "terrain":
-        if(typeof(get_resource_id()) == T_NIL) return TRUE;
-        resource_obj = area -> get_terrain(get_resource_id());
-        return resource_obj ? TRUE : FALSE;
-    }
+  switch(ward_id) {
+    case "scene": 
+      if(typeof(get_resource_id()) == T_NIL) return TRUE;
+      resource_obj = area -> get_scene(get_resource_id());
+      break;
+    case "path":
+      if(typeof(get_resource_id()) == T_NIL) return TRUE;
+      resource_obj = area -> get_path(get_resource_id());
+      break;
+    case "terrain":
+      if(typeof(get_resource_id()) == T_NIL) return TRUE;
+      resource_obj = area -> get_terrain(get_resource_id());
+      break;
+    default:
+      if(!area -> get_ward(ward_id)) return FALSE;
+      if(typeof(get_resource_id()) == T_NIL) return TRUE;
+      resource_obj = area -> get_object(ward_id, get_resource_id());
+      break;
   }
-  if(typeof(get_resource_id()) == T_NIL && hospital && hospital -> get_ward(ward_id)) return TRUE;
-  resource_obj = hospital -> get_object(ward_id, get_resource_id());
   return resource_obj ? TRUE : FALSE;
 }
 
@@ -120,6 +119,8 @@ atomic void transfer_info(object obj, string *path, mapping info) {
   if(info["ident"]) {
     if(info["ident"]["name"]) obj -> set_name(info["ident"]["name"]);
     if(info["ident"]["cap_name"]) obj -> set_cap_name(info["ident"]["cap_name"]);
+  }
+  if(info["ur"]) {
   }
 }
 

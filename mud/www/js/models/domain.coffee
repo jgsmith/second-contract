@@ -1,5 +1,15 @@
 class SC.Models.Ward extends Backbone.Model
+  idAttribute: "name"
+
   defaults: -> {}
+
+  initialize: (options) ->
+    console.log "Getting objects for ward"
+    @objects = new SC.Collections.Thing [],
+      domain: @collection.domain
+      area: @collection.area
+      ward: @id
+    @objects.fetch()
 
   url: ->
     base = @collection.url() if @collection?
@@ -7,11 +17,12 @@ class SC.Models.Ward extends Backbone.Model
     base + "/" + encodeURIComponent(@id)
 
 class SC.Collections.Ward extends Backbone.Collection
+  model: SC.Models.Ward
   initialize: (models, options) ->
     @domain = options.domain
     @area   = options.area
     console.log "Ward for ", @domain, @area
-    @url = 'http://localhost:6050/api/worldlib/ward/' + @domain + '/' + @area
+    @url = '/api/worldlib/ward/' + @domain + '/' + @area
 
 class SC.Models.Area extends Backbone.Model
   defaults: -> {}
@@ -20,19 +31,19 @@ class SC.Models.Area extends Backbone.Model
     @domain = options.domain
     @scenes = new SC.Collections.Thing [],
       domain: @domain
-      area: @get('id')
+      area: @id
       ward: 'scene'
     @paths = new SC.Collections.Thing [],
       domain: @domain
-      area: @get('id')
+      area: @id
       ward: 'path'
     @terrains = new SC.Collections.Thing [],
       domain: @domain
-      area: @get('id')
+      area: @id
       ward: 'terrain'
     @wards = new SC.Collections.Ward [],
       domain: @domain
-      area: @get('id')
+      area: @id
     @scenes.fetch()
     @paths.fetch()
     @terrains.fetch()
@@ -53,12 +64,12 @@ class SC.Collections.Area extends Backbone.Collection
   model: SC.Models.Area
 
   url: ->
-    'http://localhost:6050/api/worldlib/area/' + @domain
+    '/api/worldlib/area/' + @domain
     
 class SC.Models.Domain extends Backbone.Model
   defaults: -> {}
 
-  urlRoot: "http://localhost:6050/api/worldlib/domain"
+  urlRoot: "/api/worldlib/domain"
 
   url: ->
     base = @urlRoot
@@ -85,6 +96,6 @@ class SC.Models.Domain extends Backbone.Model
 
 class SC.Collections.Domain extends Backbone.Collection
   model: SC.Models.Domain
-  url: 'http://localhost:6050/api/worldlib/domain'
+  url: '/api/worldlib/domain'
 
 SC.Collections.domains = new SC.Collections.Domain

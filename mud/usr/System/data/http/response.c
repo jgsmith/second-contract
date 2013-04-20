@@ -9,11 +9,13 @@
 int status;
 string *body;
 mapping headers;
+int spool_line;
 
 void create(varargs int clone) {
   if(clone) {
     headers = ([ ]);
     body = nil;
+    spool_line = 0;
   }
 }
 
@@ -69,12 +71,13 @@ void add_headers(mapping h) {
 void output(object target) {
   string *keys;
   int i, n, j, m;
-  int length;
+  mixed length;
 
   if(!status) status = 500;
   target -> message("HTTP/1.0 " + status + " " +  HTTP_D -> status_message(status) + "\n");
 
   headers["Access-Control-Allow-Origin"] = ({ "*" });
+  headers["Keep-Alive"] = ({ "timeout=0; max=0" });
   if(body != nil) {
     if(!headers["Content-Length"]) {
       length = 0;
@@ -91,7 +94,17 @@ void output(object target) {
   }
   target -> message("\n");
   if(body) {
-    for(i = 0, n = sizeof(body); i < n; i++)
-      target -> message(body[i]);
+    if(sizeof(body) > 0) {
+      target -> message(body[0]);
+      spool_line = 1;
+    }
   }
 }
+
+void spool_body(object target) {
+  /* on to the next line */
+  if(spool_line < sizeof(body)) target -> message(body[spool_line]);
+  spool_line ++;
+}
+
+int spool_finished() { return !body || spool_line >= sizeof(body); }

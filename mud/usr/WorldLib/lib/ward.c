@@ -54,6 +54,8 @@ object get_object(string name) {
   object *candidates;
   int i, n, adj_len;
 
+  if(!name) return nil;
+
   if(objects[name]) return objects[name];
 
   candidates = ({ });

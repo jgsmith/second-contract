@@ -6,6 +6,46 @@ class SC.Views.Thing extends Backbone.View
   events:
     "change .event-selection": "updateEditorContent"
     "click .save": "save"
+    "change select[name='ur.domain']": "updateUrArea"
+    "change select[name='ur.area']": "updateUrWard"
+    "change select[name='ur.ward']": "updateUrItem"
+
+  updateUrArea: ->
+    # given the domain, we figure out which areas are available
+    uael = @$el.find("select[name='ur.area']")
+    domain_id = @$el.find("select[name='ur.domain']").val()
+    if domain_id? and domain_id != ""
+      domain = SC.Collections.domains.get(domain_id)
+      if domain?
+        uael.empty()
+        domain.areas.each (area) ->
+          uael.append("<option value='#{area.id}'>#{area.id}</option>")
+        @$el.find("select[name='ur.ward']").empty()
+        @$el.find("select[name='ur.item']").empty()
+        if domain.areas.length == 1
+          @updateUrWard()
+    else
+      @$el.find("select[name='ur.area']").empty()
+      @$el.find("select[name='ur.ward']").empty()
+      @$el.find("select[name='ur.item']").empty()
+
+  updateUrWard: ->
+    # given the area, we figure out which wards are available
+    uwel = @$el.find("select[name='ur.ward']")
+    domain_id = @$el.find("select[name='ur.domain']").val()
+    domain = SC.Collections.domains.get(domain_id)
+    if domain?
+      area_id = @$el.find("select[name='ur.area']").val()
+      area = domain.areas.get(area_id)
+      if area?
+        uwel.empty()
+        area.wards.each (ward) ->
+          uwel.append("<option value='#{ward.id}'>#{ward.id}</option>")
+        @$el.find("select[name='ur.item']").empty()
+        if area.wards.length == 1
+          @updateUrItem()
+
+  updateUrItem: ->
 
   render: ->
     json = @model.toJSON()
@@ -15,10 +55,17 @@ class SC.Views.Thing extends Backbone.View
     if json.events?
       sel = @$el.find(".event-selection")
       for e of json.events
-        console.log "event", e
         sel.append("<option value='#{e}'>#{e}</option>");
 
     later => 
+      udel = @$el.find("select[name='ur.domain']")
+      udel.append("<option value=''>No Template</option>")
+      SC.Collections.domains.each (domain) ->
+        console.log domain
+        udel.append("<option value='#{domain.id}'>#{domain.id}</option>")
+      udel.val("Default")
+      @updateUrArea()
+      @updateUrWard()
       @renderEditor()
       eventVal = @$(".event-selection").val()
       @editor.setValue @model.events.get(eventVal)?.get("content")

@@ -1,0 +1,7 @@
+    %script(type="text/javascript" src="/admin/static/js/jquery-min.js")
+    %script(type="text/javascript" src="/admin/static/js/underscore-min.js")
+    %script(type="text/javascript" src="/admin/static/js/backbone-min.js")
+    %script(type="text/javascript" src="/admin/static/js/bootstrap.min.js")
+    %script(type="text/javascript" src="/admin/static/js/raphael-min.js")
+    %script(type="text/javascript" src="http://d1n0x3qji82z53.cloudfront.net/src-min-noconflict/ace.js")
+    %script(type="text/javascript" src="/admin/static/js/sc-admin.js")
