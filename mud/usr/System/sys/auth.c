@@ -13,11 +13,6 @@ void create() {
   groups = ([
     "ADMIN": ({ }),
   ]);
-/*
-  this_object() -> set_user_password("admin", "password");
-  this_object() -> create_group("ADMIN");
-  this_object() -> add_user_to_group("ADMIN", "admin");
-*/
 }
 
 int create_group(string grp) {
@@ -83,7 +78,7 @@ int set_user_password(string name, string password, varargs string old_password)
     if(first_account) {
       find_object(DRIVER)->message("Adding " + name + " to ADMIN group\n");
       add_user_to_group("ADMIN", name);
-      previous_object() -> message("\n\nThis is the first account and has been added to the ADMIN group.\n");
+      previous_object() -> message("\n\nThis is the first account and has been added to the ADMIN group.\n\nUntil you run the bootstrap process to create character templates, you will not be able to create a character. Just hit return at the next prompt and you will be disconnected.\n\n");
     }
     return 1;
   }

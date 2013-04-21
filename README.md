@@ -14,6 +14,26 @@ You will need a working installation of DGD and the Kernel Library that
 came with the version of DGD you have installed. Once we have something
 closer to a working MUBLib, we'll expand these instructions.
 
+The general process for getting the system up and running (once the bootstrap
+files are included):
+
+* Install DGD with Networking extensions
+* Install KernelLib into your target mud location
+* Copy all files from /mud in this repo into your target mud location
+* Change into the www/ directory in your target mud location
+* Run "make" to assemble the HTML and JavaScript files for the web admin console
+* Copy the sc.dgd config file from this repo to an appropriate place to use with your DGD driver
+* Start up the mud
+* Create your admin account according to the KernelLib directions
+* Telnet to the first telnet port (6047 by default) and create your first account (but don't try to create a character)
+* Edit the bootstrap.sh script to reflect the account you just created
+* Run bootstrap.sh to create the default domains, areas, and templates
+* Point your browser to the second binary port (http://localhost:6050/admin/index.html by default)
+
+There are a few steps there, but that's because I haven't created a general
+distribution for the mudlib yet. A distribution will combine the KernelLib
+with the mudlib and bundle in the DGD-networking driver source.
+
 Licensing
 ---------
 
