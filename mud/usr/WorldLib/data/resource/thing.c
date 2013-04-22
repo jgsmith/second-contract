@@ -28,15 +28,15 @@ static void create(varargs int clone) {
  * /worldlib/terrain/:domain_id/:area_id         /:name , :ward_id = terrain
  */
 int resource_exists() {
-  string area_id, ward_id;
+  string area_id, ward_id, domain_id;
 
-  domain = DOMAINS_D -> get_domain(get_parameter("domain_id"));
+  if(!(domain_id = get_parameter("domain_id"))) return FALSE;
+  if(!(area_id = get_parameter("area_id"))) return FALSE;
+  domain = DOMAINS_D -> get_domain(domain_id);
   if(!domain) return FALSE;
-  if(area_id = get_parameter("area_id")) {
-    area = domain -> get_area(area_id);
-    if(!area) return FALSE;
-  }
-  else return FALSE;
+  area = domain -> get_area(area_id);
+  if(!area) return FALSE;
+
   /* we're looking for something in the area
    * unless ward_id is scene, path, or terrain
    */
@@ -56,7 +56,7 @@ int resource_exists() {
       resource_obj = area -> get_terrain(get_resource_id());
       break;
     default:
-      if(!area -> get_ward(ward_id)) return FALSE;
+      if(!area -> query_ward_exists(ward_id)) return FALSE;
       if(typeof(get_resource_id()) == T_NIL) return TRUE;
       resource_obj = area -> get_object(ward_id, get_resource_id());
       break;

@@ -24,8 +24,8 @@ inherit reputations "/usr/WorldLib/lib/prop/reputations";
 inherit sensations "/usr/WorldLib/lib/event/sensations";
 inherit skills   "/usr/WorldLib/lib/prop/skills";
 inherit stats    "/usr/WorldLib/lib/prop/stats";
+inherit template "/usr/WorldLib/lib/comp/template";
 inherit traits   "/usr/WorldLib/lib/prop/traits";
-inherit ur       "/usr/WorldLib/lib/comp/ur";
 
 static void create(varargs int clone) {
   counters::create(clone);
@@ -43,13 +43,13 @@ static void create(varargs int clone) {
 void destructed(int clone) {
   if(SYSTEM()) {
     actions::destructed(clone);
-    ur::destructed(clone);
+    template::destructed(clone);
   }
 }
 
-atomic void set_ur_object_path(string path) {
-  ur::set_ur_object_path(path);
-  bulk::set_ur_object(ur::get_ur_object());
+atomic void set_template_path(string path) {
+  template::set_template_path(path);
+  bulk::set_template_object(template::get_template_object());
 }
 
 string *parse_command_id_list() {

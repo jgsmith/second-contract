@@ -60,8 +60,10 @@ mixed from_json(mapping metadata) {
   mixed info;
   string json;
   string id;
+  string *keys;
   object ADVERB_DATA adverb;
   int args_used;
+  int i, n;
 
   json = implode(get_request() -> get_body(), "");
   info = JSON_P -> from_json(json);
@@ -79,6 +81,13 @@ mixed from_json(mapping metadata) {
   adverb -> set_brief(info["brief"]);
   adverb -> set_help(info["help"]);
 
+  if(info["constraints"]) {
+    if(typeof(info["constraints"]) != T_MAPPING) return 400;
+    keys = map_indices(info["constraints"]);
+    adverb -> clear_constraints();
+    for(i = 0, n = sizeof(keys); i < n; i++)
+      adverb -> add_constraint(keys[i], info["constraints"][keys[i]]);
+  }
   ADVERB_D -> add_adverb(adverb);
   set_resource_id(info["adverb"]);
   return 200;

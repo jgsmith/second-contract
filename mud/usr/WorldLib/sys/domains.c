@@ -10,13 +10,13 @@ static void create(varargs int clone) {
 }
 
 /* We expect domain:area:ward:unique_name */
-object get_ur_object(string path) {
+object get_template_object(string path) {
   string *bits;
 
   bits = explode(path, ":");
   if(!domains[bits[0]]) return nil;
 
-  return domains[bits[0]] -> get_ur_object(bits[1..]);
+  return domains[bits[0]] -> get_template_object(bits[1..]);
 }
 
 object DOMAIN_DATA get_domain(string id) {

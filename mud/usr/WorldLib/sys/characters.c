@@ -78,6 +78,7 @@ mapping get_templates(varargs int tiers) {
 
 atomic object create_character(string name, string cap_name, string template) {
   object ob;
+  object area;
 
   if(!SYSTEM()) {
     /* specifically, it's the login/character creation process managed by
@@ -89,7 +90,13 @@ atomic object create_character(string name, string cap_name, string template) {
   name = STRING_D -> lower_case(name);
   if(character_exists(name)) return nil;
 
-  ob = HOSPITAL_D -> create_placed_object("character-archetypes", template, HOSPITAL_D -> get_world_object(), PROX_INSIDE);
+  /* Character types are in Default:Default:character-archetypes */
+  area = DOMAINS_D -> get_domain("Default");
+  if(!area) return nil;
+  area = area -> get_area("Default");
+  if(!area) return nil;
+
+  ob = area -> create_placed_object("character-archetypes", template, area -> get_scene("start"), PROX_INSIDE);
   if(!ob) return nil; /* oops! couldn't create the character */
 
   ob -> set_name(name);

@@ -129,29 +129,29 @@ object get_object(string ward, string nom) {
   return wards[ward] -> get_object(nom);
 }
 
-/* creates a new thing with the ur_object set to the given item */
-atomic object create_object(string ward, string ur_name) {
+/* creates a new thing with the template_object set to the given item */
+atomic object create_object(string ward, string template_name) {
   object ur;
   object thing;
 
   if(!wards[ward]) return nil;
 
-  ur = wards[ward] -> get_object(ur_name);
+  ur = wards[ward] -> get_object(template_name);
   if(!ur) return nil;
 
   thing = clone_object(THING_OBJ);
-  thing -> set_ur_object(ur);
+  thing -> set_template_object(ur);
   return thing;
 }
 
 /*
  * Creates an object and places it somewhere.
  */
-atomic object create_placed_object(string ward, string ur_name, object dest, int relation) {
+atomic object create_placed_object(string ward, string template_name, object dest, int relation) {
   object thing;
   object loc;
 
-  thing = create_object(ward, ur_name);
+  thing = create_object(ward, template_name);
   if(!thing) return nil;
   /* now we can add things like clothing or other inventory */
 

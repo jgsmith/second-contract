@@ -40,9 +40,9 @@ atomic mixed set_event_handler_source(mapping s) {
   return ret;
 }
 
-mixed call_ur_event_handler(string event, mapping args) {
+mixed call_template_event_handler(string event, mapping args) {
   object ur;
-  if(ur = this_object()->get_ur_object()) return ur -> call_event_handler(event,args);
+  if(ur = this_object()->get_template_object()) return ur -> call_event_handler(event,args);
 }
 
 mixed call_event_handler(string event, mapping args) {

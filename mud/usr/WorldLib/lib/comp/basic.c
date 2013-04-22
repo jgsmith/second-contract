@@ -17,7 +17,7 @@ mapping get_properties() {
 
 mixed get_property(string *path) {
   object ur;
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   if(!sizeof(path)) return nil;
 

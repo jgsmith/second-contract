@@ -1,0 +1,6 @@
+{
+  "events": {
+    "pre-move:release": "return 1;",
+    "pre-move:receive": "return 1;"
+  }
+}

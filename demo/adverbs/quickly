@@ -1,0 +1,8 @@
+{
+  "adverb": "quickly",
+  "brief": "Minimizes time taken",
+  "help": "For those commands for which time is an essential component in their execution, this adverb will try to minimize the time taken. For example, crafting will take less time at the expense of quality and learning.",
+  "constraints": {
+    "time": -1
+  }
+}

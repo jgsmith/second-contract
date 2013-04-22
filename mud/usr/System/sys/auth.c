@@ -53,11 +53,12 @@ int user_authenticated(string name, string password) {
   mapping m;
 
   if(!accounts) return FALSE;
+  if(!name || !password) return FALSE;
   name = STRING_D -> lower_case(name);
   m = MAPPING_D -> specific_mapping(accounts, name);
-  if(!m[name] && m[name]["password"]) return 0;
-  if(crypt(password, m[name]["password"]) == m[name]["password"]) return 1;
-  return 0;
+  if(!m[name] || !m[name]["password"]) return FALSE;
+  if(crypt(password, m[name]["password"]) == m[name]["password"]) return TRUE;
+  return FALSE;
 }
 
 int set_user_password(string name, string password, varargs string old_password) {

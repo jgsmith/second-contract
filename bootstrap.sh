@@ -38,7 +38,7 @@ PORT="6050"
 post_file() {
   file=$1
   url=$2
-  $CURL --basic --data-binary "@${file};type=application/json" --silent \
+  $CURL --basic --data-binary "@${file}" --silent \
      -H "Content-Type: application/json" \
      --show-error --user "${USERNAME}:${PASSWORD}" \
      http://${IP}:${PORT}/${url}
@@ -54,19 +54,54 @@ post_content() {
      http://${IP}:${PORT}/${url}
 }
 
-# Create Default domain
-cd json
+cd demo
 
+# Create verbs
+echo "Creating verbs"
+cd verbs
+for verb in *; do
+  if [ -f $verb ]; then
+    echo -n "$verb "
+    post_file $verb "api/iflib/verb"
+  fi
+done
+cd ..
+
+echo
+echo
+echo "Creating adverbs"
+cd adverbs
+for adverb in *; do
+  if [ -f $adverb ]; then
+    echo -n "$adverb "
+    post_file $adverb "api/iflib/adverb"
+  fi
+done
+cd ..
+
+echo
+echo
+
+# Create domains
+cd domains
 for domain in *; do
   if [ -d $domain ]; then
     echo "Creating domain '$domain'"
-    post_content "{\"name\": \"$domain\"}" "api/worldlib/domain"
+    if [ -f ${domain}.json ]; then
+      post_file ${domain}.json "api/worldlib/domain"
+    else
+      post_content "{\"name\": \"$domain\"}" "api/worldlib/domain"
+    fi
 
     cd $domain
     for area in *; do
       if [ -d $area ]; then
         echo "  Creating area '$area'"
-        post_content "{\"name\": \"$area\"}" "api/worldlib/area/$domain"
+        if [ -f ${area}.json ]; then
+          post_file ${area}.json "api/worldlib/area/$domain"
+        else
+          post_content "{\"name\": \"$area\"}" "api/worldlib/area/$domain"
+        fi
         cd $area
         if [ -d wards ]; then
           cd wards
@@ -82,6 +117,28 @@ for domain in *; do
                 fi
               done
               cd ..
+            fi
+          done
+          cd ..
+        fi
+        if [ -d terrains ]; then
+          echo "    Creating terrains"
+          cd terrains
+          for terrain in *; do
+            if [ -f $terrain ]; then
+              echo "      Creating terrain '$terrain'"
+              post_file $terrain "api/worldlib/terrain/$domain/$area/$terrain"
+            fi
+          done
+          cd ..
+        fi
+        if [ -d paths ]; then
+          echo "    Creating paths"
+          cd paths
+          for path in *; do
+            if [ -f $path ]; then
+              echo "      Creating path '$path'"
+              post_file $scene "api/worldlib/path/$domain/$area/$path"
             fi
           done
           cd ..

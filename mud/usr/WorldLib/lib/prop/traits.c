@@ -19,7 +19,7 @@ mixed get_property(string *path) {
   if(deleted_traits[p]) return nil;
 
   if(traits[p]) return traits[p];
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
   if(ur) return ur -> get_property(({ "trait" }) + path);
   return nil;
 }

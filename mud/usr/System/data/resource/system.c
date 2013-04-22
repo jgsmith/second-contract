@@ -4,6 +4,7 @@
 # include <status.h>
 # include <type.h>
 # include <gamelib.h>
+# include <version.h>
 
 inherit resource HTTP_RESOURCE_LIB;
 

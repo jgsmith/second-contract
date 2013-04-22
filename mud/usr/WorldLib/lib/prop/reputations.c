@@ -16,7 +16,7 @@ mixed get_property(string *path) {
   object ur;
   int tmp;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
   if(!reputations) {
     if(ur) return ur -> get_property(({ "reputation" }) + path);
     if(!sizeof(path)) return ({ });

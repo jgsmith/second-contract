@@ -16,7 +16,7 @@ void set_genetics(object GENETICS_DATA g) {
 object GENETICS_DATA get_genetics() { 
   object ur;
   if(genetics) return genetics;
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
   if(ur) return ur -> get_genetics();
   return nil;
 }

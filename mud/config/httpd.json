@@ -4,7 +4,9 @@
   },
   "IFLib": {
     "verb": { "handler": "verb" },
-    "verb/:id": { "handler": "verb" }
+    "verb/:id": { "handler": "verb" },
+    "adverb": { "handler": "adverb" },
+    "adverb/:id": { "handler": "adverb" }
   },
   "WorldLib": {
 

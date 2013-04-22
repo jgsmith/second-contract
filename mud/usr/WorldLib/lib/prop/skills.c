@@ -26,7 +26,7 @@ mixed get_property(string *path) {
   string *idx;
   int i, n;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   if(!sizeof(path)) {
     idx =  map_indices(skills) | (ur ? ur -> get_property(({ "skill" })) : ({ }));
@@ -106,7 +106,7 @@ int set_property(string *path, mixed value) {
   }
   if(sizeof(path) != 2) return FALSE;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   switch(path[1]) {
     case "points":

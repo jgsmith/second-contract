@@ -1,0 +1,22 @@
+{
+  "detail": {
+    "default": {
+      "noun": {
+        "human": 1
+      },
+      "adjective": {
+        "simple": 1
+      }
+    }
+  },
+  "physical": {
+    "living": 1
+  },
+  "events": {
+    "msg:light:env": "Emit(\"env\", $args[\"text\");",
+    "pre-move:accept": "return 1;",
+    "pre-scan:brief": "return 1;",
+    "scan:brief": ":\"<actor> <look> around.\";",
+    "post-scan:brief": "if($this.basic:position) { if($this.basic:environment) { if($this.basic:environment.detail:default:description:brief) { Emit(\"env\",\"You are \" + $this.basic:position + \" in \" + $this.basic:environment.detail:default:description:brief + \".\"); } else { Emit(\"env\",\"You are \" + $this.basic:position + \" somewhere.\"); } } else { Emit(\"env\",\"You are \" + $this.basic:position + \" somewhere.\"); } } else { if($this.basic:environment) { if($this.basic:environment.detail:default:description:brief) { Emit(\"env\",\"You are in \" + $this.basic:environment.detail:default:description:brief + \".\"); } else { Emit(\"env\",\"You are somewhere.\"); } } else { Emit(\"env\",\"You are somewhere.\"); } }"
+  }
+}

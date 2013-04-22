@@ -15,7 +15,7 @@ void create(varargs int clone) {
 mixed get_property(string *path) {
   object ur;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   if(!sizeof(path) || sizeof(path) == 1 && path[0] == "max") {
     return map_indices(max_stats) | (ur ? ur -> get_property(({ "stat" }) + path) : ({ }));

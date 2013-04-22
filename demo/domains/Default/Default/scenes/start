@@ -1,0 +1,20 @@
+{
+  "template": "Default:Default:rooms:scene",
+  "detail": {
+    "default": {
+      "noun": {
+        "room": 1,
+        "universe": 1
+      },
+      "adjective": {
+        "universal": 1,
+        "void": 1
+      },
+      "description": {
+        "brief": "the void",
+        "long": "This is the universe. Everything else belongs here somehow.",
+        "examine": "Around you, galaxies spin and stars shine. Nothing is nearby."
+      }
+    }
+  }
+}

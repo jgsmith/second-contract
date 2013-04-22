@@ -14,7 +14,7 @@ mapping get_properties() {
   object ur;
   int i, n;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   info = ([ ]);
   idx = map_indices(details) | (ur ? ur->get_property(({ "detail" })) : ({ }));
@@ -37,7 +37,7 @@ mixed get_property(string *path) {
   object ur;
   int i, n;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   if(!sizeof(path)) {
     idx = map_indices(details) | (ur ? ur->get_property(({ "detail" })) : ({ }));
@@ -64,7 +64,7 @@ int set_property(string *path, mixed value) {
 
   if(!sizeof(path)) return FALSE;
 
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
 
   if(sizeof(path) == 1) {
     if(!value) {
@@ -94,7 +94,7 @@ object copy_details(string detail) {
     return new_object(details[detail]);
   }
   
-  ur = this_object() -> get_ur_object();
+  ur = this_object() -> get_template_object();
   if(ur) return ur -> copy_details(detail);
   return nil;
 }

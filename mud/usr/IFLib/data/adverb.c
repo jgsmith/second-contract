@@ -79,6 +79,10 @@ void set_constraint(string c, int d) {
   if(can_modify()) constraints[c] = d;
 }
 
+void clear_constraints() {
+  if(can_modify()) constraints = ([ ]);
+}
+
 mapping get_constraints() { return constraints; }
 
 void set_adverb(string a) {

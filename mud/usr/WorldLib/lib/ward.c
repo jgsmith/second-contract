@@ -25,15 +25,12 @@ void destructed(int clone) {
   }
 }
 
-string add_object(object ur) {
+atomic string add_object(object ur) {
   string *nouns;
   int i, n;
   string id;
 
-  if(ur -> is_ur_object()) return nil;
-  if(!ur -> is_valid_object()) return nil;
-
-  ur -> set_is_ur_object(1);
+  if(ur -> is_template_object()) return nil;
 
   do {
     id = "";

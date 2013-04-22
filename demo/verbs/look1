@@ -1,0 +1,7 @@
+{
+  "verbs": ["look"],
+  "brief": "Examine your environment",
+  "help": "This command allows you to see a description of the area around you, including what other things are there with you.",
+  "action": ["scan:brief"],
+  "see_also": ["examine"]
+}

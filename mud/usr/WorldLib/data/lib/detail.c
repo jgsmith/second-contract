@@ -32,7 +32,7 @@ object *held_items;
  */
 int *proximities;
 
-string ur_ward, ur_item;
+string template;
 int detail_flags;
 int damage; /* too much damage and a detachable detail might detach */
 
@@ -76,7 +76,7 @@ object *get_all_held_items() {
 }
 
 int is_detachable() {
-  return ur_ward && ur_item;
+  return template != nil;
 }
 
 mapping get_properties() {
@@ -98,13 +98,7 @@ mapping get_properties() {
    *
    * A detail is detachable *only* if the ur info is defined.
    */
-  if(ur_ward && ur_item) {
-    info["ur"] = ([ 
-      "hospital": "global",
-      "ward": ur_ward,
-      "item": ur_item,
-    ]);
-  }
+  info["template"] = template;
   info["worn_items_hide_details"] = !!(detail_flags & DETAIL_WORN_ITEMS_HIDE_DETAILS);
   info["targetable"] = !!(detail_flags & DETAIL_TARGETABLE);
 
