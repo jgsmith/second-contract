@@ -11,7 +11,7 @@
 # define WARD_OBJ "/usr/WorldLib/obj/ward"
 # define HOSPITAL_OBJ "/usr/WorldLib/obj/hospital"
 
-# define HOSPITAL_D "/usr/WorldLib/sys/hospital"
+# define OBJECT_D    "/usr/WorldLib/sys/object"
 # define PLACEMENT_D "/usr/WorldLib/sys/placement"
 # define EXITS_D    "/usr/WorldLib/sys/exits"
 # define CHARACTER_D "/usr/WorldLib/sys/characters"

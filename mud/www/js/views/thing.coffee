@@ -44,8 +44,26 @@ class SC.Views.Thing extends Backbone.View
         @$el.find("select[name='ur.item']").empty()
         if area.wards.length == 1
           @updateUrItem()
+      else
+        @$el.find("select[name='ur.ward']").empty()
+        @$el.find("select[name='ur.item']").empty()
 
   updateUrItem: ->
+    uiel = @$el.find("select[name='ur.item']")
+    domain_id = @$el.find("select[name='ur.domain']").val()
+    domain = SC.Collections.domains.get(domain_id)
+    if domain?
+      area_id = @$el.find("select[name='ur.area']").val()
+      area = domain.areas.get(area_id)
+      if area?
+        ward_id = @$el.find("select[name='ur.ward']").val()
+        console.log "Ward:", domain_id, area_id, ward_id
+        ward = area.wards.get(ward_id)
+        if ward?
+          ward.objects.each (item) ->
+            uiel.append("<option value='#{item.id}'>#{item.id}</option>")
+        else
+          @$el.find("select[name='ur.item']").empty()
 
   render: ->
     json = @model.toJSON()
@@ -61,11 +79,24 @@ class SC.Views.Thing extends Backbone.View
       udel = @$el.find("select[name='ur.domain']")
       udel.append("<option value=''>No Template</option>")
       SC.Collections.domains.each (domain) ->
-        console.log domain
         udel.append("<option value='#{domain.id}'>#{domain.id}</option>")
-      udel.val("Default")
-      @updateUrArea()
-      @updateUrWard()
+      ur_path = @model.get('template')
+      if !ur_path? or ur_path == ""
+        udel.val("Default")
+        @updateUrArea()
+        @updateUrWard()
+      else
+        bits = ur_path.split(":")
+        udel.val(bits[0])
+        @updateUrArea()
+        uael = @$el.find("select[name='ur.area']")
+        uael.val(bits[1])
+        @updateUrWard()
+        uwel = @$el.find("select[name='ur.ward']")
+        uwel.val(bits[2])
+        @updateUrItem()
+        uiel = @$el.find("select[name='ur.item']")
+        uiel.val(bits[3])
       @renderEditor()
       eventVal = @$(".event-selection").val()
       @editor.setValue @model.events.get(eventVal)?.get("content")

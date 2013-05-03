@@ -120,7 +120,8 @@ atomic void transfer_info(object obj, string *path, mapping info) {
     if(info["ident"]["name"]) obj -> set_name(info["ident"]["name"]);
     if(info["ident"]["cap_name"]) obj -> set_cap_name(info["ident"]["cap_name"]);
   }
-  if(info["ur"]) {
+  if(info["template"]) {
+    obj -> set_template_path(info["template"]);
   }
 }
 
@@ -149,7 +150,7 @@ atomic mixed from_json(mapping metadata) {
       case "path": stat = area -> add_path(id, resource_obj); break;
       case "terrain": stat = area -> add_terrain(id, resource_obj); break;
       default:
-        stat = area -> add_object(ward_id, resource_obj);
+        stat = area -> add_object(ward_id, id, resource_obj);
         break;
     }
     if(!stat) {

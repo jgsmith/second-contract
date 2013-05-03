@@ -14,6 +14,8 @@ static void create(varargs int clone) {
 
 mapping get_objects() { return objects; }
 
+string *get_object_names() { return map_indices(objects); }
+
 void destructed(int clone) {
   int i, n;
   object *obs;
@@ -25,24 +27,21 @@ void destructed(int clone) {
   }
 }
 
-atomic string add_object(object ur) {
+atomic int add_object(string id, object ur) {
   string *nouns;
   int i, n;
-  string id;
 
-  if(ur -> is_template_object()) return nil;
+  if(ur -> is_template_object()) return FALSE;
 
-  do {
-    id = "";
-    for(i = 0; i < 5; i++) {
-      n = random(20);
-      id += "bcdfghjklmnpqrstvwxz"[n..n];
-      n = random(6);
-      id += "aeiouy"[n..n];
-    }
-  } while(objects[id]);
+  if(objects[id]) return FALSE;
+
   objects[id] = ur;
-  return id;
+  return TRUE;
+}
+
+int query_object_exists(string name) {
+  if(objects[name]) return TRUE;
+  return FALSE;
 }
 
 object get_object(string name) {

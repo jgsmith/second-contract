@@ -146,7 +146,7 @@ mixed run_event_handler(string name, mapping args) {
       /* run handler */
       return call_other(handlers[key][name]["daemon"], handlers[key][name]["method"], args);
     }
-    ob = ob -> get_ur_object();
+    ob = ob -> get_template_object();
   } while(ob);
   return nil; /* no handler available */
 } 
@@ -295,6 +295,7 @@ string compile_function(object ctx, mixed *args) {
     case "MoveTo": real_name = "_C_move_to"; break;
     case "PerformSkill": real_name = "_C_perform_task"; needs_args = 1; break;
     case "CompareSkills": real_name = "_C_compare_skills"; needs_args = 1; break;
+    case "Create": real_name = "_C_new_thing"; break;
   }
 
   if(real_name) {

@@ -80,3 +80,8 @@ int rename_area(string old, string new) {
   areas[old] = nil;
   return TRUE;
 }
+
+object get_template_object(string *path) {
+  if(areas[path[0]]) return areas[path[0]] -> get_object(path[1], path[2]);
+  return nil;
+}

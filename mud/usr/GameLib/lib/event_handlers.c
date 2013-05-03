@@ -1,5 +1,6 @@
 # include <devlib.h>
 # include <worldlib.h>
+# include <worldlib/proximity.h>
 # include <data.h>
 
 /*
@@ -157,4 +158,8 @@ object TASK_RESULT_DATA _C_compare_skills(object owner, string myskill, object o
     my_adv = args["mod"];
   }
   return owner -> compare_skills(myskill, other, otherskill, modifier, my_tm_type, other_tm_type, my_adv, other_adv);
+}
+
+object THING_OBJ _C_new_thing(object owner, string template) {
+  return OBJECT_D -> create_object(template, owner);
 }

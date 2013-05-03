@@ -92,6 +92,28 @@
       domain.on 'change:name', doCrumbs
       area.on 'change:name', doCrumbs
 
+    areaThing: (domain_id, area_id, ward_id, id) ->
+      domain = SC.Collections.domains.get domain_id
+      area = domain.areas.get area_id
+      ward = area.wards.get ward_id
+      thing = ward.objects.get id
+      this.showView "#main", new SC.Views.Thing
+        model: thing
+      this.showNav "worldlib"
+      doCrumbs = =>
+        this.showCrumbs [
+          [ "#worldlib", "WorldLib" ]
+          [ "#worldlib/domain", "Domains" ]
+          [ "#worldlib/domain/#{domain_id}", domain.get('name') ]
+          [ "#worldlib/area/#{domain_id}/#{area_id}", area.get('name') ]
+          ward_id,
+          [ "#worldlib/thing/#{domain_id}/#{area_id}/#{ward_id}/#{id}", id ]
+        ]
+      doCrumbs()
+      domain.on 'change:name', doCrumbs
+      area.on 'change:name', doCrumbs
+      ward.on 'change:name', doCrumbs
+
     area: (domain_id, id) ->
       domain = SC.Collections.domains.get domain_id
       area = domain.areas.get id

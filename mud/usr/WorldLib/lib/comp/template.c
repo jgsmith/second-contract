@@ -26,6 +26,8 @@ atomic object create_clone() {
   object ob;
 
   if(!my_template_path) return nil;
+
+  if(!children) children = ({ });
   children -= ({ nil });
 
   ob = clone_object(THING_OBJ);
@@ -36,6 +38,7 @@ atomic object create_clone() {
 
 /* this can only be called from this library */
 void remove_child(object ob) {
+  if(!children) return;
   if(previous_program() == "/usr/WorldLib/lib/comp/template") {
     children -= ({ ob });
   }
@@ -43,11 +46,14 @@ void remove_child(object ob) {
 }
 
 void add_child(object ob) {
-  children -= ({ nil });
+  if(children) children -= ({ nil });
   if(previous_program() == "/usr/WorldLib/lib/comp/template") {
+    if(!children) children = ({ });
     children |= ({ ob });
   }
 }
+
+string get_template_path() { return template_path; }
 
 atomic void set_template_path(string path) {
   object ob;
@@ -64,20 +70,36 @@ atomic void set_template_path(string path) {
   /* get the domain/ward/item */
   if(!path) path = previous_object() -> get_template_path();
   if(!path) return;
+  if(template_path == path) return;
+  if(template_object) {
+    template_object -> remove_child(this_object());
+    template_object = nil;
+  }
   ob = DOMAINS_D -> get_template_object(path);
   if(ob) {
-    if(template_object) {
-      if(template_path == path) return;
-      template_object -> remove_child(this_object());
-      template_object = nil;
-    }
-    template_path = path;
     template_object = ob;
     template_object -> add_child(this_object());
   }
+  template_path = path;
 }
 
-object get_template_object() { return template_object; }
+/*
+ * This lets us create an object that relies on a template that hasn't
+ * been created yet (such as during bootstrapping). It also lets us
+ * destroy and recreate a template object at a path location and re-cache
+ * it since template_object will become nil in that case.
+ */
+atomic object get_template_object() { 
+  if(!template_object) {
+    if(template_path) {
+      template_object = DOMAINS_D -> get_template_object(template_path);
+      if(template_object) {
+        template_object -> add_child(this_object());
+      }
+    }
+  }
+  return template_object; 
+}
 
 int set_my_template_path(string x) {
   if(my_template_path) {

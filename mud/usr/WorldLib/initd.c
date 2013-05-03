@@ -19,8 +19,8 @@ static int create(varargs int clone) {
     HTTP_WARD_RESOURCE,
     THING_OBJ, WARD_OBJ, HOSPITAL_OBJ,
     PRIORITY_QUEUE, PRIORITY_QUEUE_ITEM,
-    EXITS_D, HOSPITAL_D, CHARACTER_D, PROXIMITY_D,
-    WORLD_EVENTS_D, DOMAINS_D,
+    EXITS_D, CHARACTER_D, PROXIMITY_D,
+    WORLD_EVENTS_D, DOMAINS_D, OBJECT_D,
   });
 
   for(i = 0, n = sizeof(files); i < n; i++)

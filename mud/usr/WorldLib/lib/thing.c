@@ -77,7 +77,7 @@ mixed get_properties() {
 
   info = ([
     "basic": basic::get_properties(),
-    /* "counter": counters::get_properties(), */
+    "counter": counters::get_properties(),
     "detail": details::get_properties(),
     "physical": genetics::get_properties(),
     /* "reputation": reputations::get_properties(),
@@ -86,6 +86,7 @@ mixed get_properties() {
     "trait": traits::get_properties(), */
     "ident": id::get_properties(),
     "events": actions::get_event_handler_source(),
+    "template": template::get_template_path(),
   ]);
   return info;
 }
@@ -103,6 +104,8 @@ mixed get_property(string *path) {
     case "stat":     return stats::get_property(path[1..]);
     case "trait":    return traits::get_property(path[1..]);
     case "id":       return id::get_property(path[1..]);
+    case "template": return template::get_template_object();
+    case "template-path": return template::get_template_path();
     default: return nil;
   }
 }

@@ -1,5 +1,9 @@
 # include <type.h>
 
+/*
+ * Counters are simple things that count: experience, levels, quest points, etc.
+ * These are not inherited from template objects.
+ */
 mapping counters;
 
 void create(varargs int clone) {
@@ -8,8 +12,11 @@ void create(varargs int clone) {
   }
 }
 
+mapping get_properties() {
+  return counters+([]);
+}
+
 mixed get_property(string *path) {
-  object ur;
   int tmp;
 
   if(!sizeof(path)) {

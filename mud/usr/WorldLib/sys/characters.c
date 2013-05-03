@@ -2,6 +2,7 @@
 # include <system.h>
 # include <worldlib.h>
 # include <worldlib/proximity.h>
+# include <data.h>
 
 /*
  * tracks user accounts/passwords
@@ -59,26 +60,22 @@ int leave_game(object char) {
 
 /* returns a list of pieces that can be assembled into a template name.
  * These are based on the ur-objects in the "character-archetypes"
- * ward of the primary hospital (HOSPITAL_D). We try to come up with a
- * good, two- or three-tiered system of selection.
+ * ward of the Default:Default domain/area.
  */
-mapping get_templates(varargs int tiers) {
-  if(!tiers) tiers = 2;
-  /* if the nouns change, then we use that as the last criteria and call it
-   * "race".
-   */
-  /* the parts that are constant across all archetypes are placed in the
-   * "constant-adj" or "constant-race" part
-   */
-  /* eventually, we should cache this and only recalculate when we add a
-   * new character archetype. But we also don't expect thousands of archetypes.
-   */
+string *get_character_templates() {
+  object area;
 
+  area = DOMAINS_D -> get_domain("Default");
+  if(!area) return nil;
+  area = area -> get_area("Default");
+  if(!area) return nil;
+  return area -> get_objects_in_ward("character-archetypes");
 }
 
 atomic object create_character(string name, string cap_name, string template) {
   object ob;
-  object area;
+  object area, scene;
+  object loc;
 
   if(!SYSTEM()) {
     /* specifically, it's the login/character creation process managed by
@@ -95,16 +92,27 @@ atomic object create_character(string name, string cap_name, string template) {
   if(!area) return nil;
   area = area -> get_area("Default");
   if(!area) return nil;
+  scene = area -> get_scene("start");
+  if(!scene) return nil;
 
-  ob = area -> create_placed_object("character-archetypes", template, area -> get_scene("start"), PROX_INSIDE);
-  if(!ob) return nil; /* oops! couldn't create the character */
+  if(!area -> query_object_exists("character-archetypes", template)) return nil;
 
-  ob -> set_name(name);
-  ob -> set_cap_name(cap_name);
-  ob -> set_property(({ "basic", "position" }), "floating");
-  ob -> set_property(({ "basic", "gait" }), "walking");
+  ob = clone_object(THING_OBJ);
+  ob -> set_template_path("Default:Default:character-archetypes:"+template);
+  loc = new_object(LOCATION_DATA);
+  loc -> set_object(scene);
+  if(ob -> move_to(PROX_INSIDE, loc)) {
+    ob -> set_name(name);
+    ob -> set_cap_name(cap_name);
+    ob -> set_property(({ "basic", "position" }), "floating");
+    ob -> set_property(({ "basic", "gait" }), "walking");
 
-  MAPPING_D -> specific_mapping(characters, name)[name] = ob;
+    MAPPING_D -> specific_mapping(characters, name)[name] = ob;
   
-  return ob;
+    return ob;
+  }
+  else {
+    destruct_object(ob);
+    return nil;
+  }
 }

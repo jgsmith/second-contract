@@ -13,7 +13,7 @@
     "living": 1
   },
   "events": {
-    "msg:light:env": "Emit(\"env\", $args[\"text\");",
+    "msg:light:env": "Emit(\"env\", $args[\"text\"]);",
     "pre-move:accept": "return 1;",
     "pre-scan:brief": "return 1;",
     "scan:brief": ":\"<actor> <look> around.\";",

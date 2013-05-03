@@ -64,6 +64,7 @@ int get_max_depth() { return max_depth; }
 int get_max_entrance_area() { return max_entrance_area; }
 
 atomic void set_template_object(object ob) {
+  if(!ob) return;
   if(mass < 0 && ob->get_mass() >= 0) mass = ob -> get_mass();
   if(ldim < 0 && ob->get_ldim() >= 0) ldim = ob -> get_ldim();
   if(ob->get_relative_size() >= 0) relative_size = ob -> get_relative_size();

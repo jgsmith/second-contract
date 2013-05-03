@@ -2,7 +2,6 @@
 # include <iflib.h>
 # include <type.h>
 
-int level;
 int position;
 int gait; /* default movement speed */
 mapping senses; /* senses available */
@@ -11,7 +10,6 @@ mapping get_properties() {
   return ([
     "gait": WORDS_D -> gait_word(gait),
     "position": WORDS_D -> position_word(position),
-    "level": level,
   ]);
 }
 
@@ -39,7 +37,6 @@ mixed get_property(string *path) {
         return path[1] == WORDS_D -> position_word(position);
       }
       else return nil;
-    case "level": return level;
   }
 }
 
@@ -51,12 +48,6 @@ int set_property(string *path, mixed value) {
 
   switch(path[0]) {
     case "environment": return FALSE; /* we don't change environment through this interface */
-    case "level":
-      if(typeof(value) == T_INT && value > 0) {
-        level = value;
-        return TRUE;
-      }
-      return FALSE;
     case "gait":
       tmp = -1;
       if(sizeof(path) == 1) {

@@ -100,7 +100,7 @@ static destroy_inventory(object ob, object LOCATION_DATA dest) {
   for(i = 0, n = sizeof(obs); i < n; i++) {
     if(obs[i] -> is_player()) {
       /* move them elsewhere */
-      obs[i] -> move_to(PROX_INSIDE, HOSPITAL_D -> get_world_object());
+      /* obs[i] -> move_to(PROX_INSIDE, ); */
     }
     else {
       destroy_inventory(obs[i], dest);
@@ -116,7 +116,7 @@ atomic void empty_area() {
   int i, n;
 
   dest = new_object(LOCATION_DATA);
-  dest -> set_object(HOSPITAL_D -> get_world_room());
+  dest -> set_object(/*HOSPITAL_D -> get_world_room()*/);
   /* now go through scenes, etc., and do the same for any that are left */
   items = map_values(scenes) - ({ nil });
   for(i = 0, n = sizeof(items); i < n; i++) {

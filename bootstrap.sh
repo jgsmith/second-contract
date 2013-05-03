@@ -44,6 +44,15 @@ post_file() {
      http://${IP}:${PORT}/${url}
 }
 
+put_file() {
+  file=$1
+  url=$2
+  $CURL --basic -T ${file} --silent \
+     -H "Content-Type: application/json" \
+     --show-error --user "${USERNAME}:${PASSWORD}" \
+     http://${IP}:${PORT}/${url}
+}
+
 post_content() {
   content=$1
   url=$2
@@ -113,7 +122,7 @@ for domain in *; do
               cd $ward
               for thing in *; do
                 if [ -f $thing ]; then
-                  post_file $thing "api/worldlib/thing/$domain/$area/$ward/$thing"
+                  put_file $thing "api/worldlib/thing/$domain/$area/$ward/"
                 fi
               done
               cd ..
@@ -127,7 +136,7 @@ for domain in *; do
           for terrain in *; do
             if [ -f $terrain ]; then
               echo "      Creating terrain '$terrain'"
-              post_file $terrain "api/worldlib/terrain/$domain/$area/$terrain"
+              put_file $terrain "api/worldlib/terrain/$domain/$area/"
             fi
           done
           cd ..
@@ -138,7 +147,7 @@ for domain in *; do
           for path in *; do
             if [ -f $path ]; then
               echo "      Creating path '$path'"
-              post_file $scene "api/worldlib/path/$domain/$area/$path"
+              put_file $path "api/worldlib/path/$domain/$area/"
             fi
           done
           cd ..
@@ -149,7 +158,7 @@ for domain in *; do
           for scene in *; do
             if [ -f $scene ]; then
               echo "      Creating scene '$scene'"
-              post_file $scene "api/worldlib/scene/$domain/$area/$scene"
+              put_file $scene "api/worldlib/scene/$domain/$area/"
             fi
           done
           cd ..
