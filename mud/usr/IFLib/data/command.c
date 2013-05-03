@@ -85,7 +85,7 @@ int execute(object actor) {
   object BINDER_MATCH indirect_obs;
   object BINDER_MATCH instrument_obs;
   object EVENT_DATA e;
-  object EVENT_SET e_set, estmp;
+  object EVENT_SET e_set;
   object ADVERB_DATA effective_adverb;
   object ADVERB_DATA adverb;
 
@@ -133,7 +133,7 @@ int execute(object actor) {
     actions = verb_obj->get_action();
     adverb = verb_obj->get_modified_adverb(effective_adverb);
 
-    estmp = actor -> build_event_sequence(actions, ([
+    e_set = actor -> build_event_sequence(actions, ([
       "direct": (direct_obs ? direct_obs -> get_objects() : ({ })),
       "indirect": (indirect_obs ? indirect_obs -> get_objects() : ({ })),
       "instrument": (instrument_obs ? instrument_obs -> get_objects() : ({ })),
