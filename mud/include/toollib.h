@@ -1,6 +1,5 @@
 # define TOOLLIB_INIT   "/usr/ToolLib/initd"
 # define JSON_P         "/usr/ToolLib/sys/parser/json"
-# define VERB_SYNTAX_P  "/usr/ToolLib/sys/parser/verb_syntax"
 # define EVENT_SCRIPT_P "/usr/ToolLib/sys/parser/event_script"
 # define GRAMMAR_P      "/usr/ToolLib/sys/parser/grammar"
 # define TEMPLATE_P     "/usr/ToolLib/sys/parser/template"

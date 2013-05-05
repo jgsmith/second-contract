@@ -56,7 +56,6 @@ static void create(varargs int clone) {
     if(!find_object(MAPPING_D)) compile_object(MAPPING_D);
     if(!find_object(STRING_D)) compile_object(STRING_D);
     if(!find_object(AUTH_D)) compile_object(AUTH_D);
-    if(!find_object(ERROR_D)) compile_object(ERROR_D);
 
     rsrc::create();
 
