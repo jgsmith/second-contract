@@ -9,7 +9,6 @@
 # define BULK_LIB   "/usr/WorldLib/lib/prop/bulk"
 
 # define WARD_OBJ "/usr/WorldLib/obj/ward"
-# define HOSPITAL_OBJ "/usr/WorldLib/obj/hospital"
 
 # define OBJECT_D    "/usr/WorldLib/sys/object"
 # define PLACEMENT_D "/usr/WorldLib/sys/placement"

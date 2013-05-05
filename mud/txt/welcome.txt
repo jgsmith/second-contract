@@ -1,0 +1,20 @@
+                        _____            _
+                       / __  \          | |
+                       `' / /' _ __   __| |
+               _____     / /  | '_ \ / _` |         _
+              /  __ \  ./ /___| | | | (_| |        | |
+              | /  \/ _\_____/|_| |_|\__,_|_ _  ___| |_
+              | |    / _ \| '_ \| __| '__/ _` |/ __| __|
+              | \__/\ (_) | | | | |_| | | (_| | (__| |_
+               \____/\___/|_| |_|\__|_|  \__,_|\___|\__|
+
+                  Running on DGD and Second Contract
+
+     Second Contract is in an alpha period. For more information,
+                  see http://www.second-contract.com/
+
+
+  Menu
+    N - Create a new account
+
+Or enter your e-mail to log in:
