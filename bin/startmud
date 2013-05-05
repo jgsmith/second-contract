@@ -55,9 +55,9 @@ while [ true ]; do
 
   if [ $MUDHOME ] && [ -f $MUDHOME/bin/$DRIVER ] && [ -f $MUDHOME/$CFG ]; then
     if [ -f $MUDHOME/bin/$DUMP_FILE ]; then
-      $MUDHOME/bin/$DRIVER $MUDHOME/bin/$CFG $MUDHOME/bin/$DUMP_FILE
+      $MUDHOME/bin/$DRIVER $MUDHOME/$CFG $MUDHOME/bin/$DUMP_FILE
     else
-      $MUDHOME/bin/$DRIVER $MUDHOME/bin/$CFG
+      $MUDHOME/bin/$DRIVER $MUDHOME/$CFG
     fi
   else
     if [ -f ./bin/$DRIVER ] && [ -f ./$CFG ]; then
