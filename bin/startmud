@@ -1,0 +1,73 @@
+#!/bin/sh
+
+if [ $1 ]; then
+  export DRIVER=$1
+else
+  export DRIVER="driver"
+fi
+
+if [ $2 ]; then
+  export CFG=$2".dgd"
+else
+  export CFG="mud.dgd"
+fi
+
+echo "driver: "$DRIVER
+echo "config: "$CFG
+
+# Specify your mud directory here (in which are mud/ and bin/)
+MUDHOME=""
+
+if [ $MUDHOME ]; then
+  DUMP_FILE=`grep 'dump_file' $MUDHOME/$CFG | cut -d'"' -f 2`
+else
+  DUMP_FILE=`grep 'dump_file' ./$CFG | cut -d'"' -f 2`
+fi
+
+echo "dump file: "$DUMP_FILE
+
+# If you have problems due to locale, uncomment the following to ensure
+# US handling of commas and periods in decimal numbers.
+
+# LANG=en_US
+# LANGUAGE=en_US
+# LC_ALL=en_US
+# export LANG LANGUAGE LC_ALL
+
+umask 007
+
+ulimit -a
+echo "---"
+ulimit -n 2048
+echo "---"
+ulimit -a
+
+while [ true ]; do
+  if [ $MUDHOME ] && [ -f $MUDHOME/bin/$DUMP_FILE ]; then
+    cp $MUDHOME/bin/$DUMP_FILE $MUDHOME/bin/$DUMP_FILE.`date -u '+%g%j%H%M'`
+    echo "Dump file copied to bin/"$DUMP_FILE.`date -u '+%g%j%H%M'`
+  else
+    if [ -f ./bin/$DUMP_FILE ]; then
+      cp ./bin/$DUMP_FILE ./bin/$DUMP_FILE.`date -u '+%g%j%H%M'`
+      echo "Dump file copied to bin/"$DUMP_FILE.`date -u '+%g%j%H%M'`
+    fi
+  fi
+
+  if [ $MUDHOME ] && [ -f $MUDHOME/bin/$DRIVER ] && [ -f $MUDHOME/$CFG ]; then
+    if [ -f $MUDHOME/bin/$DUMP_FILE ]; then
+      $MUDHOME/bin/$DRIVER $MUDHOME/bin/$CFG $MUDHOME/bin/$DUMP_FILE
+    else
+      $MUDHOME/bin/$DRIVER $MUDHOME/bin/$CFG
+    fi
+  else
+    if [ -f ./bin/$DRIVER ] && [ -f ./$CFG ]; then
+      if [ -f ./bin/$DUMP_FILE ]; then
+        ./bin/$DRIVER ./$CFG ./bin/$DUMP_FILE
+      else
+        ./bin/$DRIVER ./$CFG
+      fi
+    else
+      break
+    fi
+  fi
+done
