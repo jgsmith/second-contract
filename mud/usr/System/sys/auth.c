@@ -8,11 +8,13 @@
 
 mapping accounts;
 mapping groups;
+mapping character_owners;
 
 void create() {
   groups = ([
     "ADMIN": ({ }),
   ]);
+  character_owners = ([ ]);
 }
 
 int create_group(string grp) {
@@ -26,8 +28,10 @@ int create_group(string grp) {
 
 int is_in_group(string group, string user) {
   if(!groups[group]) return FALSE;
-  return sizeof(({ user}) & groups[group]);
+  return sizeof(({ user }) & groups[group]);
 }
+
+mapping get_groups() { return groups; }
 
 int add_user_to_group(string group, string user) {
   if(!SYSTEM()) {
@@ -36,6 +40,7 @@ int add_user_to_group(string group, string user) {
   }
   if(!groups[group]) return FALSE;
   groups[group] |= ({ user });
+  return sizeof(({ user }) & groups[group]);
 }
 
 int user_exists(string name) {
@@ -77,9 +82,13 @@ int set_user_password(string name, string password, varargs string old_password)
   else {
     m[name] = ([ "password": crypt(password) ]);
     if(first_account) {
-      find_object(DRIVER)->message("Adding " + name + " to ADMIN group\n");
-      add_user_to_group("ADMIN", name);
-      previous_object() -> message("\n\nThis is the first account and has been added to the ADMIN group.\n\nUntil you run the bootstrap process to create character templates, you will not be able to create a character. Just hit return at the next prompt and you will be disconnected.\n\n");
+      if(add_user_to_group("ADMIN", name)) {
+        find_object(DRIVER)->message("Adding " + name + " to ADMIN group\n");
+        previous_object() -> message("\n\nThis is the first account and has been added to the ADMIN group.\n\nUntil you run the bootstrap process to create character templates, you will not be able to create a character. Just hit return at the next prompt and you will be disconnected.\n\n");
+      }
+      else {
+        find_object(DRIVER) -> message("Failed to add " + name + " to ADMIN group\n");
+      }
     }
     return 1;
   }
@@ -88,27 +97,35 @@ int set_user_password(string name, string password, varargs string old_password)
 int owns_character(string email, string char_name) {
   mapping user_m;
 
+  if(!accounts) return FALSE;
   user_m = MAPPING_D -> specific_mapping(accounts, email);
   if(!user_m[email] || !user_m[email]["characters"]) return 0;
   return sizeof(({ char_name }) & user_m[email]["characters"]);
+}
+
+string character_owner(string char_name) {
+  return character_owners[char_name];
 }
 
 int add_character(string email, object char) {
   string name;
   mapping user_m;
 
+  if(!accounts) return FALSE;
   user_m = MAPPING_D -> specific_mapping(accounts, email);
 
-  if(!user_m[email]) return 0;
+  if(!user_m[email]) return FALSE;
 
   if(!user_m[email]["characters"]) user_m[email]["characters"] = ({ });
   user_m[email]["characters"] += ({ char });
-  return 1;
+  character_owners[char -> get_name()] = email;
+  return TRUE;
 }
 
 object *get_characters(string email) {
   mapping user_m;
 
+  if(!accounts) return ({ });
   user_m = MAPPING_D -> specific_mapping(accounts, email);
 
   if(!user_m[email]) return ({ });

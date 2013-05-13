@@ -50,6 +50,7 @@ static object Character;        /* the character we're using as the actor */
 static object *chars;
 static int i, n;
 static string oldpassword, password, name;
+static string cmd_level;        /* the level for commands - admin, creator, builder, player */
 
 /*
  * NAME:        create()
@@ -61,10 +62,23 @@ static void create(int clone)
         user::create();
         access::create();
         state = ([ ]);
+        cmd_level = "player";
     }
 }
 
+object get_character() { return Character; }
+string get_ident() { return email; }
+
 void enter_game() {
+  if(AUTH_D -> is_in_group("ADMIN", email)) {
+    cmd_level = "admin";
+  }
+  else if(AUTH_D -> is_in_group("CREATOR", email)) {
+    cmd_level = "creator";
+  }
+  else if(AUTH_D -> is_in_group("BUILDER", email)) {
+    cmd_level = "builder";
+  }
   Character -> set_iflib_driver(this_object());
   CHARACTER_D -> enter_game(Character);
 }
@@ -139,6 +153,7 @@ int receive_message(string str)
 {
     string *bits;
     string tmp;
+    object cmd_obj;
 
     if (previous_program() == LIB_CONN) {
         string cmd;
@@ -183,11 +198,11 @@ int receive_message(string str)
                 case "verbs":
                   message("\nKnown verbs: " + ENGLISH_D -> item_list(VERB_D -> get_verbs()) + ".\n");
                   break;
-                case "who":
-                  message("\nThe following players are in this reality: " + ENGLISH_D -> item_list(CHARACTER_D -> active_characters()) + ".\n");
-                  break;
                 default:
-                  if( wiztool) wiztool->input(cmd[1..]);
+                  cmd_obj = COMMAND_D -> find_command(cmd_level, bits[0]);
+                  if(cmd_obj) {
+                    cmd_obj -> _cmd(this_object(), implode(bits[1..], " "));
+                  }
                   else message("Unknown command (" + bits[0] + ")\n");
               }
             }
@@ -321,6 +336,7 @@ int receive_message(string str)
             nconn++;
             connection(previous_object());
             message("\n");
+            
             if((chars = AUTH_D -> get_characters(email)) && sizeof(chars)) {
               message("\n\nPlease select a character to play:\n");
               for(i = 0, n = sizeof(chars); i < n; i++) {

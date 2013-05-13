@@ -56,6 +56,7 @@ static void create(varargs int clone) {
     if(!find_object(MAPPING_D)) compile_object(MAPPING_D);
     if(!find_object(STRING_D)) compile_object(STRING_D);
     if(!find_object(AUTH_D)) compile_object(AUTH_D);
+    if(!find_object(COMMAND_D)) compile_object(COMMAND_D);
 
     rsrc::create();
 
@@ -72,6 +73,7 @@ static void create(varargs int clone) {
     if(!find_object(GAMELIB_INIT)) compile_object(GAMELIB_INIT);
 
     http_manager -> update_resource_handlers_from_config();
+    find_object(COMMAND_D) -> hash_commands();
 }
 
 void upgraded(varargs int clone) {

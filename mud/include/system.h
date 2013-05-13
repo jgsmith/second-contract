@@ -5,6 +5,7 @@
 # define STRING_D  "/usr/System/sys/string"
 # define TELNET_D  "/usr/System/sys/telnetd"
 # define LOG_D     "/usr/System/sys/log"
+# define COMMAND_D "/usr/System/sys/commands"
 
 # define HTTP_USER "/usr/System/obj/http/rest"
 
