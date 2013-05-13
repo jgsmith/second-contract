@@ -19,7 +19,7 @@ void set_detail_path(string dp) {
   if(dp == "default")
     detail_path = nil;
   else
-    detail_path = ({ "details" }) + explode(implode(explode(dp, ":"), ":details:"), ":");
+    detail_path = ({ "detail" }) + explode(implode(explode(dp, ":"), ":detail:"), ":");
     
 }
 /* BUG: this will return the wrong information if a detail in the path is
@@ -27,7 +27,7 @@ void set_detail_path(string dp) {
  */
 string get_detail_path() {
   if(!detail_path) return "default";
-  return implode(detail_path - ({ "details" }), ":");
+  return implode(detail_path - ({ "detail" }), ":");
 }
 
 int is_detail() { return detail_path ? TRUE : FALSE; }
@@ -38,8 +38,25 @@ mixed get_property(string *path) {
       return target;
     else return target -> get_property(detail_path + path);
   }
-  else return target -> get_property(({ "details", "default" }) + path);
+  else return target -> get_property(({ "detail", "default" }) + path);
+}
+
+string get_description(string desc_path) {
+  if(detail_path)
+    return target -> get_property(detail_path + ({ "description", desc_path }));
+  else
+    return target -> get_property(({ "detail", "default", "description", desc_path }));
 }
 
 int get_relation() { return proximity; }
 void set_relation(int p) { proximity = p; }
+
+int *get_coords() { 
+  if(target -> is_surface()) return ({})+coords;
+  return nil;
+}
+
+int get_milestone() {
+  if(target -> is_path()) return milestone;
+  return 0;
+}

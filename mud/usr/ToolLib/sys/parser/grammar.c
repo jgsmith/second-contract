@@ -6,21 +6,40 @@
 inherit parser LIB_PARSER;
 
 void create(varargs int clone) {
-  augment_bnf("\nv:'take'\nv:'get'\nv:'run'\n" 
-    + "\nadv:'quickly'\nadv:'softly'\nadv:'quietly'\n");
+  augment_bnf("");
   set_bnf_file(GRAMMAR_BNF);
 }
 
 void update_words() {
-  string *verbs;
+  string *verbs, *comm_verbs, *cmpd_verbs;
   string *adverbs;
+  string *bits;
+  string augment;
+  int i, n;
 
+  /* types of verbs:
+   * simple, one word
+   * two words: w1 ___ w2, w1 w2 ___  (___ == direct object)
+   * two words: w1 w2 ___ (only - w2 is a preposition associated with the DO)
+   */
   verbs = VERB_D -> get_verbs();
+  comm_verbs = VERB_D -> get_communication_verbs();
   adverbs = ADVERB_D -> get_adverbs();
-  augment_bnf(
+  augment =
     (verbs ? "\nv:'" + implode(verbs, "'\nv:'") + "'\n" : "")+
-    (adverbs ? "\nadv:'" + implode(adverbs, "'\nadv:'") + "'\n" : "")
-  );
+    (comm_verbs ? "\ncv:'" + implode(comm_verbs, "'\ncv:'") + "'\n" : "");
+  for(i = 0, n = sizeof(verbs); i < n; i++) {
+    bits = explode(verbs[i], " ");
+    if(sizeof(bits) == 1) {
+      augment += "v:'" + bits[0] + "'\n";
+    }
+    else {
+      augment += "tv:adverbs '" + bits[0] + "' adverbs '" + bits[1] + "' dnp adverbs\n";
+      augment += "tv:adverbs '" + bits[1] + "' dnp adverbs '" + bits[0] + "' adverbs\n";
+    }
+  }
+  augment += (adverbs ? "\nadv:'" + implode(adverbs, "'\nadv:'") + "'\n" : "");
+  augment_bnf(augment);
 }
 
 mixed *parse_command(string cmd) {

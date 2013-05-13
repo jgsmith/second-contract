@@ -113,8 +113,23 @@ mixed get_property(string *path) {
 int set_property(string *path, mixed value) {
   object e;
   int result;
+  int i;
 
   if(!sizeof(path)) return FALSE;
+  
+  i = sizeof(path)-1;
+  while(i >= 0 && !this_object() -> has_event_handler("pre:prop-change:" + implode(path[0..i], ":")))
+    i--;
+  if(i >= 0) {
+    e = EVENTS_D -> create_event(
+      "pre:prop-change:" + implode(path[0..i], ":")
+    );
+    e -> set_args(([
+      "value": value,
+      "property": implode(path, ":"),
+    ]));
+    if(!EVENTS_D -> call_event(e)) return FALSE;
+  }
 
   switch(path[0]) {
     case "basic":  result = basic::set_property(path[1..], value); break;
@@ -130,14 +145,20 @@ int set_property(string *path, mixed value) {
   }
 
   if(result) {
-    e = EVENTS_D -> create_event(
-      "post:prop-change:" + implode(path, ":")
-    );
-    e -> set_args(([
-      "value": value,
-    ]));
+    i = sizeof(path)-1;
+    while(i >= 0 && !this_object() -> has_event_handler("post:prop-change:" + implode(path[0..i], ":")))
+      i--;
+    if(i >= 0) {
+      e = EVENTS_D -> create_event(
+        "post:prop-change:" + implode(path, ":")
+      );
+      e -> set_args(([
+        "value": value,
+        "property": implode(path, ":"),
+      ]));
 
-    EVENTS_D -> queue_event(e);
+      EVENTS_D -> queue_event(e);
+    }
   }
   return result;
 }

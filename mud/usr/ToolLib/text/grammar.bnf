@@ -18,9 +18,9 @@ sentence : communication topic ? _add_topic
 commands : command
 commands : commands 'then' command ? _commands
 
-command : tritransitive_verb ? _command
-command : bitransitive_verb ? _command
-command : transitive_verb ? _command
+command : ttv ? _command
+command : btv ? _command
+command : tv ? _command
 command : verb_only ? _command
 
 communication : comm ? _command
@@ -47,21 +47,21 @@ topic : 'that' words ? _topic
 
 verb_only : adverbs verb adverbs
 
-transitive_verb : verb_only direct_noun_phrase adverbs
-transitive_verb : adverbs direct_noun_phrase verb_only
+tv : verb_only dnp adverbs
+tv : adverbs dnp verb_only
 
-bitransitive_verb : verb_only indirect_noun_phrase adverbs direct_noun_phrase adverbs
-bitransitive_verb : transitive_verb indirect_noun_phrase adverbs
-bitransitive_verb : adverbs direct_noun_phrase adverbs indirect_noun_phrase verb_only
-bitransitive_verb : adverbs indirect_noun_phrase transitive_verb
+btv : verb_only indirect_noun_phrase adverbs dnp adverbs
+btv : tv indirect_noun_phrase adverbs
+btv : adverbs dnp adverbs indirect_noun_phrase verb_only
+btv : adverbs indirect_noun_phrase tv
 
-tritransitive_verb : bitransitive_verb instrument_noun_phrase adverbs
-tritransitive_verb : adverbs instrument_noun_phrase bitransitive_verb
+ttv : btv instrument_noun_phrase adverbs
+ttv : adverbs instrument_noun_phrase btv
 
-tritransitive_verb : verb_only indirect_noun_phrase instrument_noun_phrase direct_noun_phrase adverbs
-tritransitive_verb : transitive_verb instrument_noun_phrase indirect_noun_phrase adverbs
-tritransitive_verb : adverbs direct_noun_phrase instrument_noun_phrase indirect_noun_phrase verb_only
-tritransitive_verb : adverbs indirect_noun_phrase instrument_noun_phrase adverbs transitive_verb
+ttv : verb_only indirect_noun_phrase instrument_noun_phrase dnp adverbs
+ttv : tv instrument_noun_phrase indirect_noun_phrase adverbs
+ttv : adverbs dnp instrument_noun_phrase indirect_noun_phrase verb_only
+ttv : adverbs indirect_noun_phrase instrument_noun_phrase adverbs tv
 
 adverbs :
 adverbs : adverb
@@ -107,7 +107,7 @@ indirect_preposition : 'from' rel_preposition
 indirect_preposition : 'to' rel_preposition
 
 
-direct_noun_phrase : objects ? _direct_noun_phrase
+dnp : objects ? _direct_noun_phrase
 
 indirect_noun_phrase : indirect_preposition objects ? _indirect_noun_phrase
 instrument_noun_phrase : instrument_preposition objects ? _instrument_noun_phrase

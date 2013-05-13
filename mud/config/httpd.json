@@ -1,6 +1,12 @@
 {
   "System": {
-    "": { "handler": "system" }
+    "": { "handler": "system" },
+    "who": { 
+	  "handler": "finger", 
+	  "params": { "logged_in": 1 } 
+	},
+    "character": { "handler": "finger" },
+    "character/:id": { "handler": "finger" }
   },
   "IFLib": {
     "verb": { "handler": "verb" },

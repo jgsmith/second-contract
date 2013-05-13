@@ -35,6 +35,8 @@ object PRIORITY_QUEUE_ITEM remove() {
   object PRIORITY_QUEUE_ITEM ret, ob;
   int pos, size, smallest_child, left_child, right_child;
 
+  if(!items || sizeof(items) == 0) return nil;
+  
   ret = items[0];
   size = sizeof(items)-1;
   items[0] = items[size];

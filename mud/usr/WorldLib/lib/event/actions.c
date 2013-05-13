@@ -49,6 +49,13 @@ mixed call_event_handler(string event, mapping args) {
   return EVENT_SCRIPT_D -> run_event_handler(event, args);
 }
 
+int has_event_handler(string event) {
+  object ur;
+  if(event_handler_source && event_handler_source[event]) return TRUE;
+  if(ur = this_object()->get_template_object()) return ur -> has_event_handler(event);
+  return FALSE;
+}
+
 object build_event_set(string action, mapping args) {
   object estmp, e;
 
