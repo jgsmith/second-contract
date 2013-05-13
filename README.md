@@ -124,6 +124,7 @@ in the following directories are subject to this GNU Affero GPL (with '/'
 being taken as the root of this repository):
 
 * /mud/data/
+* /mud/common/
 * /mud/include/devlib/
 * /mud/include/gamelib/
 * /mud/include/iflib/
@@ -139,6 +140,7 @@ being taken as the root of this repository):
 
 The following files are also subject to the GNU Affero GPL:
 
+* /mud/include/common.h
 * /mud/include/data.h
 * /mud/include/devlib.h
 * /mud/include/gamelib.h
